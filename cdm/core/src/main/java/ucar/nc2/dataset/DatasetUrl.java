@@ -196,26 +196,41 @@ public class DatasetUrl {
     Map<String, String> map = parseFragment(fragment);
     if (map == null)
       return null;
-    String protocol = map.get("protocol");
 
-    if (protocol == null) {
-      for (String p : FRAGPROTOCOLS) {
-        if (map.get(p) != null) {
-          protocol = p;
-          break;
-        }
+    Set<String> modeset = new HashSet<>();
+    // Break up the mode string
+    String modekey = map.get("mode");
+    if (modekey != null) {
+      String[] pieces = modekey.split("[,]");
+      for (String s : pieces)
+        modeset.add(s);
+    }
+
+    // Add protocol or proto
+    modekey = map.get("protocol");
+    if (modekey == null)
+      modekey = map.get("proto");
+    if (modekey != null)
+      modeset.add(modekey);
+
+    // Add in singletons
+    for (String p : FRAGPROTOCOLS) {
+      if (map.get(p) != null) {
+        modeset.add(p);
       }
     }
-    if (protocol != null) {
-      if (protocol.equalsIgnoreCase("dap") || protocol.equalsIgnoreCase("dods"))
+
+    // Choose the Servicetype
+    for (String mode : modeset) {
+      if (mode.equalsIgnoreCase("dap") || mode.equalsIgnoreCase("dods"))
         return ServiceType.OPENDAP;
-      if (protocol.equalsIgnoreCase("dap4"))
+      if (mode.equalsIgnoreCase("dap4"))
         return ServiceType.DAP4;
-      if (protocol.equalsIgnoreCase("cdmremote"))
+      if (mode.equalsIgnoreCase("cdmremote"))
         return ServiceType.CdmRemote;
-      if (protocol.equalsIgnoreCase("thredds"))
+      if (mode.equalsIgnoreCase("thredds"))
         return ServiceType.THREDDS;
-      if (protocol.equalsIgnoreCase("ncml"))
+      if (mode.equalsIgnoreCase("ncml"))
         return ServiceType.NCML;
     }
     return null;

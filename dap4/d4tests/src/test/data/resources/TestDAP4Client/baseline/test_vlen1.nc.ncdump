@@ -1,0 +1,12 @@
+netcdf test_vlen1 {
+  variables:
+
+    Sequence {
+      int vlen_t;
+    } x(*);
+    string x:_DAP4_Checksum_CRC32 = "0xc60621c3";
+
+
+  // global attributes:
+  string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
+}

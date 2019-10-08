@@ -15,8 +15,6 @@ import dap4.core.data.DSP;
  */
 
 /* package */ interface CDMArray {
-  public DSP getDSP();
-
   public DapVariable getTemplate();
 
   public long getSizeBytes(); // In bytes

@@ -1,0 +1,11 @@
+netcdf test_test {
+  types:
+    byte enum enum_t { c1 = 1, c2 = 2, c3 = 3};
+
+  variables:
+    enum enum_t v1;
+      string v1:_DAP4_Checksum_CRC32 = "0xa505df1b";
+
+  // global attributes:
+  string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
+}

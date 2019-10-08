@@ -1,0 +1,18 @@
+netcdf test_struct_array {
+  dimensions:
+    dx = 4;
+    dy = 3;
+  variables:
+
+    Structure {
+      int x;
+        string x:_CoordinateAxisType = "GeoX";
+      int y;
+        string y:_CoordinateAxisType = "GeoY";
+    } s(dx, dy);
+    string s:_DAP4_Checksum_CRC32 = "0x2f0389ca";
+
+
+  // global attributes:
+  string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
+}

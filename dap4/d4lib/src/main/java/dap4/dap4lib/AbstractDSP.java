@@ -18,9 +18,13 @@ import dap4.core.util.DapContext;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import org.xml.sax.SAXException;
+import ucar.nc2.NetcdfFile;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,31 +35,30 @@ import java.util.Map;
  * Provide a superclass for DSPs.
  */
 
-public abstract class AbstractDSP implements DSP {
-  public static boolean TESTING = false; /* Turned on by test programs */
+abstract public class AbstractDSP implements DSP {
+  static public boolean TESTING = false; /* Turned on by test programs */
 
   //////////////////////////////////////////////////
   // constants
 
-  protected static final boolean DEBUG = false;
-  protected static final boolean PARSEDEBUG = false;
+  static protected final boolean DEBUG = false;
+  static protected final boolean PARSEDEBUG = false;
 
-  public static final boolean USEDOM = false;
+  static public final boolean USEDOM = false;
 
-  protected static final String DAPVERSION = "4.0";
-  protected static final String DMRVERSION = "1.0";
-  protected static final String DMRNS = "http://xml.opendap.org/ns/DAP/4.0#";
+  static protected final String DAPVERSION = "4.0";
+  static protected final String DMRVERSION = "1.0";
+  static protected final String DMRNS = "http://xml.opendap.org/ns/DAP/4.0#";
 
   // Define reserved attributes
-  public static final String UCARTAGVLEN = "_edu.ucar.isvlen";
-  public static final String UCARTAGOPAQUE = "_edu.ucar.opaque.size";
-  public static final String UCARTAGORIGTYPE = "_edu.ucar.orig.type";
-  public static final String UCARTAGUNLIMITED = "_edu.ucar.isunlimited";
+  static public final String UCARTAGVLEN = "_edu.ucar.isvlen";
+  static public final String UCARTAGOPAQUE = "_edu.ucar.opaque.size";
+  static public final String UCARTAGORIGTYPE = "_edu.ucar.orig.type";
+  static public final String UCARTAGUNLIMITED = "_edu.ucar.isunlimited";
 
 
   protected DapContext context = null;
   protected DapDataset dmr = null;
-  protected String location = null;
   private ByteOrder order = null;
   private ChecksumMode checksummode = ChecksumMode.DAP;
 
@@ -75,18 +78,31 @@ public abstract class AbstractDSP implements DSP {
 
   /**
    * "open" a reference to a data source and return the DSP wrapper.
+   * There is one for each possible kind of source
    *
-   * @param location - Object that defines the data source
-   * @return = wrapping dsp
-   * @throws DapException
+   * @param src - Object that defines the data source
+   * @return wrapping dsp
+   * @throws DapException | UnsupportedOperationException
    */
-  @Override
-  public abstract AbstractDSP open(String location) throws DapException;
+  public AbstractDSP open(NetcdfFile src) throws DapException {
+    throw new UnsupportedOperationException();
+  }
+
+  public AbstractDSP open(File src) throws DapException {
+    throw new UnsupportedOperationException();
+  }
+
+  public AbstractDSP open(URI src) throws DapException {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * @throws IOException
    */
-  public abstract void close() throws IOException;
+  abstract public void close() throws IOException;
+
+  // Misc
+  abstract public String getLocation();
 
   //////////////////////////////////////////////////
   // Implemented
@@ -99,17 +115,6 @@ public abstract class AbstractDSP implements DSP {
   @Override
   public DapContext getContext() {
     return this.context;
-  }
-
-  @Override
-  public String getLocation() {
-    return this.location;
-  }
-
-  @Override
-  public AbstractDSP setLocation(String loc) {
-    this.location = loc;
-    return this;
   }
 
   @Override
@@ -278,7 +283,7 @@ public abstract class AbstractDSP implements DSP {
     }
   }
 
-  public static String printDMR(DapDataset dmr) {
+  static public String printDMR(DapDataset dmr) {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     DMRPrinter printer = new DMRPrinter(dmr, pw);

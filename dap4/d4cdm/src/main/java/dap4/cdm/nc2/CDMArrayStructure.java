@@ -47,7 +47,7 @@ import static dap4.core.data.DataCursor.Scheme;
    * To promote some clarity a eschew Array[|dimset|][|fields|]
    * in favor of FieldArrays[|dimset|].
    */
-  protected static class FieldArrays {
+  static protected class FieldArrays {
     public Array[] fields; // Make externally accessible
 
     FieldArrays(int nfields) {
@@ -61,7 +61,7 @@ import static dap4.core.data.DataCursor.Scheme;
 
   // CDMArry variables
   protected Group cdmroot = null;
-  protected DSP dsp = null;
+  // protected DSP dsp = null;
   protected DapVariable template = null;
   protected DapType basetype = null;
   protected long dimsize = 0;
@@ -99,7 +99,7 @@ import static dap4.core.data.DataCursor.Scheme;
         CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
     this.template = (DapVariable) data.getTemplate();
     assert data.getScheme() == Scheme.STRUCTARRAY;
-    this.dsp = data.getDSP();
+    // this.dsp = data.getDSP();
     this.cdmroot = cdmroot;
     this.basetype = this.template.getBaseType();
     this.dimsize = DapUtil.dimProduct(template.getDimensions());
@@ -132,10 +132,8 @@ import static dap4.core.data.DataCursor.Scheme;
   //////////////////////////////////////////////////
   // CDMArray Interface
 
-  @Override
-  public DSP getDSP() {
-    return this.dsp;
-  }
+  // @Override
+  // public DSP getDSP(){return this.dsp;}
 
   @Override
   public DapVariable getTemplate() {
@@ -473,7 +471,7 @@ import static dap4.core.data.DataCursor.Scheme;
     return fa;
   }
 
-  protected static int memberIndex(StructureMembers.Member m) {
+  static protected int memberIndex(StructureMembers.Member m) {
     return m.getDataParam();
   }
 

@@ -32,32 +32,32 @@ public class HttpDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Constants
 
-  protected static final boolean DEBUG = false;
+  static protected final boolean DEBUG = false;
 
-  protected static final String DAPVERSION = "4.0";
-  protected static final String DMRVERSION = "1.0";
+  static protected final String DAPVERSION = "4.0";
+  static protected final String DMRVERSION = "1.0";
 
-  protected static final String DAP4PROTO = "dap4";
-  protected static final String FILEPROTO = "file";
+  static protected final String DAP4PROTO = "dap4";
+  static protected final String FILEPROTO = "file";
 
-  protected static final String DMRSUFFIX = "dmr";
-  protected static final String DATASUFFIX = "dap";
-  protected static final String DSRSUFFIX = "dsr";
+  static protected final String DMRSUFFIX = "dmr";
+  static protected final String DATASUFFIX = "dap";
+  static protected final String DSRSUFFIX = "dsr";
 
-  protected static final String QUERYSTART = "?";
-  protected static final String CONSTRAINTTAG = "dap4.ce";
-  protected static final String PROTOTAG = "protocol";
+  static protected final String QUERYSTART = "?";
+  static protected final String CONSTRAINTTAG = "dap4.ce";
+  static protected final String[] MODETAGS = new String[] {"mode", "proto", "protocol"};
 
-  protected static final int DFALTPRELOADSIZE = 50000; // databuffer
+  static protected final int DFALTPRELOADSIZE = 50000; // databuffer
 
-  protected static final String[] DAPEXTENSIONS = new String[] {"dmr", "dap", "dds", "das", "ddx", "dods"};
+  static protected final String[] DAPEXTENSIONS = new String[] {"dmr", "dap", "dds", "das", "ddx", "dods"};
 
-  protected static final String[] DAP4EXTENSIONS = new String[] {"dmr", "dap"};
+  static protected final String[] DAP4EXTENSIONS = new String[] {"dmr", "dap"};
 
-  protected static final String[][] DAP4QUERYMARKERS = new String[][] {{"proto", "dap4"}, {"dap4.ce", null},};
-  protected static final String[][] DAP4FRAGMARKERS = new String[][] {{"protocol", "dap4"}, {"dap4", null},};
+  static protected final String[][] DAP4QUERYMARKERS = new String[][] {{"proto", "dap4"}, {"dap4.ce", null},};
+  static protected final String[][] DAP4FRAGMARKERS = new String[][] {{"protocol", "dap4"}, {"dap4", null},};
 
-  protected static final String[] DAP4SCHEMES = {"dap4", "http", "https"};
+  static protected final String[] DAP4SCHEMES = {"dap4", "http", "https"};
 
   //////////////////////////////////////////////////
   // Instance variables
@@ -80,10 +80,15 @@ public class HttpDSP extends D4DSP {
   //////////////////////////////////////////////////
   // DSP API
 
+  @Override
+  public String getLocation() {
+    return xuri.toString();
+  }
+
   /**
    * A path is a DAP4 path if at least one of the following is true.
    * 1. it has "dap4:" as its leading protocol
-   * 2. it has #protocol=dap4 in its fragment
+   * 2. it has #mode=dap4 in its fragment
    *
    * @param url
    * @param context Any parameters that may help to decide.
@@ -125,9 +130,8 @@ public class HttpDSP extends D4DSP {
   }
 
   @Override
-  public HttpDSP open(String url) throws DapException {
-    setLocation(url);
-    parseURL(url);
+  public HttpDSP open(URI uri) throws DapException {
+    parseURL(uri.toString());
 
     /*
      * Take from the incoming data
@@ -288,7 +292,7 @@ public class HttpDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Utilities
 
-  protected static String buildURL(String baseurl, String suffix, DapDataset template, String ce) {
+  static protected String buildURL(String baseurl, String suffix, DapDataset template, String ce) {
     StringBuilder methodurl = new StringBuilder();
     methodurl.append(baseurl);
     if (suffix != null) {

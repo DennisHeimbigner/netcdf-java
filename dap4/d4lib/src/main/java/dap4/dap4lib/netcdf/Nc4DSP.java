@@ -26,6 +26,7 @@ import dap4.core.util.DapUtil;
 import dap4.dap4lib.AbstractDSP;
 import dap4.dap4lib.DapCodes;
 import dap4.dap4lib.XURI;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.jni.netcdf.Nc4Iosp;
 import ucar.nc2.jni.netcdf.Nc4prototypes;
 import ucar.nc2.jni.netcdf.SizeTByReference;
@@ -42,20 +43,20 @@ public class Nc4DSP extends AbstractDSP {
   //////////////////////////////////////////////////
   // Constants
 
-  public static final boolean DEBUG = false;
-  public static final boolean DUMPDMR = false;
+  static public final boolean DEBUG = false;
+  static public final boolean DUMPDMR = false;
 
   static String PATHSUFFIX = "/src/data";
 
-  public static String[] EXTENSIONS = new String[] {".nc", ".hdf5"};
+  static public String[] EXTENSIONS = new String[] {".nc", ".hdf5"};
 
   static final Pointer NC_NULL = Pointer.NULL;
   static final int NC_FALSE = 0;
   static final int NC_TRUE = 1;
   // "null" id(s)
-  public static final int NC_GRPNULL = 0;
-  public static final int NC_IDNULL = -1;
-  public static final int NC_NOERR = 0;
+  static public final int NC_GRPNULL = 0;
+  static public final int NC_IDNULL = -1;
+  static public final int NC_NOERR = 0;
 
   static int NC_INT_BYTES = (java.lang.Integer.SIZE / java.lang.Byte.SIZE);
   static int NC_LONG_BYTES = (Native.LONG_SIZE);
@@ -69,8 +70,8 @@ public class Nc4DSP extends AbstractDSP {
    * Provide a wrapper for pointers that tracks the size.
    * Also allows for allocation.
    */
-  public static class Nc4Pointer {
-    public static Nc4Pointer allocate(long size) {
+  static public class Nc4Pointer {
+    static public Nc4Pointer allocate(long size) {
       if (size == 0)
         throw new IllegalArgumentException("Attempt to allocate zero bytes");
       Memory m = new Memory(size);
@@ -99,7 +100,7 @@ public class Nc4DSP extends AbstractDSP {
       return String.format("0x%016x/%d", Pointer.nativeValue(this.p), this.size);
     }
 
-    public static boolean validate(Nc4Pointer mem, long require) {
+    static public boolean validate(Nc4Pointer mem, long require) {
       if (mem == null || mem.p == null || mem.size == 0)
         return false;
       return (mem.size > require);
@@ -252,11 +253,6 @@ public class Nc4DSP extends AbstractDSP {
         // There is a bug in some versions of netcdf that does not
         // handle NC_STRING correctly when the gid is invalid.
         // Handle specially ; this is a temporary hack
-        //
-        // 8/16/2019 jlcaron upgrade to jna 5.4.0
-        // com.sun.jna.Pointer#SIZE is removed. Its use is replaced by
-        // com.sun.jna.Native#POINTER_SIZE to prevent a class loading deadlock, when JNA is initialized from multiple
-        // threads
         tn.setSize(Native.POINTER_SIZE);
       } else {
         SizeTByReference sizep = new SizeTByReference();
@@ -282,9 +278,10 @@ public class Nc4DSP extends AbstractDSP {
   protected int ncid = -1; // file id ; also set as DSP.source
   protected int format = 0; // from nc_inq_format
   protected int mode = 0;
-  protected String filepath = null; // real path to the dataset
 
   protected DMRFactory dmrfactory = null;
+
+  protected NetcdfFile ncfile = null;
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -304,27 +301,25 @@ public class Nc4DSP extends AbstractDSP {
   // DSP API
 
   @Override
-  public Nc4DSP open(String filepath) throws DapException {
-    if (filepath.startsWith("file:"))
-      try {
-        XURI xuri = new XURI(filepath);
-        filepath = xuri.getPath();
-      } catch (URISyntaxException use) {
-        throw new DapException("Malformed filepath: " + filepath).setCode(DapCodes.SC_NOT_FOUND);
-      }
+  public String getLocation() {
+    return ncfile.getLocation();
+  }
+
+  @Override
+  public Nc4DSP open(NetcdfFile ncfile) throws DapException {
     int ret, mode;
+    this.ncfile = ncfile;
     IntByReference ncidp = new IntByReference();
-    this.filepath = filepath;
     try {
       mode = NC_NOWRITE;
-      Nc4Cursor.errcheck(nc4, ret = nc4.nc_open(this.filepath, mode, ncidp));
+      Nc4Cursor.errcheck(nc4, ret = nc4.nc_open(this.ncfile.getLocation(), mode, ncidp));
       this.ncid = ncidp.getValue();
       // Figure out what kind of file
       IntByReference formatp = new IntByReference();
       Nc4Cursor.errcheck(nc4, ret = nc4.nc_inq_format(ncid, formatp));
       this.format = formatp.getValue();
       if (DEBUG)
-        System.out.printf("TestNetcdf: open: %s; ncid=%d; format=%d%n", this.filepath, ncid, this.format);
+        System.out.printf("TestNetcdf: open: %s; ncid=%d; format=%d%n", this.ncfile.getLocation(), ncid, this.format);
       // Compile the DMR
       Nc4DMRCompiler dmrcompiler = new Nc4DMRCompiler(this, ncid, dmrfactory);
       setDMR(dmrcompiler.compile());
@@ -350,7 +345,7 @@ public class Nc4DSP extends AbstractDSP {
     Nc4Cursor.errcheck(nc4, ret);
     closed = true;
     if (trace)
-      System.out.printf("Nc4DSP: closed: %s%n", this.filepath);
+      System.out.printf("Nc4DSP: closed: %s%n", this.ncfile.getLocation());
   }
 
   @Override
@@ -386,15 +381,10 @@ public class Nc4DSP extends AbstractDSP {
     return this.nc4;
   }
 
-  @Override
-  public String getLocation() {
-    return this.filepath;
-  }
-
   //////////////////////////////////////////////////
   // Utilities
 
-  public static String makeString(byte[] b) {
+  static public String makeString(byte[] b) {
     // null terminates
     int count;
     for (count = 0; (count < b.length && b[count] != 0); count++) {

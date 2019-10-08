@@ -27,7 +27,7 @@ public interface DataCursor {
   //////////////////////////////////////////////////
   // Kinds of Cursor
 
-  public static enum Scheme {
+  static public enum Scheme {
     ATOMIC, STRUCTARRAY, STRUCTURE, SEQARRAY, SEQUENCE, RECORD;
 
     public boolean isCompoundArray() {
@@ -39,8 +39,6 @@ public interface DataCursor {
   // API
 
   public Scheme getScheme();
-
-  public DSP getDSP();
 
   public DapNode getTemplate();
 
