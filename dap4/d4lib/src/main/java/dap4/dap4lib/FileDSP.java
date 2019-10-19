@@ -24,7 +24,7 @@ public class FileDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Constants
 
-  static protected final String[] EXTENSIONS = new String[] {".dap", ".raw"};
+  protected static final String[] EXTENSIONS = new String[] {".dap", ".raw"};
 
   //////////////////////////////////////////////////
   // Instance variables

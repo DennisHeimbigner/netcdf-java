@@ -35,26 +35,26 @@ import java.util.Map;
  * Provide a superclass for DSPs.
  */
 
-abstract public class AbstractDSP implements DSP {
-  static public boolean TESTING = false; /* Turned on by test programs */
+public abstract class AbstractDSP implements DSP {
+  public static boolean TESTING = false; /* Turned on by test programs */
 
   //////////////////////////////////////////////////
   // constants
 
-  static protected final boolean DEBUG = false;
-  static protected final boolean PARSEDEBUG = false;
+  protected static final boolean DEBUG = false;
+  protected static final boolean PARSEDEBUG = false;
 
-  static public final boolean USEDOM = false;
+  public static final boolean USEDOM = false;
 
-  static protected final String DAPVERSION = "4.0";
-  static protected final String DMRVERSION = "1.0";
-  static protected final String DMRNS = "http://xml.opendap.org/ns/DAP/4.0#";
+  protected static final String DAPVERSION = "4.0";
+  protected static final String DMRVERSION = "1.0";
+  protected static final String DMRNS = "http://xml.opendap.org/ns/DAP/4.0#";
 
   // Define reserved attributes
-  static public final String UCARTAGVLEN = "_edu.ucar.isvlen";
-  static public final String UCARTAGOPAQUE = "_edu.ucar.opaque.size";
-  static public final String UCARTAGORIGTYPE = "_edu.ucar.orig.type";
-  static public final String UCARTAGUNLIMITED = "_edu.ucar.isunlimited";
+  public static final String UCARTAGVLEN = "_edu.ucar.isvlen";
+  public static final String UCARTAGOPAQUE = "_edu.ucar.opaque.size";
+  public static final String UCARTAGORIGTYPE = "_edu.ucar.orig.type";
+  public static final String UCARTAGUNLIMITED = "_edu.ucar.isunlimited";
 
 
   protected DapContext context = null;
@@ -99,10 +99,10 @@ abstract public class AbstractDSP implements DSP {
   /**
    * @throws IOException
    */
-  abstract public void close() throws IOException;
+  public abstract void close() throws IOException;
 
   // Misc
-  abstract public String getLocation();
+  public abstract String getLocation();
 
   //////////////////////////////////////////////////
   // Implemented
@@ -283,7 +283,7 @@ abstract public class AbstractDSP implements DSP {
     }
   }
 
-  static public String printDMR(DapDataset dmr) {
+  public static String printDMR(DapDataset dmr) {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     DMRPrinter printer = new DMRPrinter(dmr, pw);

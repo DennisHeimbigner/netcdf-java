@@ -29,10 +29,10 @@ netcdf test_atomic_types {
 
     opaque vo;
 
-    enum cloud_class_t primary_cloud;
+    enum primary_cloud primary_cloud;
       string primary_cloud:_FillValue = "Missing";
 
-    enum cloud_class_t secondary_cloud;
+    enum secondary_cloud secondary_cloud;
       string secondary_cloud:_FillValue = "Missing";
 
   // global attributes:

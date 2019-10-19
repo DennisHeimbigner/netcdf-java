@@ -58,6 +58,7 @@ public class TestDAP4Client extends DapTestCommon {
   // Type Declarations
 
   static class Server {
+    public static String SERVLET = "dts";
     public String ip;
     public String port;
 
@@ -75,6 +76,14 @@ public class TestDAP4Client extends DapTestCommon {
         buf.append(this.port);
       }
       return buf.toString();
+    }
+
+    // Return a URL for testing if server is up/down
+    public String getTestURL() {
+      StringBuilder baseurl = new StringBuilder().append(getURL());
+      baseurl.append("/");
+      baseurl.append(SERVLET);
+      return baseurl.toString();
     }
 
   }
@@ -172,7 +181,7 @@ public class TestDAP4Client extends DapTestCommon {
     // Find the server to use
     this.server = null;
     for (Server svc : SERVERS) {
-      String url = svc.getURL();
+      String url = svc.getTestURL();
       try (HTTPMethod method = HTTPFactory.Get(url)) {
         try {
           int code = method.execute();

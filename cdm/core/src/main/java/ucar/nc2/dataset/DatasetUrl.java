@@ -4,10 +4,8 @@
  */
 package ucar.nc2.dataset;
 
-import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
-import static java.net.HttpURLConnection.HTTP_NOT_ACCEPTABLE;
-import static java.net.HttpURLConnection.HTTP_OK;
-import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
 import thredds.client.catalog.ServiceType;
 import thredds.client.catalog.tools.DataFactory;
 import ucar.httpservices.HTTPFactory;
@@ -21,18 +19,20 @@ import java.util.*;
 
 /**
  * Detection of the protocol from a location string.
- * TODO: Break this up so that each protocol is responsible for itself. We still need to disambiguate http:
+ * Split out from NetcdfDataset.
+ * LOOK should be refactored
  *
  * @author caron
  * @since 10/20/2015.
  */
 public class DatasetUrl {
-  protected static final String alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  protected static final String slashalpha = "\\/" + alpha;
+  static final protected String alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  static final protected String slashalpha = "\\/" + alpha;
 
   static final String[] FRAGPROTOCOLS = {"dap4", "dap2", "dods", "cdmremote", "thredds", "ncml"};
   static final ServiceType[] FRAGPROTOSVCTYPE = {ServiceType.DAP4, ServiceType.OPENDAP, ServiceType.OPENDAP,
       ServiceType.THREDDS, ServiceType.THREDDS, ServiceType.NCML};
+
 
   /**
    * Return the set of leading protocols for a url; may be more than one.
@@ -45,14 +45,14 @@ public class DatasetUrl {
    * @param url the url whose protocols to return
    * @return list of leading protocols without the trailing :
    */
-  public static List<String> getProtocols(String url) {
+  static public List<String> getProtocols(String url) {
     List<String> allprotocols = new ArrayList<>(); // all leading protocols upto path or host
 
     // Note, we cannot use split because of the context sensitivity
     // This code is quite ugly because of all the confounding cases
     // (e.g. windows path, embedded colons, etc.).
     // Specifically, the 'file:' protocol is a problem because
-    // it has so many non-standard forms such as file:x/y file://x/y file:///x/y.
+    // it has no many non-standard forms such as file:x/y file://x/y file:///x/y.
     StringBuilder buf = new StringBuilder(url);
     // If there are any leading protocols, then they must stop at the first '/'.
     int slashpos = buf.indexOf("/");
@@ -62,55 +62,56 @@ public class DatasetUrl {
     } else if (slashpos >= 0) {
       // Remove everything after the first slash
       buf.delete(slashpos + 1, buf.length());
-      int index = buf.indexOf(":");
-      while (index > 0) {
+      for (;;) {
+        int index = buf.indexOf(":");
+        if (index < 0)
+          break; // no more protocols
         // Validate protocol
-        if (!validateProtocol(buf, 0, index))
+        if (!validateprotocol(url, 0, index))
           break;
         String protocol = buf.substring(0, index); // not including trailing ':'
         allprotocols.add(protocol);
         buf.delete(0, index + 1); // remove the leading protocol
-        index = buf.indexOf(":");
       }
     }
     return allprotocols;
   }
 
-  // Eliminate windows drive letters.
-  // "protocol:" must be followed by alpha or "/"
-  private static boolean validateProtocol(StringBuilder buf, int startpos, int endpos) {
+  static private boolean validateprotocol(String url, int startpos, int endpos) {
     int len = endpos - startpos;
     if (len == 0)
       return false;
-    char cs = buf.charAt(startpos);
-    char ce1 = buf.charAt(endpos + 1);
-    String wtf = "/\\";
-    if (len == 1 && alpha.indexOf(cs) >= 0 && (ce1 == '/' || ce1 == '\\'))
+    char cs = url.charAt(startpos);
+    char ce1 = url.charAt(endpos + 1);
+    if (len == 1 // =>|protocol| == 1
+        && alpha.indexOf(cs) >= 0 && "/\\".indexOf(ce1) >= 0)
       return false; // looks like windows drive letter
     // If trailing colon is not followed by alpha or /, then assume not url
-    return slashalpha.indexOf(ce1) >= 0;
+    if (slashalpha.indexOf(ce1) < 0)
+      return false;
+    return true;
   }
 
   /////////////////////////////////////////////////////////////////////////////////////
 
-  public static DatasetUrl findDatasetUrl(String orgLocation) throws IOException {
-    ServiceType serviceType = null;
+  static public DatasetUrl findDatasetUrl(String orgLocation) throws IOException {
+    ServiceType svctype = null;
 
     // Canonicalize the location
     String location = StringUtil2.replace(orgLocation.trim(), '\\', "/");
-    List<String> allProtocols = getProtocols(location);
+    List<String> allprotocols = DatasetUrl.getProtocols(location);
 
-    String trueUrl = location;
-    String leadProtocol;
-    if (allProtocols.isEmpty()) {
-      leadProtocol = "file"; // The location has no leading protocols, assume file:
+    String trueurl = location;
+    String leadprotocol;
+    if (allprotocols.size() == 0) {
+      leadprotocol = "file"; // The location has no leading protocols, assume file:
     } else {
-      leadProtocol = allProtocols.get(0);
+      leadprotocol = allprotocols.get(0);
     }
 
     // Priority in deciding
     // the service type is as follows.
-    // 1. "protocol" tag in fragment
+    // 1. "mode" tag in fragment (or "proto" or "protocol" for back compatibility)
     // 2. specific protocol in fragment
     // 3. leading protocol
     // 4. path extension
@@ -118,58 +119,58 @@ public class DatasetUrl {
 
     // temporarily remove any trailing query or fragment
     String fragment = null;
-    int pos = trueUrl.lastIndexOf('#');
+    int pos = trueurl.lastIndexOf('#');
     if (pos >= 0) {
-      fragment = trueUrl.substring(pos + 1);
-      trueUrl = trueUrl.substring(0, pos);
+      fragment = trueurl.substring(pos + 1, trueurl.length());
+      trueurl = trueurl.substring(0, pos);
     }
     pos = location.lastIndexOf('?');
     String query = null;
     if (pos >= 0) {
-      query = trueUrl.substring(pos + 1);
-      trueUrl = trueUrl.substring(0, pos);
+      query = trueurl.substring(pos + 1, trueurl.length());
+      trueurl = trueurl.substring(0, pos);
     }
     if (fragment != null)
-      serviceType = searchFragment(fragment);
+      svctype = searchFragment(fragment);
 
-    if (serviceType == null) // See if leading protocol tells us how to interpret
-      serviceType = decodeLeadProtocol(leadProtocol);
+    if (svctype == null) // See if leading protocol tells us how to interpret
+      svctype = decodeLeadProtocol(leadprotocol);
 
-    if (serviceType == null) // See if path tells us how to interpret
-      serviceType = searchPath(trueUrl);
+    if (svctype == null) // See if path tells us how to interpret
+      svctype = searchPath(trueurl);
 
-    if (serviceType == null) {
+    if (svctype == null) {
       // There are several possibilities at this point; all of which
       // require further info to disambiguate
       // - we have file://<path> or file:<path>; we need to see if
       // the extension can help, otherwise, start defaulting.
       // - we have a simple url: e.g. http://... ; contact the server
-      if (leadProtocol.equals("file")) {
-        serviceType = decodePathExtension(trueUrl); // look at the path extension
-        if (serviceType == null && checkIfNcml(new File(location))) {
-          serviceType = ServiceType.NCML;
+      if (leadprotocol.equals("file")) {
+        svctype = decodePathExtension(trueurl); // look at the path extension
+        if (svctype == null && checkIfNcml(new File(location))) {
+          svctype = ServiceType.NCML;
         }
       } else {
-        serviceType = disambiguateHttp(trueUrl);
+        svctype = disambiguateHttp(trueurl);
         // special cases
-        if ((serviceType == null || serviceType == ServiceType.HTTPServer)) {
+        if ((svctype == null || svctype == ServiceType.HTTPServer)) {
           // ncml file being served over http?
-          if (checkIfRemoteNcml(trueUrl)) {
-            serviceType = ServiceType.NCML;
+          if (checkIfRemoteNcml(trueurl)) {
+            svctype = ServiceType.NCML;
           }
         }
       }
     }
 
-    if (serviceType == ServiceType.NCML) { // ??
-      // If lead protocol was null, then pretend it was a file
+    if (svctype == ServiceType.NCML) { // ??
+      // If lead protocol was null and then pretend it was a file
       // Note that technically, this should be 'file://'
-      trueUrl = (allProtocols.isEmpty() ? "file:" + trueUrl : location);
+      trueurl = (allprotocols.size() == 0 ? "file:" + trueurl : location);
     }
 
     // Add back the query and fragment (if any)
     if (query != null || fragment != null) {
-      StringBuilder buf = new StringBuilder(trueUrl);
+      StringBuilder buf = new StringBuilder(trueurl);
       if (query != null) {
         buf.append('?');
         buf.append(query);
@@ -178,50 +179,38 @@ public class DatasetUrl {
         buf.append('#');
         buf.append(fragment);
       }
-      trueUrl = buf.toString();
+      trueurl = buf.toString();
     }
-    return new DatasetUrl(serviceType, trueUrl);
+    return new DatasetUrl(svctype, trueurl);
   }
 
   /**
    * Given a location, find markers indicated which protocol to use
-   * TODO: what use case is this handling ?
+   * LOOK what use case is this handling ?
    *
    * @param fragment the fragment is to be examined
    * @return The discovered ServiceType, or null
    */
-  private static ServiceType searchFragment(String fragment) {
-    if (fragment.isEmpty())
+  static private ServiceType searchFragment(String fragment) {
+    if (fragment.length() == 0)
       return null;
     Map<String, String> map = parseFragment(fragment);
     if (map == null)
       return null;
-
-    Set<String> modeset = new HashSet<>();
-    // Break up the mode string
-    String modekey = map.get("mode");
-    if (modekey != null) {
-      String[] pieces = modekey.split("[,]");
-      for (String s : pieces)
-        modeset.add(s);
-    }
-
-    // Add protocol or proto
-    modekey = map.get("protocol");
-    if (modekey == null)
-      modekey = map.get("proto");
-    if (modekey != null)
-      modeset.add(modekey);
-
-    // Add in singletons
-    for (String p : FRAGPROTOCOLS) {
-      if (map.get(p) != null) {
-        modeset.add(p);
+    String mode = map.get("mode");
+    if (mode == null)
+      mode = map.get("proto");
+    if (mode == null)
+      mode = map.get("protocol");
+    if (mode == null) {
+      for (String p : FRAGPROTOCOLS) {
+        if (map.get(p) != null) {
+          mode = p;
+          break;
+        }
       }
     }
-
-    // Choose the Servicetype
-    for (String mode : modeset) {
+    if (mode != null) {
       if (mode.equalsIgnoreCase("dap") || mode.equalsIgnoreCase("dods"))
         return ServiceType.OPENDAP;
       if (mode.equalsIgnoreCase("dap4"))
@@ -245,7 +234,7 @@ public class DatasetUrl {
    * @return a map of the name value pairs (possibly empty),
    *         or null if the fragment does not parse.
    */
-  private static Map<String, String> parseFragment(String fragment) {
+  static private Map<String, String> parseFragment(String fragment) {
     Map<String, String> map = new HashMap<>();
     if (fragment != null && fragment.length() >= 0) {
       if (fragment.charAt(0) == '#')
@@ -275,14 +264,14 @@ public class DatasetUrl {
    * @param url the url is to be examined
    * @return The discovered ServiceType, or null
    */
-  private static ServiceType searchPath(String url) {
+  static private ServiceType searchPath(String url) {
     if (false) { // Disable for now
-      if (url == null || url.isEmpty())
+      if (url == null || url.length() == 0)
         return null;
       url = url.toLowerCase(); // for matching purposes
       for (int i = 0; i < FRAGPROTOCOLS.length; i++) {
         String p = FRAGPROTOCOLS[i];
-        if (url.contains("/thredds/" + p.toLowerCase() + "/")) {
+        if (url.indexOf("/thredds/" + p.toLowerCase() + "/") >= 0) {
           return FRAGPROTOSVCTYPE[i];
         }
       }
@@ -296,7 +285,7 @@ public class DatasetUrl {
    * @param path the path to examine for extension
    * @return ServiceType inferred from the extension or null
    */
-  private static ServiceType decodePathExtension(String path) {
+  static private ServiceType decodePathExtension(String path) {
     // Look at the path extensions
     if (path.endsWith(".dds") || path.endsWith(".das") || path.endsWith(".dods"))
       return ServiceType.OPENDAP;
@@ -320,24 +309,25 @@ public class DatasetUrl {
    * </ol>
    *
    * @param protocol The leading protocol
-   *
+   * 
    * @return ServiceType indicating how to handle the url, or null.
    */
   @Urlencoded
-  private static ServiceType decodeLeadProtocol(String protocol) {
-    switch (protocol) {
-      case "dods":
-        return ServiceType.OPENDAP;
-      case "dap4":
-        return ServiceType.DAP4;
-      case "httpserver":
-      case "nodods":
-        return ServiceType.HTTPServer;
-      case CdmRemote.PROTOCOL:
-        return ServiceType.CdmRemote;
-      case DataFactory.PROTOCOL: // thredds
-        return ServiceType.THREDDS;
-    }
+  static private ServiceType decodeLeadProtocol(String protocol) throws IOException {
+    if (protocol.equals("dods"))
+      return ServiceType.OPENDAP;
+
+    else if (protocol.equals("dap4"))
+      return ServiceType.DAP4;
+
+    else if (protocol.equals("httpserver") || protocol.equals("nodods"))
+      return ServiceType.HTTPServer;
+
+    else if (protocol.equals(CdmRemote.PROTOCOL))
+      return ServiceType.CdmRemote;
+
+    else if (protocol.equals(DataFactory.PROTOCOL)) // thredds
+      return ServiceType.THREDDS;
 
     return null;
   }
@@ -356,14 +346,8 @@ public class DatasetUrl {
    * @return ServiceType indicating how to handle the url
    */
   @Urlencoded
-  private static ServiceType disambiguateHttp(String location) throws IOException {
-    boolean checkDap2 = false;
-    boolean checkDap4 = false;
-    boolean checkCdmr = false;
-
-    if (!location.startsWith("http")) {
-      return null;
-    }
+  static private ServiceType disambiguateHttp(String location) throws IOException {
+    boolean checkDap2 = false, checkDap4 = false, checkCdmr = false;
 
     // some TDS specific tests
     if (location.contains("cdmremote")) {
@@ -400,29 +384,36 @@ public class DatasetUrl {
 
     if (!checkCdmr) {
       ServiceType result = checkIfCdmr(location);
-      return result;
+      if (result != null)
+        return result;
     }
     return null;
   }
 
   // cdmremote
-  private static ServiceType checkIfCdmr(String location) throws IOException {
+  static private ServiceType checkIfCdmr(String location) throws IOException {
+
     try (HTTPMethod method = HTTPFactory.Head(location + "?req=header")) {
       int statusCode = method.execute();
       if (statusCode >= 300) {
-        if (statusCode == HTTP_UNAUTHORIZED || statusCode == HTTP_FORBIDDEN)
+        if (statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_FORBIDDEN)
           throw new IOException("Unauthorized to open dataset " + location);
         else
           throw new IOException(location + " is not a valid URL, return status=" + statusCode);
       }
 
-      Optional<String> value = method.getResponseHeaderValue("Content-Description");
-      return value.map(v -> v.equalsIgnoreCase("ncstream") ? ServiceType.CdmRemote : null).orElse(null);
+      Header h = method.getResponseHeader("Content-Description");
+      if ((h != null) && (h.getValue() != null)) {
+        String v = h.getValue();
+        if (v.equalsIgnoreCase("ncstream"))
+          return ServiceType.CdmRemote;
+      }
     }
+    return null;
   }
 
   // not sure what other opendap servers do, so fall back on check for dds
-  private static ServiceType checkIfDods(String location) throws IOException {
+  static private ServiceType checkIfDods(String location) throws IOException {
     int len = location.length();
     // Strip off any trailing .dds, .das, or .dods
     if (location.endsWith(".dds"))
@@ -439,17 +430,17 @@ public class DatasetUrl {
         HTTPMethod method = HTTPFactory.Get(location + ".dds")) {
 
       int status = method.execute();
-      if (status == HTTP_OK) {
-        Optional<String> value = method.getResponseHeaderValue("Content-Description");
-        if (value.isPresent()) {
-          String v = value.get();
+      if (status == 200) {
+        Header h = method.getResponseHeader("Content-Description");
+        if ((h != null) && (h.getValue() != null)) {
+          String v = h.getValue();
           if (v.equalsIgnoreCase("dods-dds") || v.equalsIgnoreCase("dods_dds"))
             return ServiceType.OPENDAP;
           else
             throw new IOException("OPeNDAP Server Error= " + method.getResponseAsString());
         }
       }
-      if (status == HTTP_UNAUTHORIZED || status == HTTP_FORBIDDEN)
+      if (status == HttpStatus.SC_UNAUTHORIZED || status == HttpStatus.SC_FORBIDDEN)
         throw new IOException("Unauthorized to open dataset " + location);
 
       // not dods
@@ -458,7 +449,7 @@ public class DatasetUrl {
   }
 
   // check for dmr
-  private static ServiceType checkIfDap4(String location) throws IOException {
+  static private ServiceType checkIfDap4(String location) throws IOException {
     // Strip off any trailing DAP4 prefix
     if (location.endsWith(".dap"))
       location = location.substring(0, location.length() - ".dap".length());
@@ -470,14 +461,15 @@ public class DatasetUrl {
       location = location.substring(0, location.length() - ".dsr".length());
     try (HTTPMethod method = HTTPFactory.Get(location + ".dmr.xml")) {
       int status = method.execute();
-      if (status == HTTP_OK) {
-        Optional<String> value = method.getResponseHeaderValue("Content-Type");
-        if (value.isPresent()) {
-          if (value.get().startsWith("application/vnd.opendap.org"))
+      if (status == 200) {
+        Header h = method.getResponseHeader("Content-Type");
+        if ((h != null) && (h.getValue() != null)) {
+          String v = h.getValue();
+          if (v.startsWith("application/vnd.opendap.org"))
             return ServiceType.DAP4;
         }
       }
-      if (status == HTTP_UNAUTHORIZED || status == HTTP_FORBIDDEN)
+      if (status == HttpStatus.SC_UNAUTHORIZED || status == HttpStatus.SC_FORBIDDEN)
         throw new IOException("Unauthorized to open dataset " + location);
 
       // not dods
@@ -491,11 +483,7 @@ public class DatasetUrl {
   // location="dods://ma
   private static int NUM_BYTES_TO_DETERMINE_NCML = 128;
 
-  private static boolean checkIfRemoteNcml(String location) throws IOException {
-    if (!location.startsWith("http")) {
-      return false;
-    }
-
+  static private boolean checkIfRemoteNcml(String location) throws IOException {
     if (decodePathExtension(location) == ServiceType.NCML) {
       // just because location ends with ncml does not mean it's ncml
       // if the ncml file is being served up via http by a remote server,
@@ -506,9 +494,9 @@ public class DatasetUrl {
         method.setRequestHeader("accept-encoding", "identity");
         int statusCode = method.execute();
         if (statusCode >= 300) {
-          if (statusCode == HTTP_UNAUTHORIZED) {
+          if (statusCode == 401) {
             throw new IOException("Unauthorized to open dataset " + location);
-          } else if (statusCode == HTTP_NOT_ACCEPTABLE) {
+          } else if (statusCode == 406) {
             String msg = location + " - this server does not support returning content without any encoding.";
             msg = msg + " Please download the file locally. Return status=" + statusCode;
             throw new IOException(msg);
@@ -524,7 +512,7 @@ public class DatasetUrl {
     return false;
   }
 
-  private static boolean checkIfNcml(File file) throws IOException {
+  static private boolean checkIfNcml(File file) throws IOException {
     if (!file.exists()) {
       return false;
     }
@@ -541,7 +529,7 @@ public class DatasetUrl {
     }
   }
 
-  private static boolean checkIfNcml(String string) {
+  static private boolean checkIfNcml(String string) {
     // Look for the ncml element as well as a reference to the ncml namespace URI.
     return string.contains("<netcdf ") && string.contains("unidata.ucar.edu/namespaces/netcdf/ncml");
   }

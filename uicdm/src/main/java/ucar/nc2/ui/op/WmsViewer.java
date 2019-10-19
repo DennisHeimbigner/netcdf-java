@@ -179,7 +179,7 @@ public class WmsViewer extends JPanel {
 
       info.format(" Status = %d %s%n", method.getStatusCode(), method.getStatusText());
       info.format(" Status Line = %s%n", method.getStatusLine());
-      printHeaders(" Response Headers", method.getResponseHeaders().entries());
+      printHeaders(" Response Headers", method.getResponseHeadersMap().entries());
       info.format("GetCapabilities:%n%n");
 
       if (statusCode == 404) {
@@ -255,7 +255,7 @@ public class WmsViewer extends JPanel {
 
         info.format(" Status = %d %s%n", method.getStatusCode(), method.getStatusText());
         info.format(" Status Line = %s%n", method.getStatusLine());
-        printHeaders(" Response Headers", method.getResponseHeaders().entries());
+        printHeaders(" Response Headers", method.getResponseHeadersMap().entries());
 
         if (statusCode == 404) {
           throw new FileNotFoundException(method.getPath() + " " + method.getStatusLine());

@@ -299,17 +299,17 @@ public class URLDumpPane extends TextHistoryPane {
        * appendLine("   timeout (msecs)= " + p.getSoTimeout());
        * appendLine("   virtual host= " + p.getVirtualHost());
        */
-      printHeaders("Request Headers = ", m.getRequestHeaders().entries());
+      printHeaders("Request Headers = ", m.getRequestHeadersMap().entries());
       appendLine(" ");
 
       m.execute();
 
-      printHeaders("Request Headers2 = ", m.getRequestHeaders().entries());
+      printHeaders("Request Headers2 = ", m.getRequestHeadersMap().entries());
       appendLine(" ");
 
       appendLine("Status = " + m.getStatusCode() + " " + m.getStatusText());
       appendLine("Status Line = " + m.getStatusLine());
-      printHeaders("Response Headers = ", m.getResponseHeaders().entries());
+      printHeaders("Response Headers = ", m.getResponseHeadersMap().entries());
       if (cmd == Command.GET) {
         appendLine("\nResponseBody---------------");
 

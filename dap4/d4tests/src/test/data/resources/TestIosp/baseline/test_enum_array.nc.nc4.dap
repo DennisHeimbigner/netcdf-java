@@ -5,12 +5,13 @@ netcdf test_enum_array {
   dimensions:
     d5 = 5;
   variables:
-    enum cloud_class_t primary_cloud(d5);
+    enum primary_cloud primary_cloud(d5);
       string primary_cloud:_FillValue = "Missing";
 
   // global attributes:
   string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
- data:
-primary_cloud =
-  {0, 2, 0, 1, 127}
+
+  data:
+    primary_cloud = 
+      {0, 2, 0, 1, 127}
 }

@@ -31,6 +31,7 @@ public abstract class UnitTestCommon {
   public static final boolean DEBUG = false;
 
   public static final Charset UTF8 = StandardCharsets.UTF_8;
+  public static final Charset ISO88591 = Charset.forName("ISO-8859-1");
 
   protected static final int[] OKCODES = {200, 404};
 
@@ -616,7 +617,7 @@ public abstract class UnitTestCommon {
 
   /*
    * // Replacement for stderr & stdout
-   * static public class STDIO
+   * public static class STDIO
    * {
    * public STDIO(String name)
    * {
@@ -646,12 +647,12 @@ public abstract class UnitTestCommon {
    * }
    * }
    * 
-   * static public STDIO stderr = new STDIO("test");
-   * static public STDIO stdout = new STDIO("test");
+   * public static STDIO stderr = new STDIO("test");
+   * public static STDIO stdout = new STDIO("test");
    * 
    * static TemporaryFolder temporaryfolder = null;
    * 
-   * static public File
+   * public static File
    * makeTemporaryDir(String name)
    * throws IOException
    * {
@@ -660,7 +661,7 @@ public abstract class UnitTestCommon {
    * return temporaryfolder.newFolder(name);
    * }
    * 
-   * static public File
+   * public static File
    * makeTemporaryFile(String name)
    * throws IOException
    * {
@@ -668,7 +669,7 @@ public abstract class UnitTestCommon {
    * temporaryfolder = new TemporaryFolder();
    * return temporaryfolder.newFile(name);
    * }
-   * static public void
+   * public static void
    * logify(String s)
    * {
    * StringReader rs = new StringReader(s);

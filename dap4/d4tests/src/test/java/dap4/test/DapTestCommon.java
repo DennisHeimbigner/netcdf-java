@@ -42,19 +42,20 @@ abstract public class DapTestCommon extends UnitTestCommon {
 
   static final String DEFAULTTREEROOT = "dap4";
 
-  static public final String FILESERVER = "file://localhost:8080";
+  public static final String FILESERVER = "file://localhost:8080";
 
-  static public final String CONSTRAINTTAG = "dap4.ce";
-  static public final String ORDERTAG = "ucar.littleendian";
-  static public final String NOCSUMTAG = "ucar.nochecksum";
-  static public final String TRANSLATETAG = "ucar.translate";
-  static public final String TESTTAG = "ucar.testing";
+  static final String DAP4MODE = "#mode=dap4";
+  public static final String CONSTRAINTTAG = "dap4.ce";
+  public static final String ORDERTAG = "ucar.littleendian";
+  public static final String NOCSUMTAG = "ucar.nochecksum";
+  public static final String TRANSLATETAG = "ucar.translate";
+  public static final String TESTTAG = "ucar.testing";
 
   static final String D4TESTDIRNAME = "d4tests";
 
   // Equivalent to the path to the webapp/d4ts for testing purposes
-  static protected final String DFALTRESOURCEPATH = "/src/test/data/resources";
-  static protected Class NC4IOSP = ucar.nc2.jni.netcdf.Nc4Iosp.class;
+  protected static final String DFALTRESOURCEPATH = "/src/test/data/resources";
+  protected static Class NC4IOSP = ucar.nc2.jni.netcdf.Nc4Iosp.class;
 
   //////////////////////////////////////////////////
   // Type decls
@@ -105,9 +106,9 @@ abstract public class DapTestCommon extends UnitTestCommon {
   //////////////////////////////////////////////////
   // Static variables
 
-  static protected String dap4root = null;
-  static protected String dap4testroot = null;
-  static protected String dap4resourcedir = null;
+  protected static String dap4root = null;
+  protected static String dap4testroot = null;
+  protected static String dap4resourcedir = null;
 
   static {
     dap4root = locateDAP4Root(threddsroot);
@@ -121,11 +122,11 @@ abstract public class DapTestCommon extends UnitTestCommon {
   // Static methods
 
 
-  static protected String getD4TestsRoot() {
+  protected static String getD4TestsRoot() {
     return dap4testroot;
   }
 
-  static protected String getResourceRoot() {
+  protected static String getResourceRoot() {
     return dap4resourcedir;
   }
 
@@ -240,7 +241,7 @@ abstract public class DapTestCommon extends UnitTestCommon {
     return this.dap4resourcedir;
   }
 
-  static protected void testSetup() {
+  protected static void testSetup() {
     try {
       // Always prefer Nc4Iosp over HDF5
       NetcdfFile.iospDeRegister(NC4IOSP);
@@ -268,12 +269,12 @@ abstract public class DapTestCommon extends UnitTestCommon {
     System.err.flush();
   }
 
-  static public String getCLibraryVersion() {
+  public static String getCLibraryVersion() {
     Nc4prototypes nc4 = getCLibrary();
     return (nc4 == null ? "Unknown" : nc4.nc_inq_libvers());
   }
 
-  static public Nc4prototypes getCLibrary() {
+  public static Nc4prototypes getCLibrary() {
     try {
       Method getclib = NC4IOSP.getMethod("getCLibrary");
       return (Nc4prototypes) getclib.invoke(null);

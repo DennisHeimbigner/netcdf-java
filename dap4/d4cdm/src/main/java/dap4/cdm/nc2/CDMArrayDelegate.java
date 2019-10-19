@@ -7,7 +7,6 @@ package dap4.cdm.nc2;
 
 import dap4.core.dmr.*;
 import dap4.core.data.DSP;
-import dap4.core.data.DSP;
 
 /**
  * Since we can't use AbstractCDMArray,
@@ -37,9 +36,6 @@ import dap4.core.data.DSP;
    * this.basetype = this.template.getBaseType();
    * this.primitivetype = this.basetype.getPrimitiveType();
    */
-
-  // @Override
-  // public DSP getDSP()
 
   @Override
   public DapVariable getTemplate() {

@@ -434,7 +434,7 @@ public class DConnect2 implements Closeable {
   }
 
   private void checkHeaders(HTTPMethod method) {
-    for (Map.Entry<String, String> entry : method.getResponseHeaders().entries()) {
+    for (Map.Entry<String, String> entry : method.getResponseHeadersMap().entries()) {
       String name = entry.getKey();
       String value = entry.getValue();
 

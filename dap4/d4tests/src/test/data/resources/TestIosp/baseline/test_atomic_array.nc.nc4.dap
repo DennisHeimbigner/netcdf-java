@@ -23,34 +23,35 @@ netcdf test_atomic_array {
 
     opaque vo(d1, d2);
 
-    enum cloud_class_t primary_cloud(d5);
+    enum primary_cloud primary_cloud(d5);
       string primary_cloud:_FillValue = "Missing";
 
   // global attributes:
   string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
- data:
-vu8 =
-  {
-    {255, 1, 2},
-    {3, 4, 5}
-  }
-v16 =
-  {1, 2, 3, 4}
-vu32 =
-  {
-    {5, 4, 3},
-    {2, 1, 0}
-  }
-vd =
-  {17.9, 1024.8}
-vc =  "@&"
-vs =
-  {  "hello	world",   "
-",  "Καλημέα",   "abc"
-  }
-vo =  0x0123456789abcdef,
-  0xabcdef0000000000;
 
-primary_cloud =
-  {0, 2, 0, 1, 127}
+  data:
+    vu8 = 
+      {
+        {255, 1, 2},
+        {3, 4, 5}
+      }
+    v16 = 
+      {1, 2, 3, 4}
+    vu32 = 
+      {
+        {5, 4, 3},
+        {2, 1, 0}
+      }
+    vd = 
+      {17.9, 1024.8}
+    vc =   "@&"
+    vs = 
+      {  "hello	world",   "
+",  "Καλημέα",   "abc"
+      }
+    vo =       0x0123456789abcdef,
+      0xabcdef0000000000;
+
+    primary_cloud = 
+      {0, 2, 0, 1, 127}
 }

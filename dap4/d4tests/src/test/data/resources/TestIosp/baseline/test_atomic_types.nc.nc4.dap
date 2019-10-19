@@ -29,29 +29,30 @@ netcdf test_atomic_types {
 
     opaque vo;
 
-    enum cloud_class_t primary_cloud;
+    enum primary_cloud primary_cloud;
       string primary_cloud:_FillValue = "Missing";
 
-    enum cloud_class_t secondary_cloud;
+    enum secondary_cloud secondary_cloud;
       string secondary_cloud:_FillValue = "Missing";
 
   // global attributes:
   string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
- data:
-v8 =-128
-vu8 =255
-v16 =-32768
-vu16 =65535
-v32 =2147483647
-vu32 =4294967295
-v64 =9223372036854775807
-vu64 =18446744073709551615
-vf =3.1415927
-vd =3.141592653589793
-vc =@
-vs =  "hello	world"
-vo =  0x0123456789abcdef;
 
-primary_cloud =2
-secondary_cloud =127
+  data:
+    v8 = -128
+    vu8 = 255
+    v16 = -32768
+    vu16 = 65535
+    v32 = 2147483647
+    vu32 = 4294967295
+    v64 = 9223372036854775807
+    vu64 = 18446744073709551615
+    vf = 3.1415927
+    vd = 3.141592653589793
+    vc = @
+    vs =   "hello	world"
+    vo =       0x0123456789abcdef;
+
+    primary_cloud = 2
+    secondary_cloud = 127
 }

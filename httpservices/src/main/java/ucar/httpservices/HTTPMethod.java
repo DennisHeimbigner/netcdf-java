@@ -553,6 +553,25 @@ public class HTTPMethod implements Closeable, Comparable<HTTPMethod> {
     return getResponseAsString("UTF-8");
   }
 
+  public Header getResponseHeader(String name) {
+    try {
+      return this.lastresponse == null ? null : this.lastresponse.getFirstHeader(name);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public Header[] getResponseHeaders() {
+    try {
+      if(this.lastresponse == null)
+        return null;
+      Header[] hs = this.lastresponse.getAllHeaders();
+      return hs;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
   public Optional<String> getRequestHeaderValue(String name) {
     if (this.lastrequest == null) {
       return Optional.empty();
@@ -571,7 +590,7 @@ public class HTTPMethod implements Closeable, Comparable<HTTPMethod> {
    *
    * @return Map, may be empty but not null.
    */
-  public Multimap<String, String> getRequestHeaders() {
+  public Multimap<String, String> getRequestHeadersMap() {
     if (this.lastrequest == null)
       return ImmutableMultimap.of();
 
@@ -602,7 +621,7 @@ public class HTTPMethod implements Closeable, Comparable<HTTPMethod> {
    *
    * @return Map, may be empty but not null.
    */
-  public Multimap<String, String> getResponseHeaders() {
+  public Multimap<String, String> getResponseHeadersMap() {
     if (this.lastresponse == null)
       return ImmutableMultimap.of();
 

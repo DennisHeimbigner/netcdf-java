@@ -141,8 +141,8 @@ public class HTTPRandomAccessFile extends ucar.unidata.io.RandomAccessFile {
 
     if (debugDetails) {
       // request headers dont seem to be available until after execute()
-      printHeaders("Request: " + method.getURI(), method.getRequestHeaders().entries());
-      printHeaders("Response: " + method.getStatusCode(), method.getResponseHeaders().entries());
+      printHeaders("Request: " + method.getURI(), method.getRequestHeadersMap().entries());
+      printHeaders("Response: " + method.getStatusCode(), method.getResponseHeadersMap().entries());
     }
   }
 
