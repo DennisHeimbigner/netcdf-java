@@ -24,6 +24,8 @@ public class TestDAP4Client extends DapTestCommon {
 
   static final boolean DEBUG = false;
 
+  static final boolean BROKEN = false; // on/off known broken tests
+
   static final boolean BUILDBASELINE = false;
 
   static final boolean NCDUMP = true; // Use NcDumpW instead of NCPrint
@@ -230,9 +232,9 @@ public class TestDAP4Client extends DapTestCommon {
     alltestcases.add(new ClientTest("test_enum1.nc"));
     alltestcases.add(new ClientTest("test_fill.nc"));
     alltestcases.add(new ClientTest("test_groups1.nc"));
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_misc1.nc")); // 0 size unlimited
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_one_var.nc")); // 0 size unlimited
     alltestcases.add(new ClientTest("test_one_vararray.nc"));
     alltestcases.add(new ClientTest("test_opaque.nc"));
@@ -243,33 +245,33 @@ public class TestDAP4Client extends DapTestCommon {
     alltestcases.add(new ClientTest("test_struct_type.nc"));
     alltestcases.add(new ClientTest("test_struct1.nc"));
     alltestcases.add(new ClientTest("test_test.nc"));
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_unlim.nc")); // ?
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_unlim1.nc")); // ?
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_utf8.nc")); // ?
     alltestcases.add(new ClientTest("test_vlen1.nc"));
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen2.nc")); // non scalar vlen
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen3.nc")); // non scalar vlen
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen4.nc")); // non scalar vlen
     alltestcases.add(new ClientTest("test_vlen5.nc"));
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen6.nc")); // non-scalar vlen
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen7.nc")); // non-scalar vlen
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen8.nc")); // non-scalar vlen
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen9.nc")); // non-scalar
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen10.nc")); // non-scalar
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_vlen11.nc")); // unknown failure
-    if (false)
+    if (BROKEN)
       alltestcases.add(new ClientTest("test_zerodim.nc")); // non-scalar seq
     alltestcases.add(new ClientTest("tst_fills.nc"));
     for (ClientTest test : alltestcases) {
