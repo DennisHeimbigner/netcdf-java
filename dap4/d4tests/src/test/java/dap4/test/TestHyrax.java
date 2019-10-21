@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * Test OpenDap Server at the NetcdfDataset level
  */
-@Ignore
 public class TestHyrax extends UnitTestCommon {
   private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
