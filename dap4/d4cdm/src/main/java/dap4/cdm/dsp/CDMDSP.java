@@ -83,7 +83,7 @@ public class CDMDSP extends AbstractDSP {
   public CDMDSP() {}
 
   //////////////////////////////////////////////////
-  // DSP Interface
+  // AbstractDSP Interface
 
   public String getLocation() {
     return this.ncdfile.getLocation();

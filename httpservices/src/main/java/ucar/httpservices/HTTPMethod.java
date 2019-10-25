@@ -563,7 +563,7 @@ public class HTTPMethod implements Closeable, Comparable<HTTPMethod> {
 
   public Header[] getResponseHeaders() {
     try {
-      if(this.lastresponse == null)
+      if (this.lastresponse == null)
         return null;
       Header[] hs = this.lastresponse.getAllHeaders();
       return hs;

@@ -33,8 +33,8 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
-@ContextConfiguration
-@WebAppConfiguration("file:src/test/data")
+//@ContextConfiguration
+//@WebAppConfiguration("file:src/test/data")
 abstract public class DapTestCommon extends UnitTestCommon {
 
   //////////////////////////////////////////////////
