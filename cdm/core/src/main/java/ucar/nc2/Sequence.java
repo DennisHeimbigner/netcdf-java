@@ -11,26 +11,23 @@ import java.util.ArrayList;
 /**
  * Sequence is a one-dimensional Structure with indeterminate length.
  * The only data access is through getStructureIterator().
- * However, read() will read in the entire data and return an ArraySequence.
+ * However, read() will read in the entire data and return an in-memory ArraySequence.
  * 
  * @author caron
  * @since Feb 23, 2008
- * @deprecated Sequence may not extend Structure or Variable, in 6.
  */
-@Deprecated
 public class Sequence extends Structure {
 
-  /*
+  /**
    * Sequence Constructor
-   *
+   * 
    * @param ncfile the containing NetcdfFile.
-   * 
    * @param group the containing group; if null, use rootGroup
-   * 
    * @param parent parent Structure, may be null
-   * 
    * @param shortName variable shortName, must be unique within the Group
+   * @deprecated use Builder.
    */
+  @Deprecated
   public Sequence(NetcdfFile ncfile, Group group, Structure parent, String shortName) {
     super(ncfile, group, parent, shortName);
 
@@ -115,10 +112,11 @@ public class Sequence extends Structure {
 
   ////////////////////////////////////////////////////////////////////////////////////////////
 
-  protected Sequence(Builder<?> builder) {
-    super(builder);
+  protected Sequence(Builder<?> builder, Group parentGroup) {
+    super(builder, parentGroup);
   }
 
+  /** Turn into a mutable Builder. Can use toBuilder().build() to copy. */
   public Builder<?> toBuilder() {
     return addLocalFieldsToBuilder(builder());
   }
@@ -144,16 +142,18 @@ public class Sequence extends Structure {
     }
   }
 
+  /** A builder of Sequences */
   public static abstract class Builder<T extends Builder<T>> extends Structure.Builder<T> {
     private boolean built;
 
     protected abstract T self();
 
-    public Sequence build() {
+    public Sequence build(Group parentGroup) {
       if (built)
         throw new IllegalStateException("already built");
       built = true;
-      return new Sequence(this);
+      this.setDataType(DataType.SEQUENCE);
+      return new Sequence(this, parentGroup);
     }
   }
 

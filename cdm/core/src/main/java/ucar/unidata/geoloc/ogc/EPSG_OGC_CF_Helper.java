@@ -17,7 +17,9 @@ import ucar.unidata.util.Parameter;
  *
  * @author edavis
  * @since 4.0
+ * @deprecated will move in ver6
  */
+@Deprecated
 public class EPSG_OGC_CF_Helper {
   private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EPSG_OGC_CF_Helper.class);
 
@@ -155,12 +157,11 @@ public class EPSG_OGC_CF_Helper {
     Attribute gridMappingAtt = gridDatatype.findAttributeIgnoreCase(CF.GRID_MAPPING);
     if (gridMappingAtt != null) {
       String gridMapping = gridMappingAtt.getStringValue();
-      Variable gridMapVar = gridDataset.getNetcdfFile().getRootGroup().findVariable(gridMapping);
+      Variable gridMapVar = gridDataset.getNetcdfFile().getRootGroup().findVariableLocal(gridMapping);
       if (gridMapVar != null) {
-        Attribute gridMappingNameAtt = gridMapVar.findAttributeIgnoreCase(CF.GRID_MAPPING_NAME);
+        String gridMappingNameAtt = gridMapVar.attributes().findAttributeString(CF.GRID_MAPPING_NAME, null);
         if (gridMappingNameAtt != null)
-          buf.append("EPSG:")
-              .append(ProjectionStandardsInfo.getProjectionByCfName(gridMappingNameAtt.getStringValue()));
+          buf.append("EPSG:").append(ProjectionStandardsInfo.getProjectionByCfName(gridMappingNameAtt));
       }
     }
 

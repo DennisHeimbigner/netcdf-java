@@ -31,7 +31,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.EnumTypedef;
 import ucar.nc2.Group;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.Sequence;
 import ucar.nc2.Structure;
 import ucar.nc2.Variable;
@@ -41,8 +40,8 @@ import ucar.unidata.io.RandomAccessFile;
 /**
  * Defines the ncstream format, along with ncStream.proto.
  *
- * @see "http://www.unidata.ucar.edu/software/netcdf-java/stream/NcStream.html"
- * @see "http://www.unidata.ucar.edu/software/netcdf-java/stream/NcstreamGrammer.html"
+ * @see "https://www.unidata.ucar.edu/software/netcdf-java/stream/NcStream.html"
+ * @see "https://www.unidata.ucar.edu/software/netcdf-java/stream/NcstreamGrammer.html"
  */
 public class NcStream {
   // must start with this "CDFS"
@@ -69,7 +68,7 @@ public class NcStream {
     for (Dimension dim : g.getDimensions())
       groupBuilder.addDims(NcStream.encodeDim(dim));
 
-    for (Attribute att : g.getAttributes())
+    for (Attribute att : g.attributes())
       groupBuilder.addAtts(NcStream.encodeAtt(att));
 
     for (EnumTypedef enumType : g.getEnumTypedefs())
@@ -152,7 +151,7 @@ public class NcStream {
       builder.addShape(encodeDim(dim));
     }
 
-    for (Attribute att : var.getAttributes()) {
+    for (Attribute att : var.attributes()) {
       builder.addAtts(encodeAtt(att));
     }
 
@@ -176,7 +175,7 @@ public class NcStream {
     for (Dimension dim : s.getDimensions())
       builder.addShape(encodeDim(dim));
 
-    for (Attribute att : s.getAttributes())
+    for (Attribute att : s.attributes())
       builder.addAtts(encodeAtt(att));
 
     for (Variable v : s.getVariables()) {
@@ -416,13 +415,13 @@ public class NcStream {
   private static Dimension decodeDim(NcStreamProto.Dimension dim) {
     String name = (dim.getName().isEmpty() ? null : dim.getName());
     int dimLen = dim.getIsVlen() ? -1 : (int) dim.getLength();
-    return Dimension.builder(name, dimLen).setIsShared(!dim.getIsPrivate()).setIsUnlimited(dim.getIsUnlimited())
-        .setIsVariableLength(dim.getIsVlen()).build();
+    return Dimension.builder().setName(name).setIsShared(!dim.getIsPrivate()).setIsUnlimited(dim.getIsUnlimited())
+        .setIsVariableLength(dim.getIsVlen()).setLength(dimLen).build();
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  static void readGroup(NcStreamProto.Group proto, NetcdfFile ncfile, Group.Builder g) {
+  static void readGroup(NcStreamProto.Group proto, Group.Builder g) {
 
     for (NcStreamProto.Dimension dim : proto.getDimsList())
       g.addDimension(NcStream.decodeDim(dim)); // always added to group? what if private ??
@@ -440,9 +439,9 @@ public class NcStream {
       g.addVariable(NcStream.decodeStructure(s));
 
     for (NcStreamProto.Group gp : proto.getGroupsList()) {
-      Group.Builder ng = Group.builder(g).setName(gp.getName()).setNcfile(ncfile);
+      Group.Builder ng = Group.builder().setName(gp.getName());
       g.addGroup(ng);
-      readGroup(gp, ncfile, ng);
+      readGroup(gp, ng);
     }
   }
 
@@ -475,8 +474,6 @@ public class NcStream {
 
     if (dtUse == DataType.STRING) {
       int lenp = attp.getSdataCount();
-      if (lenp != len)
-        System.out.println("HEY lenp != len");
       if (lenp == 1)
         return new Attribute(attp.getName(), attp.getSdata(0));
       else {
@@ -505,7 +502,7 @@ public class NcStream {
     // If shared, they must also exist in a parent Group. However, we dont yet have the Groups wired together,
     // so that has to wait until build().
     List<Dimension> dims = new ArrayList<>(6);
-    Section section = new Section();
+    Section.Builder section = Section.builder();
     for (ucar.nc2.stream.NcStreamProto.Dimension dim : var.getShapeList()) {
       dims.add(decodeDim(dim));
       section.appendRange((int) dim.getLength());
@@ -518,7 +515,7 @@ public class NcStream {
     if (!var.getData().isEmpty()) {
       // LOOK may mess with ability to change var size later.
       ByteBuffer bb = ByteBuffer.wrap(var.getData().toByteArray());
-      Array data = Array.factory(varType, section.getShape(), bb);
+      Array data = Array.factory(varType, section.build().getShape(), bb);
       ncvar.setCachedData(data, true);
     }
 
@@ -532,10 +529,8 @@ public class NcStream {
     ncvar.setName(s.getName()).setDataType(convertDataType(s.getDataType()));
 
     List<Dimension> dims = new ArrayList<>(6);
-    Section section = new Section();
     for (ucar.nc2.stream.NcStreamProto.Dimension dim : s.getShapeList()) {
       dims.add(decodeDim(dim));
-      section.appendRange((int) dim.getLength());
     }
     ncvar.addDimensions(dims);
 
@@ -553,7 +548,7 @@ public class NcStream {
 
   @Nonnull
   public static Section decodeSection(NcStreamProto.Section proto) {
-    Section section = new Section();
+    Section.Builder section = Section.builder();
 
     for (ucar.nc2.stream.NcStreamProto.Range pr : proto.getRangeList()) {
       try {
@@ -571,7 +566,7 @@ public class NcStream {
         throw new RuntimeException("Bad Section in ncstream", e);
       }
     }
-    return section;
+    return section.build();
   }
 
   /*

@@ -6,7 +6,6 @@ package ucar.nc2;
 
 import ucar.ma2.*;
 import ucar.nc2.util.CancelTask;
-import ucar.nc2.util.CancelTaskImpl;
 import ucar.nc2.write.Nc4Chunking;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,14 +22,11 @@ import java.util.Map;
  * (modified by the NcML) is written to the new file. If the NcML does not have a referenced dataset,
  * then the new file is filled with fill values, like ncgen.
  * <p/>
- * <p>
- * Use a NetcdfFileWriter object for a lower level API.
+ * Use NetcdfFileWriter object for a lower level API.
  *
- * @see ucar.nc2.dt.grid.CFGridWriter2
- * @see ucar.nc2.ft.point.writer.CFPointWriter
- *
- * @deprecated use ucar.nc2.writer.FileWriter
+ * @deprecated use {@link ucar.nc2.write.NetcdfCopier} (library) or {@link ucar.nc2.write.Nccopy} (command line)
  */
+@Deprecated
 public class FileWriter2 {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileWriter2.class);
   private static final long maxSize = 50 * 1000 * 1000; // 50 Mbytes
@@ -72,6 +68,8 @@ public class FileWriter2 {
     this.version = version;
   }
 
+  /** @deprecated do not use */
+  @Deprecated
   public enum N3StructureStrategy {
     flatten, exclude
   }
@@ -121,7 +119,7 @@ public class FileWriter2 {
     varMap.put(oldVar, newVar);
     varList.add(oldVar);
 
-    for (Attribute orgAtt : oldVar.getAttributes())
+    for (Attribute orgAtt : oldVar.attributes())
       writer.addVariableAttribute(newVar, convertAttribute(orgAtt));
 
     return newVar;
@@ -261,7 +259,7 @@ public class FileWriter2 {
       varList.add(oldVar);
 
       // attributes
-      for (Attribute orgAtt : oldVar.getAttributes()) {
+      for (Attribute orgAtt : oldVar.attributes()) {
         writer.addVariableAttribute(v, convertAttribute(orgAtt));
       }
     }
@@ -271,7 +269,7 @@ public class FileWriter2 {
     Group newGroup = writer.addGroup(newParent, oldGroup.getShortName());
 
     // attributes
-    for (Attribute att : oldGroup.getAttributes()) {
+    for (Attribute att : oldGroup.attributes()) {
       writer.addGroupAttribute(newGroup, att); // atts are immutable
       if (debug)
         System.out.println("add gatt= " + att);
@@ -324,7 +322,7 @@ public class FileWriter2 {
         System.out.println("add var= " + v);
 
       // attributes
-      for (Attribute att : oldVar.getAttributes())
+      for (Attribute att : oldVar.attributes())
         writer.addVariableAttribute(v, att); // atts are immutable
     }
 
@@ -526,7 +524,10 @@ public class FileWriter2 {
    * An index that computes chunk shapes. It is intended to be used to compute the origins and shapes for a series
    * of contiguous writes to a multidimensional array.
    * It writes the first n elements (n < maxChunkElems), then the next, etc.
+   * 
+   * @deprecated use ucar.nc2.write.ChunkingIndex
    */
+  @Deprecated
   public static class ChunkingIndex extends Index {
     public ChunkingIndex(int[] shape) {
       super(shape);
@@ -561,8 +562,6 @@ public class FileWriter2 {
   }
 
   /**
-   * Better to use ucar.nc.dataset.NetcdfDataset main program instead.
-   * <p>
    * <strong>ucar.nc2.FileWriter -in fileIn -out fileOut</strong>.
    * <p>
    * where:
@@ -573,7 +572,9 @@ public class FileWriter2 {
    *
    * @param arg -in fileIn -out fileOut [-netcdf4]
    * @throws IOException on read or write error
+   * @deprecated use ucar.nc2.write.Nccopy
    */
+  @Deprecated
   public static void main(String[] arg) throws IOException {
     if (arg.length < 4) {
       usage();
@@ -597,7 +598,7 @@ public class FileWriter2 {
     }
 
     System.out.printf("FileWriter2 copy %s to %s ", datasetIn, datasetOut);
-    CancelTaskImpl cancel = new CancelTaskImpl();
+    CancelTask cancel = CancelTask.create();
     NetcdfFile ncfileIn = ucar.nc2.NetcdfFile.open(datasetIn, cancel);
     if (cancel.isCancel())
       return;

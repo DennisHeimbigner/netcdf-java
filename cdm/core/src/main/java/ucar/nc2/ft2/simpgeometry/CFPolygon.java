@@ -197,10 +197,9 @@ public class CFPolygon implements Polygon {
     CoordinateAxis x = null;
     CoordinateAxis y = null;
 
-    String[] nodeCoords = polyvar.findAttributeIgnoreCase(CF.NODE_COORDINATES).getStringValue().split(" ");
+    String[] nodeCoords = polyvar.attributes().findAttributeString(CF.NODE_COORDINATES, "").split(" ");
 
     // Look for x and y
-
     for (CoordinateAxis ax : axes) {
 
       if (ax.getFullName().equals(nodeCoords[0]))
@@ -210,7 +209,7 @@ public class CFPolygon implements Polygon {
     }
 
     // Affirm node counts
-    String nodeCoStr = polyvar.findAttValueIgnoreCase(CF.NODE_COUNT, "");
+    String nodeCoStr = polyvar.findAttributeString(CF.NODE_COUNT, "");
 
     if (!nodeCoStr.equals("")) {
       nodeCounts = dataset.findVariable(nodeCoStr);
@@ -220,14 +219,14 @@ public class CFPolygon implements Polygon {
       return null;
 
     // Affirm part node counts
-    String pNodeCoStr = polyvar.findAttValueIgnoreCase(CF.PART_NODE_COUNT, "");
+    String pNodeCoStr = polyvar.findAttributeString(CF.PART_NODE_COUNT, "");
 
     if (!pNodeCoStr.equals("")) {
       partNodeCounts = dataset.findVariable(pNodeCoStr);
     }
 
     // Affirm interior rings
-    String interiorRingsStr = polyvar.findAttValueIgnoreCase(CF.PART_NODE_COUNT, "");
+    String interiorRingsStr = polyvar.findAttributeString(CF.PART_NODE_COUNT, "");
 
     if (!interiorRingsStr.equals("")) {
       interiorRings = dataset.findVariable(interiorRingsStr);

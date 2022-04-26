@@ -5,7 +5,7 @@
 package ucar.nc2.ft2.coverage;
 
 import ucar.nc2.Attribute;
-import ucar.nc2.AttributeContainerHelper;
+import ucar.nc2.AttributeContainer;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.nc2.util.Indent;
@@ -29,7 +29,7 @@ import java.util.*;
 public class CoverageCollection implements Closeable, CoordSysContainer {
 
   private final String name;
-  private final AttributeContainerHelper atts;
+  private final AttributeContainer atts;
   private final LatLonRect latLonBoundingBox;
   private final ProjectionRect projBoundingBox;
   private final CalendarDateRange calendarDateRange;
@@ -60,7 +60,7 @@ public class CoverageCollection implements Closeable, CoordSysContainer {
    * @param coverages list of coverages
    * @param reader delegate for reading
    */
-  public CoverageCollection(String name, FeatureType coverageType, AttributeContainerHelper atts,
+  public CoverageCollection(String name, FeatureType coverageType, AttributeContainer atts,
       LatLonRect latLonBoundingBox, ProjectionRect projBoundingBox, CalendarDateRange calendarDateRange,
       List<CoverageCoordSys> coordSys, List<CoverageTransform> coordTransforms, List<CoverageCoordAxis> coordAxes,
       List<Coverage> coverages, CoverageReader reader) {
@@ -139,18 +139,31 @@ public class CoverageCollection implements Closeable, CoordSysContainer {
     return name;
   }
 
+  /** Get the global attributes. */
+  public AttributeContainer attributes() {
+    return atts;
+  }
+
+  /** @deprecated use attributes() */
+  @Deprecated
   public List<Attribute> getGlobalAttributes() {
     return atts.getAttributes();
   }
 
+  /** @deprecated use attributes() */
+  @Deprecated
   public String findAttValueIgnoreCase(String attName, String defaultValue) {
-    return atts.findAttValueIgnoreCase(attName, defaultValue);
+    return atts.findAttributeString(attName, defaultValue);
   }
 
+  /** @deprecated use attributes() */
+  @Deprecated
   public Attribute findAttribute(String attName) {
     return atts.findAttribute(attName);
   }
 
+  /** @deprecated use attributes() */
+  @Deprecated
   public Attribute findAttributeIgnoreCase(String attName) {
     return atts.findAttributeIgnoreCase(attName);
   }
@@ -220,8 +233,9 @@ public class CoverageCollection implements Closeable, CoordSysContainer {
     Indent indent = new Indent(2);
     f.format("%sGridDatasetCoverage %s%n", indent, name);
     f.format("%s Global attributes:%n", indent);
-    for (Attribute att : atts.getAttributes())
+    for (Attribute att : atts) {
       f.format("%s  %s%n", indent, att);
+    }
     f.format("%s Date Range:%s%n", indent, calendarDateRange);
     f.format("%s LatLon BoundingBox:%s%n", indent, latLonBoundingBox);
     if (projBoundingBox != null)
@@ -250,7 +264,7 @@ public class CoverageCollection implements Closeable, CoordSysContainer {
 
   public Coverage findCoverageByAttribute(String attName, String attValue) {
     for (Coverage cov : coverageMap.values()) {
-      for (Attribute att : cov.getAttributes())
+      for (Attribute att : cov.attributes())
         if (attName.equals(att.getShortName()) && attValue.equals(att.getStringValue()))
           return cov;
     }

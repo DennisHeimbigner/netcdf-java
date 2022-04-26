@@ -13,9 +13,10 @@ import ucar.nc2.time.CalendarDateUnit;
 import ucar.nc2.units.DateUnit;
 import ucar.nc2.units.DateFormatter;
 import ucar.ma2.*;
+import ucar.unidata.geoloc.EarthLocation;
+import ucar.unidata.geoloc.LatLonPoint;
 import ucar.unidata.geoloc.LatLonRect;
 import ucar.unidata.geoloc.Earth;
-import ucar.unidata.geoloc.LatLonPointImpl;
 import java.io.IOException;
 import java.util.*;
 
@@ -27,9 +28,9 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
 
   /////////////////////////////////////////////////
   public Object isMine(FeatureType wantFeatureType, NetcdfDataset ncd, Formatter errlog) {
-    String convention = ncd.findAttValueIgnoreCase(null, "Conventions", null);
+    String convention = ncd.getRootGroup().findAttributeString("Conventions", null);
     if (_Coordinate.Convention.equals(convention)) {
-      String format = ncd.findAttValueIgnoreCase(null, "Format", null);
+      String format = ncd.getRootGroup().findAttributeString("Format", null);
       if ("UNIVERSALFORMAT".equals(format))
         return this;
     }
@@ -75,13 +76,13 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
     if (origin == null)
       return;
 
-    double dLat = Math.toDegrees(getMaximumRadialDist() / Earth.getRadius());
+    double dLat = Math.toDegrees(getMaximumRadialDist() / Earth.WGS84_EARTH_RADIUS_METERS);
     double latRadians = Math.toRadians(origin.getLatitude());
     double dLon = dLat * Math.cos(latRadians);
 
     double lat1 = origin.getLatitude() - dLat / 2;
     double lon1 = origin.getLongitude() - dLon / 2;
-    bb = new LatLonRect(new LatLonPointImpl(lat1, lon1), dLat, dLon);
+    bb = new LatLonRect(LatLonPoint.create(lat1, lon1), dLat, dLon);
 
     boundingBox = bb;
   }
@@ -121,7 +122,7 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
     else
       elev = 0.0;
 
-    origin = new ucar.unidata.geoloc.EarthLocationImpl(latv, lonv, elev);
+    origin = EarthLocation.create(latv, lonv, elev);
   }
 
   public ucar.unidata.geoloc.EarthLocation getCommonOrigin() {
@@ -169,7 +170,7 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
   }
 
   protected void setStartDate() {
-    String start_datetime = ds.findAttValueIgnoreCase(null, "time_coverage_start", null);
+    String start_datetime = ds.getRootGroup().findAttributeString("time_coverage_start", null);
     if (start_datetime != null)
       startDate = formatter.getISODate(start_datetime);
     else
@@ -177,7 +178,7 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
   }
 
   protected void setEndDate() {
-    String end_datetime = ds.findAttValueIgnoreCase(null, "time_coverage_end", null);
+    String end_datetime = ds.getRootGroup().findAttributeString("time_coverage_end", null);
     if (end_datetime != null)
       endDate = formatter.getISODate(end_datetime);
     else
@@ -193,21 +194,19 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
 
   protected void addRadialVariable(NetcdfDataset nds, Variable var) {
     RadialDatasetSweep.RadialVariable rsvar = null;
-    String vName = var.getShortName();
     int rnk = var.getRank();
 
     if (rnk == 3) {
-      VariableSimpleIF v = new MyRadialVariableAdapter(vName, var.getAttributes());
-      rsvar = makeRadialVariable(nds, v, var);
+      rsvar = makeRadialVariable(nds, var);
     }
 
     if (rsvar != null)
       dataVariables.add(rsvar);
   }
 
-  protected RadialDatasetSweep.RadialVariable makeRadialVariable(NetcdfDataset nds, VariableSimpleIF v, Variable v0) {
+  protected RadialDatasetSweep.RadialVariable makeRadialVariable(NetcdfDataset nds, Variable v0) {
     // this function is null in level 2
-    return new UF2Variable(nds, v, v0);
+    return new UF2Variable(nds, v0);
   }
 
   public String getInfo() {
@@ -220,15 +219,11 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
     int nsweeps;
 
     ArrayList<UF2Sweep> sweeps;
-    String name;
 
-    private UF2Variable(NetcdfDataset nds, VariableSimpleIF v, Variable v0) {
-      super(v.getShortName(), v0.getAttributes());
-
+    private UF2Variable(NetcdfDataset nds, Variable v0) {
+      super(v0.getShortName(), v0);
 
       sweeps = new ArrayList<>();
-      name = v.getShortName();
-
 
       int[] shape = v0.getShape();
       int count = v0.getRank() - 1;
@@ -295,9 +290,7 @@ public class UF2RadialAdapter extends AbstractRadialAdapter {
         this.sweepno = sweepno;
         this.nrays = rays;
         this.ngates = gates;
-
-        Attribute att = sweepVar.findAttribute("abbrev");
-        abbrev = att.getStringValue();
+        abbrev = sweepVar.attributes().findAttributeString("abbrev", null);
       }
 
       public Variable getsweepVar() {

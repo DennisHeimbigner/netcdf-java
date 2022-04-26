@@ -25,9 +25,9 @@ import java.util.*;
  * - The idea is to subset the coordsys, use that for the file's metadata.
  * - Then subset the grid, and write out the data. Check that the grid's metadata matches.
  *
- * @author caron
- * @since 5/8/2015
+ * @deprecated use CFGridCoverageWriter
  */
+@Deprecated
 public class CFGridCoverageWriter2 {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CFGridCoverageWriter2.class);
   private static final boolean show = false;
@@ -241,7 +241,7 @@ public class CFGridCoverageWriter2 {
       }
 
       Variable v = writer.addVariable(null, axis.getName(), axis.getDataType(), dims);
-      addVariableAttributes(v, axis.getAttributes());
+      addVariableAttributes(v, axis.getAttributeContainer());
       v.addAttribute(new Attribute(CDM.UNITS, axis.getUnits())); // override what was in att list
       if (hasBounds)
         v.addAttribute(new Attribute(CF.BOUNDS, axis.getName() + BOUNDS));
@@ -253,11 +253,11 @@ public class CFGridCoverageWriter2 {
   private void addCoverages(CoverageCollection subsetDataset, NetcdfFileWriter writer) {
     for (Coverage grid : subsetDataset.getCoverages()) {
       Variable v = writer.addVariable(null, grid.getName(), grid.getDataType(), grid.getIndependentAxisNamesOrdered());
-      addVariableAttributes(v, grid.getAttributes());
+      addVariableAttributes(v, grid.attributes());
     }
   }
 
-  private void addVariableAttributes(Variable v, List<Attribute> atts) {
+  private void addVariableAttributes(Variable v, AttributeContainer atts) {
     for (Attribute att : atts) {
       if (att.getShortName().startsWith("_Coordinate"))
         continue;
@@ -272,7 +272,7 @@ public class CFGridCoverageWriter2 {
       // scalar coordinate transform variable - container for transform info
       Variable ctv = writer.addVariable(null, ct.getName(), DataType.INT, "");
 
-      for (Attribute att : ct.getAttributes())
+      for (Attribute att : ct.attributes())
         ctv.addAttribute(att);
     }
   }
@@ -414,8 +414,6 @@ public class CFGridCoverageWriter2 {
     CoverageCoordAxis1D yAxis = horizCoordSys.getYAxis();
 
     Projection proj = horizCoordSys.getTransform().getProjection();
-    ProjectionPointImpl projPoint = new ProjectionPointImpl();
-    LatLonPointImpl latlonPoint = new LatLonPointImpl();
 
     double[] xData = (double[]) xAxis.getCoordsAsArray().get1DJavaArray(DataType.DOUBLE);
     double[] yData = (double[]) yAxis.getCoordsAsArray().get1DJavaArray(DataType.DOUBLE);
@@ -429,8 +427,8 @@ public class CFGridCoverageWriter2 {
     // create the data
     for (int i = 0; i < numY; i++) {
       for (int j = 0; j < numX; j++) {
-        projPoint.setLocation(xData[j], yData[i]);
-        proj.projToLatLon(projPoint, latlonPoint);
+        ProjectionPoint projPoint = ProjectionPoint.create(xData[j], yData[i]);
+        LatLonPoint latlonPoint = proj.projToLatLon(projPoint);
         latData[i * numX + j] = latlonPoint.getLatitude();
         lonData[i * numX + j] = latlonPoint.getLongitude();
       }

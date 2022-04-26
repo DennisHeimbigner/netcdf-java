@@ -45,8 +45,9 @@ import java.util.*;
  * <li>ucar.nc2.ft2.coverage.grid.CFGridCoverageWriter</li>
  * </ul>
  *
- * @deprecated use ucar.nc2.writer.NetcdfFileWriter
+ * @deprecated use ucar.nc2.write.NetcdfFormatWriter or ucar.nc2.write.NetcdfCopier
  */
+@Deprecated
 public class NetcdfFileWriter implements Closeable {
   private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NetcdfFileWriter.class);
   private static Set<DataType> validN3types =
@@ -54,7 +55,10 @@ public class NetcdfFileWriter implements Closeable {
 
   /**
    * The kinds of netcdf file that can be written.
+   * 
+   * @deprecated use NetcdfFileFormat
    */
+  @Deprecated
   public enum Version {
     netcdf3(".nc"), // java iosp
     netcdf4(".nc4"), // jni netcdf4 iosp mode = NC_FORMAT_NETCDF4
@@ -539,7 +543,7 @@ public class NetcdfFileWriter implements Closeable {
    */
   public Variable addVariable(Group g, String shortName, DataType dataType, String dimString) {
     Group parent = (g == null) ? ncfile.getRootGroup() : g;
-    return addVariable(g, null, shortName, dataType, Dimension.makeDimensionsList(parent, dimString));
+    return addVariable(g, null, shortName, dataType, Dimensions.makeDimensionsList(parent::findDimension, dimString));
   }
 
   public Variable addVariable(String shortName, DataType dataType, List<Dimension> dims) {
@@ -559,7 +563,7 @@ public class NetcdfFileWriter implements Closeable {
   public Variable addVariable(Group g, String shortName, DataType dataType, List<Dimension> dims) {
     if (g == null)
       g = ncfile.getRootGroup();
-    Variable oldVar = g.findVariable(shortName);
+    Variable oldVar = g.findVariableLocal(shortName);
     if (oldVar != null)
       return null;
     return addVariable(g, null, shortName, dataType, dims);
@@ -646,7 +650,7 @@ public class NetcdfFileWriter implements Closeable {
       Variable nest = new Variable(ncfile, g, s, m.getShortName());
       nest.setDataType(m.getDataType());
       nest.setDimensions(m.getDimensions());
-      nest.addAll(m.getAttributes());
+      nest.addAll(m.attributes());
       s.addMemberVariable(nest);
     }
 
@@ -914,6 +918,7 @@ public class NetcdfFileWriter implements Closeable {
    * @throws java.io.IOException on read/write error
    */
   public boolean setRedefineMode(boolean redefineMode) throws IOException {
+    boolean rewroteEntireFile = false;
     if (redefineMode && !defineMode) {
       defineMode = true;
 
@@ -922,10 +927,13 @@ public class NetcdfFileWriter implements Closeable {
       ncfile.finish();
 
       // try to rewrite header, if it fails, then we have to rewrite entire file
-      boolean ok = spiw.rewriteHeader(isLargeFile); // LOOK seems like we should be using isNewFile
-      if (!ok)
+      boolean rewriteInPlace = spiw.rewriteHeader(isLargeFile); // LOOK seems like we should be using isNewFile
+      if (!rewriteInPlace) {
+        // rewrite the whole thing
         rewrite();
-      return !ok;
+        rewroteEntireFile = true;
+      }
+      return rewroteEntireFile;
     }
 
     return false;

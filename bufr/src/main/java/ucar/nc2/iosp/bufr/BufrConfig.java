@@ -10,6 +10,7 @@ import thredds.client.catalog.Catalog;
 import ucar.ma2.*;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Sequence;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.ft.point.bufr.BufrCdmIndexProto;
@@ -32,11 +33,11 @@ import java.util.*;
 public class BufrConfig {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BufrConfig.class);
 
-  public static BufrConfig scanEntireFile(RandomAccessFile raf) throws IOException {
+  public static BufrConfig scanEntireFile(RandomAccessFile raf) {
     return new BufrConfig(raf);
   }
 
-  public static BufrConfig openFromMessage(RandomAccessFile raf, Message m, Element iospParam) throws IOException {
+  static BufrConfig openFromMessage(RandomAccessFile raf, Message m, Element iospParam) throws IOException {
     BufrConfig config = new BufrConfig(raf, m);
     if (iospParam != null)
       config.merge(iospParam);
@@ -220,13 +221,11 @@ public class BufrConfig {
       featureType = guessFeatureType(standardFields);
       hasDate = standardFields.hasTime();
 
-      // ncd = NetcdfDataset.openDataset(raf.getLocation(), BufrIosp2.enhance, -1, null, null); // LOOK opening another
-      // raf
-      ncd = NetcdfFile.open(raf.getLocation()); // LOOK opening another raf
+      ncd = NetcdfFiles.open(raf.getLocation()); // LOOK opening another raf
       Attribute centerAtt = ncd.findGlobalAttribute(BufrIosp2.centerId);
       int center = (centerAtt == null) ? 0 : centerAtt.getNumericValue().intValue();
 
-      Sequence seq = (Sequence) ncd.findVariable(null, BufrIosp2.obsRecord);
+      Sequence seq = (Sequence) ncd.getRootGroup().findVariableLocal(BufrIosp2.obsRecordName);
       extract = new StandardFields.StandardFieldsFromStructure(center, seq);
 
       StructureDataIterator iter = seq.getStructureIterator();
@@ -306,11 +305,6 @@ public class BufrConfig {
   private void processStations(FieldConverter parent, StructureData sdata) {
     BufrStation station = new BufrStation();
     station.read(parent, sdata);
-
-    if (station.getName() == null) {
-      log.warn("bad station name: " + station);
-      return;
-    }
 
     BufrStation check = map.get(station.getName());
     if (check == null)
@@ -535,7 +529,7 @@ public class BufrConfig {
       return null;
     }
 
-    public FieldConverter getChild(int i) {
+    FieldConverter getChild(int i) {
       return flds.get(i);
     }
 

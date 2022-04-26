@@ -12,26 +12,30 @@ import java.util.StringTokenizer;
 
 /**
  * A Dimension is used to define the array shape of a Variable.
- * It may be shared among Variables, which provides a simple yet powerful way of associating Variables.
+ * A Variable can be thought of as a sampled function with Domain its Dimensions.
+ * A Dimension may be shared among Variables, which provides a simple yet powerful way of associating Variables.
  * When a Dimension is shared, it has a unique name within its Group.
  * It may have a coordinate Variable, which gives each index a coordinate value.
  * A private Dimension cannot have a coordinate Variable, so use shared dimensions with coordinates when possible.
  * The Dimension length must be > 0, except for an unlimited dimension which may have length = 0, and a vlen
- * Dimension which has length = -1.
+ * Dimension which has a length known only when the variable is read.
  * <p/>
  * <p>
  * Immutable if setImmutable() was called, except for an Unlimited Dimension, whose size can change.
  * <p>
  * Note: this class has a natural ordering that is inconsistent with equals.
  *
- * TODO Dimensions will be immutable in 6.
- * TODO Dimensions will not have a reference to their owning Group in 6.
+ * TODO Dimension will be immutable in 6.
+ * TODO Dimension will not extend CDMNode in 6.
+ * TODO Dimension will not have a reference to its owning Group in 6.
+ * TODO Dimension.getFullName() will not exist in 6.
  *
  * @author caron
  */
 public class Dimension extends CDMNode implements Comparable<Dimension> {
   /** A variable-length dimension: the length is not known until the data is read. */
-  public static Dimension VLEN = Dimension.builder().setName("*").setIsVariableLength(true).build().setImmutable();
+  public static final Dimension VLEN =
+      Dimension.builder().setName("*").setIsVariableLength(true).build().setImmutable();
 
   /**
    * Make a space-delineated String from a list of Dimension names.
@@ -173,7 +177,7 @@ public class Dimension extends CDMNode implements Comparable<Dimension> {
   private boolean isShared; // shared means its in a group dimension list.
   private int length;
 
-  public Dimension(Builder builder) {
+  private Dimension(Builder builder) {
     super(builder.shortName);
     setParentGroup(builder.parent);
     this.isShared = builder.isShared;
@@ -182,23 +186,31 @@ public class Dimension extends CDMNode implements Comparable<Dimension> {
     this.length = builder.length;
   }
 
-  /** Turn into a mutable Builder. Like a copy constructor. */
+  /** Turn into a mutable Builder, use toBuilder().build() to make a copy. */
   public Builder toBuilder() {
     return builder().setName(this.shortName).setGroup(this.getGroup()).setIsUnlimited(this.isUnlimited)
         .setIsVariableLength(this.isVariableLength).setIsShared(this.isShared).setLength(this.length);
   }
 
-  /**
-   * Get the length of the Dimension.
-   *
-   * @return length of Dimension
-   */
+  /** Get the length of the Dimension. */
   public int getLength() {
     return length;
   }
 
+  /** Get the name of the Dimension. Same as getShortName. Not deprecated. */
+  public String getName() {
+    return this.shortName;
+  }
+
+  /** Get the name of the Dimension. */
+  public String getShortName() {
+    return this.getName();
+  }
+
   /**
-   * If unlimited, then the length can increase; otherwise it is immutable.
+   * If this is a NetCDF unlimited dimension. The length might increase between invocations,
+   * but it remains fixed for the lifetime of the NetcdfFile.
+   * If you modify the file in a separate process, you must close and reopen the file.
    *
    * @return if its an "unlimited" Dimension
    */
@@ -279,9 +291,6 @@ public class Dimension extends CDMNode implements Comparable<Dimension> {
     return result;
   }
 
-  /**
-   * CDL representation, not strict.
-   */
   @Override
   public String toString() {
     return writeCDL(false);
@@ -303,15 +312,19 @@ public class Dimension extends CDMNode implements Comparable<Dimension> {
    *
    * @param strict if true, write in strict adherence to CDL definition.
    * @return CDL representation.
+   * @deprecated use CDLWriter
    */
+  @Deprecated
   public String writeCDL(boolean strict) {
     Formatter f = new Formatter();
     writeCDL(f, new Indent(2), strict);
     return f.toString();
   }
 
-  protected void writeCDL(Formatter out, Indent indent, boolean strict) {
-    String name = strict ? NetcdfFile.makeValidCDLName(getShortName()) : getShortName();
+  /** @deprecated use CDLWriter */
+  @Deprecated
+  void writeCDL(Formatter out, Indent indent, boolean strict) {
+    String name = strict ? NetcdfFiles.makeValidCDLName(getShortName()) : getShortName();
     out.format("%s%s", indent, name);
     if (isUnlimited())
       out.format(" = UNLIMITED;   // (%d currently)", getLength());
@@ -352,9 +365,7 @@ public class Dimension extends CDMNode implements Comparable<Dimension> {
    * @param isShared whether its shared or local to Variable.
    * @param isUnlimited whether the length can grow.
    * @param isVariableLength whether the length is unknown until the data is read.
-   * @deprecated Use Dimension.builder()
    */
-  @Deprecated
   public Dimension(String name, int length, boolean isShared, boolean isUnlimited, boolean isVariableLength) {
     super(name);
     this.isShared = isShared;
@@ -503,10 +514,12 @@ public class Dimension extends CDMNode implements Comparable<Dimension> {
     return new Builder();
   }
 
+  /** A builder with the Dimension name and length set */
   public static Builder builder(String name, int length) {
     return new Builder().setName(name).setLength(length);
   }
 
+  /** A builder of Dimensions. */
   public static class Builder {
     private Group parent;
     private String shortName;

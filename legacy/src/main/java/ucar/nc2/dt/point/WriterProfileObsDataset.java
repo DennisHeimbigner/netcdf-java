@@ -258,11 +258,7 @@ public class WriterProfileObsDataset {
           dimNames.append(" ").append(d.getShortName());
       }
       Variable newVar = ncfile.addVariable(oldVar.getShortName(), oldVar.getDataType(), dimNames.toString());
-
-      List<Attribute> atts = oldVar.getAttributes();
-      for (Attribute att : atts) {
-        ncfile.addVariableAttribute(newVar, att);
-      }
+      newVar.addAll(oldVar.attributes());
     }
 
   }
@@ -602,7 +598,7 @@ public class WriterProfileObsDataset {
           manAS.setMemberArray(mname, sdata.getArray(mname));
         }
 
-        // each level is weritten as a seperate structure
+        // each level is weritten as a separate structure
         int numMand = sdata.getScalarInt("numMand");
         if (numMand >= manDim.getLength())
           continue;

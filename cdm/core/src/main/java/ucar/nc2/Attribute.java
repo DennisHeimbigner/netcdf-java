@@ -12,6 +12,7 @@ import ucar.ma2.DataType;
 import ucar.ma2.ForbiddenConversionException;
 import ucar.ma2.Index;
 import ucar.nc2.constants.CDM;
+import ucar.unidata.util.Parameter;
 import ucar.unidata.util.StringUtil2;
 import java.nio.ByteBuffer;
 import java.util.Formatter;
@@ -20,18 +21,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An Attribute has a name and a value, used for associating arbitrary metadata with a Variable or a Group.
+ * An Attribute is a name and a value, used for associating arbitrary metadata with another object.
  * The value can be a one dimensional array of Strings or numeric values.
  * <p/>
- * Attributes are immutable after setImmutable().
  * TODO Attributes will be immutable in 6.
- * 
+ * TODO Attribute will not extend CDMNode in 6.
+ * TODO Attribute will not know who it belongs to in 6 (Group or Variable).
+ * TODO Attribute.getFullName() will not exist in 6.
+ *
  * @author caron
  */
 public class Attribute extends CDMNode {
+  /** @deprecated move to jni.Nc4Iosp */
+  @Deprecated
   private static final String SPECIALPREFIX = "_";
 
-  /** @deprecated */
+  /** @deprecated move to jni.Nc4Iosp */
   @Deprecated
   static final String[] SPECIALS =
       {CDM.NCPROPERTIES, CDM.ISNETCDF4, CDM.SUPERBLOCKVERSION, CDM.DAP4_LITTLE_ENDIAN, CDM.EDU_UCAR_PREFIX};
@@ -41,7 +46,7 @@ public class Attribute extends CDMNode {
    *
    * @param atts list of attributes
    * @return map of attributes by name
-   * @deprecated
+   * @deprecated do not use
    */
   @Deprecated
   public static Map<String, Attribute> makeMap(List<Attribute> atts) {
@@ -54,7 +59,7 @@ public class Attribute extends CDMNode {
     return result;
   }
 
-  /** @deprecated */
+  /** @deprecated move to jni.Nc4Iosp */
   @Deprecated
   public static boolean isspecial(Attribute a) {
     String nm = a.getShortName();
@@ -71,10 +76,15 @@ public class Attribute extends CDMNode {
   ///////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Get the data type of the Attribute value.
-   *
-   * @return DataType
+   * Get the Attribute name.
+   * Not deprecated in version 5 for Attribute.
    */
+  @SuppressWarnings("deprecated")
+  public String getName() {
+    return shortName;
+  }
+
+  /** Get the data type of the Attribute value. */
   public DataType getDataType() {
     return dataType;
   }
@@ -85,6 +95,7 @@ public class Attribute extends CDMNode {
     this.dataType = dt;
   }
 
+  /** Get the EnumTypedef of the Attribute value, if DataType is an ENUM. */
   @Nullable
   public EnumTypedef getEnumType() {
     return this.enumtype;
@@ -239,23 +250,19 @@ public class Attribute extends CDMNode {
     return null;
   }
 
-  /**
-   * CDL representation, not strict
-   *
-   * @return CDL representation
-   */
   @Override
   public String toString() {
     return toString(false);
   }
 
   /**
-   * CDL representation, may be strict
+   * CDL representation, may be strict.
    * 
    * @param strict if true, create strict CDL, escaping names
    * @return CDL representation
+   * @deprecated use CDLWriter
    */
-
+  @Deprecated
   public String toString(boolean strict) {
     Formatter f = new Formatter();
     writeCDL(f, strict, null);
@@ -263,19 +270,21 @@ public class Attribute extends CDMNode {
   }
 
   /**
-   * Write CDL representation into f
+   * Write CDL representation into a Formatter.
    *
    * @param f write into this
    * @param strict if true, create strict CDL, escaping names
+   * @deprecated use CDLWriter
    */
+  @Deprecated
   protected void writeCDL(Formatter f, boolean strict, String parentname) {
     if (strict && (isString() || this.getEnumType() != null))
       // Force type explicitly for string.
       f.format("string "); // note lower case and trailing blank
     if (strict && parentname != null)
-      f.format(NetcdfFile.makeValidCDLName(parentname));
+      f.format(NetcdfFiles.makeValidCDLName(parentname));
     f.format(":");
-    f.format("%s", strict ? NetcdfFile.makeValidCDLName(getShortName()) : getShortName());
+    f.format("%s", strict ? NetcdfFiles.makeValidCDLName(getShortName()) : getShortName());
     if (isString()) {
       f.format(" = ");
       for (int i = 0; i < getLength(); i++) {
@@ -333,12 +342,7 @@ public class Attribute extends CDMNode {
   private static char[] org = {'\b', '\f', '\n', '\r', '\t', '\\', '\'', '\"'};
   private static String[] replace = {"\\b", "\\f", "\\n", "\\r", "\\t", "\\\\", "\\\'", "\\\""};
 
-  /**
-   * Replace special characters '\t', '\n', '\f', '\r', for CDL
-   *
-   * @param s string to quote
-   * @return equivilent string replacing special chars
-   */
+  @Deprecated
   private static String encodeString(String s) {
     return StringUtil2.replace(s, org, replace);
   }
@@ -371,15 +375,15 @@ public class Attribute extends CDMNode {
    */
   public Attribute(String name, String val) {
     super(name);
-    setDataType(DataType.STRING);
     if (name == null)
       throw new IllegalArgumentException("Trying to set name to null on " + this);
+    this.dataType = DataType.STRING;
     setStringValue(val);
     setImmutable();
   }
 
   /**
-   * Create a scalar numeric-valued Attribute.
+   * Create a scalar, signed, numeric-valued Attribute.
    *
    * @param name name of Attribute
    * @param val value of Attribute
@@ -388,6 +392,15 @@ public class Attribute extends CDMNode {
     this(name, val, false);
   }
 
+  /**
+   * Create a scalar numeric-valued Attribute, possibly unsigned.
+   *
+   * @param name name of Attribute
+   * @param val value of Attribute
+   * @param isUnsigned if value is unsigned, used only for integer types.
+   * @deprecated Use Attribute.builder()
+   */
+  @Deprecated
   public Attribute(String name, Number val, boolean isUnsigned) {
     super(name);
     if (name == null)
@@ -396,11 +409,11 @@ public class Attribute extends CDMNode {
     int[] shape = new int[1];
     shape[0] = 1;
     DataType dt = DataType.getType(val.getClass(), isUnsigned);
-    setDataType(dt);
+    this.dataType = dt;
     Array vala = Array.factory(dt, shape);
     Index ima = vala.getIndex();
     vala.setObject(ima.set0(0), val);
-    setValues(vala);
+    setValues(vala); // make private
     setImmutable();
   }
 
@@ -409,10 +422,12 @@ public class Attribute extends CDMNode {
    *
    * @param name name of attribute
    * @param values array of values.
+   * @deprecated Use Attribute.builder()
    */
+  @Deprecated
   public Attribute(String name, Array values) {
     this(name, values.getDataType());
-    setValues(values);
+    setValues(values); // make private
     setImmutable();
   }
 
@@ -448,8 +463,8 @@ public class Attribute extends CDMNode {
     if (values == null || values.isEmpty())
       throw new IllegalArgumentException("Cannot determine attribute's type");
     Class c = values.get(0).getClass();
-    setDataType(DataType.getType(c, isUnsigned));
-    setValues(values);
+    this.dataType = DataType.getType(c, isUnsigned);
+    setValues(values); // make private
     setImmutable();
   }
 
@@ -461,7 +476,7 @@ public class Attribute extends CDMNode {
    * @deprecated Use Attribute.builder()
    */
   @Deprecated
-  public Attribute(ucar.unidata.util.Parameter param) {
+  public Attribute(Parameter param) {
     this(param.getName());
 
     if (param.isString()) {
@@ -471,7 +486,7 @@ public class Attribute extends CDMNode {
       double[] values = param.getNumericValues();
       int n = values.length;
       Array vala = Array.factory(DataType.DOUBLE, new int[] {n}, values);
-      setValues(vala);
+      setValues(vala); // make private
     }
     setImmutable();
   }
@@ -480,9 +495,7 @@ public class Attribute extends CDMNode {
    * Set the value as a String, trimming trailing zeros
    * 
    * @param val value of Attribute
-   * @deprecated Use Attribute.builder()
    */
-  @Deprecated
   private void setStringValue(String val) {
     if (val == null)
       throw new IllegalArgumentException("Attribute value cannot be null");
@@ -497,12 +510,7 @@ public class Attribute extends CDMNode {
     this.svalue = val;
     this.nelems = 1;
     this.dataType = DataType.STRING;
-
-    // values = Array.factory(String.class, new int[]{1});
-    // values.setObject(values.getIndex(), val);
-    // setValues(values);
   }
-
 
   //////////////////////////////////////////
   // the following make this mutable, but its restricted to subclasses, namely DODSAttribute
@@ -577,7 +585,7 @@ public class Attribute extends CDMNode {
 
 
   /**
-   * set the values from an Array
+   * Set the values from an Array
    *
    * @param arr value of Attribute
    * @deprecated Use Attribute.builder()
@@ -668,9 +676,9 @@ public class Attribute extends CDMNode {
     if (dataType != att.dataType)
       return false;
 
-    if (isString())
+    if (isString()) {
       return att.getStringValue().equals(getStringValue());
-    // if (svalue != null) return svalue.equals(att.getStringValue());
+    }
 
     if (values != null) {
       for (int i = 0; i < getLength(); i++) {
@@ -723,7 +731,7 @@ public class Attribute extends CDMNode {
     this.nelems = (svalue != null) ? 1 : (this.values != null) ? (int) this.values.getSize() : 0;
   }
 
-  /** Turn into a mutable Builder. Like a copy constructor. */
+  /** Turn into a mutable Builder. Can use toBuilder().build() to copy. */
   public Builder toBuilder() {
     Builder b = builder().setName(this.shortName).setDataType(this.dataType).setEnumType(this.enumtype);
     if (this.svalue != null) {
@@ -734,14 +742,17 @@ public class Attribute extends CDMNode {
     return b;
   }
 
+  /** Create an Attribute builder. */
   public static Builder builder() {
     return new Builder();
   }
 
+  /** Create an Attribute builder with the given Attribute name. */
   public static Builder builder(String name) {
     return new Builder().setName(name);
   }
 
+  /** A builder for Attributes */
   public static class Builder {
     private String name;
     private DataType dataType;
@@ -862,10 +873,7 @@ public class Attribute extends CDMNode {
     }
 
     /**
-     * Set the values from an Array.
-     * Also sets the DataType from values.getElementType().
-     *
-     * @param arr value of Attribute
+     * Set the values from an Array, and the DataType from values.getElementType().
      */
     public Builder setValues(Array arr) {
       if (arr == null) {

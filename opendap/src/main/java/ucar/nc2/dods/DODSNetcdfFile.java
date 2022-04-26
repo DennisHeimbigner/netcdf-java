@@ -49,7 +49,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
   public static boolean debugCached = false;
   public static boolean debugOpenTime = false;
 
-  // Define a utility class to decompse names
+  // Define a utility class to decompose names
   private static class NamePieces {
     String prefix = null; // group part of the path
     String var = null; // struct part of the path
@@ -242,7 +242,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
     if (cancelTask != null && cancelTask.isCancel())
       return;
 
-    // LOOK why do we want to do the primitives seperate from compounds?
+    // LOOK why do we want to do the primitives separate from compounds?
     constructTopVariables(rootDodsV, cancelTask);
     if (cancelTask != null && cancelTask.isCancel())
       return;
@@ -325,7 +325,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
       }
       if (cancelTask != null && cancelTask.isCancel())
         return;
-      readArrays(preloadList);
+      preloadData(preloadList);
     }
 
     finish();
@@ -367,7 +367,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
    * 
    * // DDS -> {BaseType} for arrays, BaseType = DArray -> {elemType}
    * // here we 1) put all Variables into a DodsV, 2) unravel DConstructors (DSequence, DStructure, DGrid)
-   * // 3) for Darray, we put Variable = elemType, and store the darray seperately, not in the heirarchy.
+   * // 3) for Darray, we put Variable = elemType, and store the darray separately, not in the heirarchy.
    * // so you need to get the parent from the dodsV.
    * private void parseVariables( DodsV parent, Enumeration variables, ArrayList dodsVlist) {
    * while (variables.hasMoreElements()) {
@@ -554,9 +554,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
     // Start by moving global attributes
     // An issue to be addressed is that some attributes that should be attached
     // to variables, instead get made global with name var.att.
-    Object[] gattlist = rootgroup.getAttributes().toArray();
-    for (Object att : gattlist) {
-      Attribute ncatt = (Attribute) att;
+    for (Attribute ncatt : rootgroup.attributes()) {
       String dodsname = ncatt.getDODSName();
       NamePieces pieces = parseName(dodsname);
       if (pieces.var != null) {
@@ -611,7 +609,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
   }
 
   @Deprecated
-  protected void reGroupVariable(Group rootgroup, DODSVariable dodsv) throws opendap.dap.DAP2Exception {
+  protected void reGroupVariable(Group rootgroup, DODSVariable dodsv) {
     String dodsname = dodsv.getDODSName();
     NamePieces pieces = parseName(dodsname);
     if (pieces.prefix != null) {
@@ -619,7 +617,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
       Group gnew = rootgroup.makeRelativeGroup(this, dodsname, true);
       // Get current group for the variable
       Group gold = null;
-      gold = dodsv.getParentGroup();
+      gold = dodsv.getParentGroupOrRoot();
       if (gnew != gold) {
         gold.remove(dodsv);
         dodsv.setParentGroup(gnew);
@@ -631,12 +629,10 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
     }
   }
 
-  protected void reGroupVariableAttributes(Group rootgroup, Variable v) throws opendap.dap.DAP2Exception {
+  private void reGroupVariableAttributes(Group rootgroup, Variable v) {
     String vname = v.getShortName();
-    Group vgroup = v.getParentGroup();
-    Object[] attlist = v.getAttributes().toArray();
-    for (Object att : attlist) {
-      Attribute ncatt = (Attribute) att;
+    Group vgroup = v.getParentGroupOrRoot();
+    for (Attribute ncatt : v.attributes()) {
       String adodsname = ncatt.getDODSName();
       NamePieces pieces = parseName(adodsname);
       Group agroup = null;
@@ -655,7 +651,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
       if (pieces.var != null && !pieces.var.equals(vname)) {
         // move the attribute to the correct variable
         // (presumably in the same group)
-        Variable newvar = (Variable) agroup.findVariable(pieces.var);
+        Variable newvar = (Variable) agroup.findVariableLocal(pieces.var);
         if (newvar != null) {// if not found leave the attribute as is
           // otherwise, move the attribute and rename
           newvar.addAttribute(ncatt);
@@ -919,7 +915,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
         for (int i = 1; i < dodsV.children.size(); i++) {
           DodsV map = dodsV.children.get(i);
           String shortName = DODSNetcdfFile.makeShortName(map.bt.getEncodedName());
-          Variable mapV = parentGroup.findVariable(shortName); // LOOK WRONG
+          Variable mapV = parentGroup.findVariableLocal(shortName); // LOOK WRONG
           if (mapV == null) { // if not, add it LOOK need to compare values
             mapV = addVariable(parentGroup, parentStructure, map);
             makeCoordinateVariable(parentGroup, mapV, map.data);
@@ -1193,7 +1189,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
 
     if (dimLength <= 0)
       return null; // LOOK what about unlimited ??
-    return new Dimension(dimName, dimLength, dimName != null);
+    return Dimension.builder(dimName, dimLength).setIsShared(dimName != null).build();
   }
 
   /**
@@ -1236,7 +1232,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
       Dimension myd;
 
       if (name == null) { // if no name, make an anonymous dimension
-        myd = new Dimension(null, dad.getSize(), false);
+        myd = Dimension.builder(null, dad.getSize()).setIsShared(false).build();
 
       } else { // see if shared
         if (RC.getUseGroups()) {
@@ -1251,7 +1247,7 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
           myd = new Dimension(name, dad.getSize());
           group.addDimension(myd);
         } else if (myd.getLength() != dad.getSize()) { // make a non-shared dimension
-          myd = new Dimension(name, dad.getSize(), false);
+          myd = Dimension.builder(name, dad.getSize()).setIsShared(false).build();
         } // else use existing, shared dimension
       }
       dims.add(myd); // add it to the list
@@ -1496,19 +1492,17 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
   // called from ucar.nc2.Variable
 
   /**
-   * Make a single call to the DODS Server to read all the named variable's data
+   * Make a single call to the DODS Server to read and cache all the named v\Variable's
    * in one client/server roundtrip.
    *
    * @param preloadVariables list of type Variable
-   * @return list of type Array, contains the data
    * @throws IOException on error
    */
-  @Override
-  public List<Array> readArrays(List<Variable> preloadVariables) throws IOException {
+  private void preloadData(List<Variable> preloadVariables) throws IOException {
     // For performance tests:
     // if (true) return super.readArrays (variables);
     if (preloadVariables.size() == 0)
-      return new ArrayList<Array>();
+      return;
 
     // construct the list of variables, skipping ones with cached data
     List<DodsV> reqDodsVlist = new ArrayList<DodsV>();
@@ -1523,72 +1517,109 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
     // read the data
     DataDDS dataDDS;
     Map<DodsV, DodsV> map = new HashMap<DodsV, DodsV>(2 * reqDodsVlist.size() + 1);
+    // As we build the request URL, we need to keep in mind that there is a limit on the length of a GET request
+    // URL, otherwise we will run into a 414 (https://github.com/Unidata/netcdf-java/issues/413)
+    // According to stackoverflow lore, the 414 does not always happen, so sometimes things will fail silently.
+    // This limit is configurable on the server side, and there does not appear to be a "one size fits all web server
+    // stacks" solution here. RFC 2616 says "Note: Servers ought to be cautious about depending on URI lengths
+    // above 255 bytes, because some older client or proxy implementations might not properly support these lengths."
+    // 255 byte URIs feels too small for DAP (i.e. I'd assume the maintainers of a DAP server with that limitation
+    // would hear about it quickly, and adjust the settings higher, so we won't go with that as the max uri size).
+    // Apache 2.4 has a default limit of 8190 bytes (https://httpd.apache.org/docs/2.4/mod/core.html#limitrequestline)
+    // * Nginx has a default of 8K bytes:
+    // http://nginx.org/en/docs/http/ngx_http_core_module.html#large_client_header_buffers
+    // * Microsoft IIS has a default of 4096 bytes:
+    // https://docs.microsoft.com/en-us/iis/configuration/system.webserver/security/requestfiltering/requestlimits/#attributes
+    // * Tomcat has a default header size of 8192 bytes - not quite the same thing as the url size defined above, but
+    // effectively much less than the limits above because the header will contain the various parts of the request
+    // URI. Again, stackoverflow lore suggest tomcat issue start to creep in when the URL gets above 4kB (as that's
+    // only part of the header size).
+    // Given the above defaults, we'll go with 4kb for now.
+    // If we find this gives us trouble in the future, we should just go with the limit set by Internet Explorer,
+    // since we know web servers will likely at least support that, which is 2048 bytes.
+    // https://support.microsoft.com/en-us/help/208427/maximum-url-length-is-2-083-characters-in-internet-explorer
+    int maxQueryLength = 4096 - this.location.length(); // just keep track of the query size
+    // Track where we are in reqDodsVlist
+    int lastRequestedVariableIndex = 0;
     if (reqDodsVlist.size() > 0) {
+      // keep preloading until we get all the variables
+      while (lastRequestedVariableIndex < reqDodsVlist.size()) {
+        // current length of the query for this round of prefetching
+        int queryLength = 0;
+        // track number of variables being requested in this round of prefetching
+        short numberOfVarsInRequest = 0;
+        // Create the request
+        StringBuilder requestString = new StringBuilder();
+        // keep the length of the query under the maxUriSize
+        while (queryLength <= maxQueryLength && lastRequestedVariableIndex < reqDodsVlist.size()) {
+          DodsV dodsV = reqDodsVlist.get(lastRequestedVariableIndex);
+          // will this take us over our query length limit?
+          int newQueryLength = queryLength + dodsV.getEncodedName().length() + 1; // +1 for var separator
+          if (newQueryLength >= maxQueryLength) {
+            break;
+          } else {
+            // we're good on size - add the variable to the query
+            requestString.append(numberOfVarsInRequest == 0 ? "?" : ",");
+            requestString.append(dodsV.getEncodedName());
+            // bump up the query length, increment to next request variable
+            queryLength = newQueryLength;
+            lastRequestedVariableIndex += 1;
+            numberOfVarsInRequest += 1;
+          }
+        }
 
-      // Create the request
-      StringBuilder requestString = new StringBuilder();
-      for (int i = 0; i < reqDodsVlist.size(); i++) {
-        DodsV dodsV = reqDodsVlist.get(i);
-        requestString.append(i == 0 ? "?" : ",");
-        // requestString.append(makeDODSname(dodsV));
-        requestString.append(dodsV.getEncodedName());
-      }
-      String s = requestString.toString();
+        try {
+          dataDDS = readDataDDSfromServer(requestString.toString());
+          root = DodsV.parseDataDDS(dataDDS);
 
-      try {
-        dataDDS = readDataDDSfromServer(requestString.toString());
-        root = DodsV.parseDataDDS(dataDDS);
+        } catch (Exception exc) {
+          logger.error("ERROR readDataDDSfromServer on " + requestString, exc);
+          throw new IOException(exc.getMessage());
+        }
 
-      } catch (Exception exc) {
-        logger.error("ERROR readDataDDSfromServer on " + requestString, exc);
-        throw new IOException(exc.getMessage());
-      }
-
-      // gotta find the corresponding data in "depth first" order
-      for (DodsV ddsV : reqDodsVlist) {
-        DodsV dataV = root.findDataV(ddsV);
-        if (dataV != null) {
-          if (debugConvertData)
-            System.out.println("readArray found dataV= " + makeDODSname(ddsV));
-          dataV.isDone = true;
-          map.put(ddsV, dataV); // thread safe!
-        } else {
-          logger.error("ERROR findDataV cant find " + makeDODSname(ddsV) + " on " + location);
+        // gotta find the corresponding data from this round of prefetching in "depth first" order
+        for (int i = lastRequestedVariableIndex - numberOfVarsInRequest; i < lastRequestedVariableIndex; i++) {
+          // variable that was requested
+          DodsV ddsV = reqDodsVlist.get(i);
+          // requested variable, but from the parsed dds
+          DodsV dataV = root.findDataV(ddsV);
+          if (dataV != null) {
+            if (debugConvertData) {
+              System.out.println("readArray found dataV= " + makeDODSname(ddsV));
+            }
+            dataV.isDone = true;
+            map.put(ddsV, dataV); // thread safe!
+          } else {
+            logger.error("ERROR findDataV cant find " + makeDODSname(ddsV) + " on " + location);
+          }
         }
       }
     }
 
     // For each variable either extract the data or use cached data.
-    List<Array> result = new ArrayList<Array>();
     for (Variable var : preloadVariables) {
-      if (var.hasCachedData()) {
-        result.add(var.read());
-
-      } else {
-        Array data = null;
+      if (!var.hasCachedData()) {
+        Array data;
         DodsV ddsV = (DodsV) var.getSPobject();
 
         DodsV dataV = map.get(ddsV);
         if (dataV == null) {
           logger.error("DODSNetcdfFile.readArrays cant find " + makeDODSname(ddsV) + " in dataDDS; " + location);
-          // dataDDS.print( System.out);
         } else {
-          if (debugConvertData)
+          if (debugConvertData) {
             System.out.println("readArray converting " + makeDODSname(ddsV));
+          }
           dataV.isDone = true;
 
           try {
             if (var.isMemberOfStructure()) {
-
               // we want the top structure this variable is contained in.
               while ((dataV.parent != null) && (dataV.parent.bt != null)) {
                 dataV = dataV.parent;
               }
               data = convertD2N.convertNestedVariable(var, null, dataV, true);
-
             } else
               data = convertD2N.convertTopVariable(var, null, dataV);
-
           } catch (DAP2Exception de) {
             logger.error("ERROR convertVariable on " + var.getFullName(), de);
             throw new IOException(de.getMessage());
@@ -1596,14 +1627,13 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
 
           if (var.isCaching()) {
             var.setCachedData(data);
-            if (debugCached)
+            if (debugCached) {
               System.out.println(" cache for <" + var.getFullName() + "> length =" + data.getSize());
+            }
           }
         }
-        result.add(data);
       }
     }
-    return result;
   }
 
   @Override
@@ -1641,9 +1671,28 @@ public class DODSNetcdfFile extends ucar.nc2.NetcdfFile {
 
       DataDDS dataDDS = readDataDDSfromServer(buff.toString());
       DodsV root = DodsV.parseDataDDS(dataDDS);
-      DodsV want = root.children.get(0); // can only be one
-      dataArray = convertD2N.convertTopVariable(v, section.getRanges(), want);
+      DodsV want = null;
+      // Find the child node matching the requested variable
+      for (int i = 0; i < root.children.size(); i++) {
+        DodsV element = root.children.get(i);
+        if (element.getFullName().equals(v.getFullName())) {
+          want = element;
+          break;
+        }
+      }
 
+      if (want == null) {
+        throw new ParseException("Variable " + v.getFullName() + " not found in DDS.");
+      }
+
+      dataArray = convertD2N.convertTopVariable(v, section.getRanges(), want);
+      // if reading from a server response, we have exactly the section of data
+      // requested. If reading from a file, we need to make sure we are only returning
+      // the section. What's not-so-good is that we've already read the entire array into
+      // memory when parsing the binary file.
+      if (location.startsWith("file:")) {
+        dataArray = dataArray.section(section.getRanges());
+      }
     } catch (DAP2Exception ex) {
       ex.printStackTrace();
       throw new IOException(ex.getMessage() + "; " + v.getShortName() + " -- " + section);

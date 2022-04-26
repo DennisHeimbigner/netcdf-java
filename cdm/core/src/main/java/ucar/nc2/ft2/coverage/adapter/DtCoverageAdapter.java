@@ -7,13 +7,12 @@ package ucar.nc2.ft2.coverage.adapter;
 import ucar.ma2.*;
 import ucar.nc2.Attribute;
 import ucar.nc2.AttributeContainer;
-import ucar.nc2.AttributeContainerHelper;
+import ucar.nc2.AttributeContainerMutable;
 import ucar.nc2.Dimension;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.*;
 import ucar.nc2.ft2.coverage.*;
-import ucar.nc2.util.Misc;
 import ucar.unidata.util.Parameter;
 import java.io.IOException;
 import java.util.*;
@@ -32,7 +31,7 @@ public class DtCoverageAdapter implements CoverageReader, CoordAxisReader {
   public static FeatureDatasetCoverage factory(DtCoverageDataset proxy, Formatter errlog) {
     DtCoverageAdapter reader = new DtCoverageAdapter(proxy);
 
-    AttributeContainerHelper atts = new AttributeContainerHelper(proxy.getName());
+    AttributeContainerMutable atts = new AttributeContainerMutable(proxy.getName());
     atts.addAll(proxy.getGlobalAttributes());
 
     List<Coverage> pgrids = new ArrayList<>();
@@ -132,7 +131,7 @@ public class DtCoverageAdapter implements CoverageReader, CoordAxisReader {
   }
 
   private static CoverageTransform makeTransform(ucar.nc2.dataset.CoordinateTransform dt) {
-    AttributeContainerHelper atts = new AttributeContainerHelper(dt.getName());
+    AttributeContainerMutable atts = new AttributeContainerMutable(dt.getName());
     for (Parameter p : dt.getParameters())
       atts.addAttribute(new Attribute(p));
     return new CoverageTransform(dt.getName(), atts, dt.getTransformType() == TransformType.Projection);
@@ -160,7 +159,7 @@ public class DtCoverageAdapter implements CoverageReader, CoordAxisReader {
     AxisType axisType = dtCoordAxis.getAxisType();
     String units = dtCoordAxis.getUnitsString();
     String description = dtCoordAxis.getDescription();
-    AttributeContainer atts = dtCoordAxis.getAttributeContainer();
+    AttributeContainer atts = dtCoordAxis.attributes();
 
     if (axisType == null)
       return ucar.nc2.util.Optional.empty("Coordinate " + name + " has no axisType");
@@ -246,7 +245,7 @@ public class DtCoverageAdapter implements CoverageReader, CoordAxisReader {
       builder.description = description;
       builder.dataType = dataType;
       builder.axisType = axisType;
-      builder.attributes = atts;
+      builder.attributes = AttributeContainerMutable.copyFrom(atts);
       builder.dependenceType = dependenceType;
       builder.setDependsOn(dependsOn);
       builder.spacing = spacing;
@@ -311,7 +310,7 @@ public class DtCoverageAdapter implements CoverageReader, CoordAxisReader {
     builder.description = description;
     builder.dataType = dataType;
     builder.axisType = axisType;
-    builder.attributes = dtCoordAxis.getAttributeContainer();
+    builder.attributes = AttributeContainerMutable.copyFrom(dtCoordAxis.attributes());
     builder.dependenceType = dependenceType;
     builder.setDependsOn(dependsOn);
     builder.spacing = spacing;
@@ -393,7 +392,7 @@ public class DtCoverageAdapter implements CoverageReader, CoordAxisReader {
     // Could use an Array composite here, if we had one
     Array result = Array.factory(coverage.getDataType(), subsetCoordSys.getShape());
     if (debug)
-      System.out.printf(" read %s result shape=%s%n", coverage.getName(), Misc.showInts(result.getShape()));
+      System.out.printf(" read %s result shape=%s%n", coverage.getName(), Arrays.toString(result.getShape()));
     int[] origin = new int[result.getRank()]; // all zeroes
 
     ranges.add(null); // make room for last

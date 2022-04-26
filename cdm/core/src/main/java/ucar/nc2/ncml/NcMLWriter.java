@@ -37,8 +37,10 @@ import java.util.TreeMap;
  * @author cwardgar
  * @see ucar.nc2.NetcdfFile
  * @see <a href=
- *      "http://www.unidata.ucar.edu/software/netcdf/ncml/">http://www.unidata.ucar.edu/software/netcdf/ncml/</a>
+ *      "https://www.unidata.ucar.edu/software/netcdf/ncml/">https://www.unidata.ucar.edu/software/netcdf/ncml/</a>
+ * @deprecated use ucar.nc2.write.NcmlWriter
  */
+@Deprecated
 public class NcMLWriter {
   /**
    * A default namespace constructed from the NcML URI: {@code http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2}.
@@ -283,7 +285,7 @@ public class NcMLWriter {
     }
 
     // attributes
-    for (Attribute att : group.getAttributes()) {
+    for (Attribute att : group.attributes()) {
       elem.addContent(makeAttributeElement(att));
     }
 
@@ -355,7 +357,7 @@ public class NcMLWriter {
 
 
     // attributes
-    for (Attribute att : var.getAttributes()) {
+    for (Attribute att : var.attributes()) {
       varElem.addContent(makeAttributeElement(att));
     }
 
@@ -474,12 +476,23 @@ public class NcMLWriter {
       }
 
       // not regular
-      boolean isRealType = (variable.getDataType() == DataType.DOUBLE) || (variable.getDataType() == DataType.FLOAT);
       IndexIterator iter = a.getIndexIterator();
-      buff.append(isRealType ? iter.getDoubleNext() : iter.getIntNext());
+      boolean first = true;
       while (iter.hasNext()) {
-        buff.append(" ");
-        buff.append(isRealType ? iter.getDoubleNext() : iter.getIntNext());
+        if (!first)
+          buff.append(" ");
+        switch (variable.getDataType()) {
+          case FLOAT:
+            buff.append(iter.getFloatNext());
+            break;
+          case DOUBLE:
+            buff.append(iter.getDoubleNext());
+            break;
+          default:
+            buff.append(iter.getIntNext());
+            break;
+        }
+        first = false;
       }
       elem.setText(buff.toString());
 

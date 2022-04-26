@@ -443,13 +443,13 @@ public class FeatureDatasetFactoryManager {
    */
   public static FeatureType findFeatureType(NetcdfFile ncd) {
     // search for explicit featureType global attribute
-    String cdm_datatype = ncd.findAttValueIgnoreCase(null, CF.FEATURE_TYPE, null);
+    String cdm_datatype = ncd.getRootGroup().findAttributeString(CF.FEATURE_TYPE, null);
     if (cdm_datatype == null)
-      cdm_datatype = ncd.findAttValueIgnoreCase(null, "cdm_data_type", null);
+      cdm_datatype = ncd.getRootGroup().findAttributeString("cdm_data_type", null);
     if (cdm_datatype == null)
-      cdm_datatype = ncd.findAttValueIgnoreCase(null, "cdm_datatype", null);
+      cdm_datatype = ncd.getRootGroup().findAttributeString("cdm_datatype", null);
     if (cdm_datatype == null)
-      cdm_datatype = ncd.findAttValueIgnoreCase(null, "thredds_data_type", null);
+      cdm_datatype = ncd.getRootGroup().findAttributeString("thredds_data_type", null);
 
     if (cdm_datatype != null) {
       for (FeatureType ft : FeatureType.values())

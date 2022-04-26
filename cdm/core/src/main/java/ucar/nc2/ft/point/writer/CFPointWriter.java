@@ -35,10 +35,10 @@ import java.util.*;
  * <ul>
  * <li>netcdf3: use indexed ragged array representation</li>
  * </ul>
- *
- * @author caron
- * @since 4/11/12
+ * 
+ * @deprecated use writer2
  */
+@Deprecated
 public abstract class CFPointWriter implements Closeable {
   private static final Logger logger = LoggerFactory.getLogger(CFPointWriter.class);
 
@@ -68,8 +68,6 @@ public abstract class CFPointWriter implements Closeable {
   public static final String trajIdName = "trajectoryId";
 
   public static final int idMissingValue = -9999;
-
-
   private static boolean debug;
 
   public static int writeFeatureCollection(FeatureDatasetPoint fdpoint, String fileOut,
@@ -517,7 +515,7 @@ public abstract class CFPointWriter implements Closeable {
     for (VariableSimpleIF vs : extra) {
       List<Dimension> dims = makeDimensionList(dimMap, vs.getDimensions());
       Variable mv = writer.addVariable(null, vs.getShortName(), vs.getDataType(), dims);
-      for (Attribute att : vs.getAttributes())
+      for (Attribute att : vs.attributes())
         mv.addAttribute(att);
       extraMap.put(mv.getShortName(), mv);
     }
@@ -558,11 +556,11 @@ public abstract class CFPointWriter implements Closeable {
       }
 
       if (newVar == null) {
-        logger.warn("Variable already exists =" + oldVar.getShortName()); // LOOK barf
+        logger.warn("Variable already exists =" + oldVar.getShortName());
         continue;
       }
 
-      for (Attribute att : oldVar.getAttributes())
+      for (Attribute att : oldVar.attributes())
         newVar.addAttribute(att);
       varMap.put(newVar.getShortName(), newVar);
     }
@@ -572,7 +570,7 @@ public abstract class CFPointWriter implements Closeable {
   // added as members of the given structure
   protected void addCoordinatesExtended(Structure parent, List<VariableSimpleIF> coords) {
     for (VariableSimpleIF vs : coords) {
-      String dims = Dimension.makeDimensionsString(vs.getDimensions());
+      String dims = Dimensions.makeDimensionsString(vs.getDimensions());
       Variable member = writer.addStructureMember(parent, vs.getShortName(), vs.getDataType(), dims);
 
       if (member == null) {
@@ -580,7 +578,7 @@ public abstract class CFPointWriter implements Closeable {
         continue;
       }
 
-      for (Attribute att : vs.getAttributes())
+      for (Attribute att : vs.attributes())
         member.addAttribute(att);
     }
   }
@@ -620,8 +618,7 @@ public abstract class CFPointWriter implements Closeable {
         }
       }
 
-      List<Attribute> atts = oldVar.getAttributes();
-      for (Attribute att : atts) {
+      for (Attribute att : oldVar.attributes()) {
         String attName = att.getShortName();
         if (!reservedVariableAtts.contains(attName) && !attName.startsWith("_Coordinate"))
           newVar.addAttribute(att);
@@ -661,8 +658,7 @@ public abstract class CFPointWriter implements Closeable {
         continue;
       }
 
-      List<Attribute> atts = oldVar.getAttributes();
-      for (Attribute att : atts) {
+      for (Attribute att : oldVar.attributes()) {
         String attName = att.getShortName();
         if (!reservedVariableAtts.contains(attName) && !attName.startsWith("_Coordinate"))
           newVar.addAttribute(att);
@@ -757,11 +753,12 @@ public abstract class CFPointWriter implements Closeable {
     for (StructureMembers.Member m : sdata.getMembers()) {
       Variable mv = varMap.get(m.getName());
       if (mv == null)
-        continue; // LOOK OK??
+        continue; // ok
 
       Array org = sdata.getArray(m);
       if (m.getDataType() == DataType.STRING) { // convert to ArrayChar
-        org = ArrayChar.makeFromStringArray((ArrayObject) org);
+        int strlen = mv.getDimension(mv.getDimensions().size() - 1).getLength();
+        org = ArrayChar.makeFromStringArray((ArrayObject) org, strlen);
       }
 
       Array orgPlus1 = Array.makeArrayRankPlusOne(org); // add dimension on the left (slow)
@@ -784,9 +781,9 @@ public abstract class CFPointWriter implements Closeable {
     if (loc != null) {
       if (llbb == null) {
         llbb = new LatLonRect(loc, .001, .001);
-        return;
+      } else {
+        llbb.extend(loc);
       }
-      llbb.extend(loc);
     }
 
     // date is handled specially
