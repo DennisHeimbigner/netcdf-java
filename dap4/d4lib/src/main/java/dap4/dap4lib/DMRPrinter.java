@@ -464,9 +464,13 @@ public class DMRPrinter {
     // Special case for char
     if (type == DapType.CHAR) {
       // Print the value as a string of all the characters
+      // except any NULs
       StringBuilder buf = new StringBuilder();
       for (int i = 0; i < svec.length; i++) {
-        buf.append(svec[i]);
+	String si = svec[i];
+	int end = si.length();
+	if(si.charAt(end-1) == '\0') end--;
+	buf.append(((CharSequence)svec[i]),0,end);
       }
       String cs = String.format("<Value value=\"%s\"/>", buf.toString());
       printer.marginPrintln(cs);
