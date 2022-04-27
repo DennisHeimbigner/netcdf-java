@@ -472,7 +472,9 @@ public class DMRPrinter {
 	if(si.charAt(end-1) == '\0') end--;
 	buf.append(((CharSequence)svec[i]),0,end);
       }
-      String cs = String.format("<Value value=\"%s\"/>", buf.toString());
+      // Still needs XML escaping
+      String s = Escape.entityEscape(buf.toString(), null);
+      String cs = String.format("<Value value=\"%s\"/>", s);
       printer.marginPrintln(cs);
     } else if (type.isEnumType()) {
       String[] names = (String[]) ((DapEnumeration) type).convert(svec);
