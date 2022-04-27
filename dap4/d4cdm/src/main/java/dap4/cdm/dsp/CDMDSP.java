@@ -515,9 +515,9 @@ public class CDMDSP extends AbstractDSP {
     DapVariable dapvar = (DapVariable) dmrfactory.newVariable(cdmvar.getShortName(), DapType.OPAQUE);
     recordVar(cdmvar, dapvar);
     buildattributes(dapvar, cdmvar.attributes());
-    Object osize = cdmvar.annotation(UCARTAGOPAQUE);
+    Object osize = cdmvar.annotation(DapAttribute.UCARTAGOPAQUE);
     if (osize != null) {
-      dapvar.addXMLAttribute(UCARTAGOPAQUE, osize.toString());
+      dapvar.addXMLAttribute(DapAttribute.UCARTAGOPAQUE, osize.toString());
     }
     return dapvar;
   }

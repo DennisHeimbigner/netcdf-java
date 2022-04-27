@@ -11,7 +11,7 @@ import dap4.core.dmr.ErrorResponse;
 import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.dmr.parser.ParseUtil;
-import dap4.dap4lib.DMRPrinter;
+import dap4.core.dmr.DMRPrinter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

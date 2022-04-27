@@ -3,7 +3,7 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.dap4lib;
+package dap4.core.dmr;
 
 import dap4.core.ce.CEConstraint;
 import dap4.core.dmr.*;
@@ -199,7 +199,7 @@ public class DMRPrinter {
         printer.marginPrint("<" + dmrname);
         printXMLAttributes(node, ce, NILFLAGS);
         if (dim.isUnlimited())
-          printXMLAttribute(AbstractDSP.UCARTAGUNLIMITED, "1", NILFLAGS);
+          printXMLAttribute(DapAttribute.UCARTAGUNLIMITED, "1", NILFLAGS);
         if (hasMetadata(node)) {
           printer.println(">");
           printMetadata(node);

@@ -3,7 +3,7 @@ package dap4.test;
 import dap4.core.data.DSP;
 import dap4.core.util.DapContext;
 import dap4.core.util.DapUtil;
-import dap4.dap4lib.DMRPrinter;
+import dap4.core.dmr.DMRPrinter;
 import dap4.dap4lib.DSPPrinter;
 import dap4.dap4lib.FileDSP;
 import dap4.dap4lib.HttpDSP;

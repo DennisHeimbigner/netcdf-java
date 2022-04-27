@@ -15,11 +15,16 @@ import java.util.List;
 
 public class DapAttribute extends DapNode {
 
-  //////////////////////////////////////////////////
+    // Define reserved attributes
+    public static final String UCARTAGVLEN = "_edu.ucar.isvlen";
+    public static final String UCARTAGOPAQUE = "_edu.ucar.opaque.size";
+    public static final String UCARTAGORIGTYPE = "_edu.ucar.orig.type";
+    public static final String UCARTAGUNLIMITED = "_edu.ucar.isunlimited";
+
+    //////////////////////////////////////////////////
   // Instance Variables
 
-
-  protected List<String> namespaceList = new ArrayList<String>();
+  protected List<String> namespaceList = new ArrayList<>();
 
   protected DapType basetype = null;
   protected String[] valuelist = null;

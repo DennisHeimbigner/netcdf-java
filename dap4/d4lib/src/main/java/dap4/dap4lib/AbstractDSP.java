@@ -8,10 +8,7 @@ package dap4.dap4lib;
 import dap4.core.data.ChecksumMode;
 import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
-import dap4.core.dmr.DapAttribute;
-import dap4.core.dmr.DapDataset;
-import dap4.core.dmr.DapNode;
-import dap4.core.dmr.DapVariable;
+import dap4.core.dmr.*;
 import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.util.DapContext;
@@ -46,18 +43,11 @@ public abstract class AbstractDSP implements DSP {
   protected static final String DMRVERSION = "1.0";
   protected static final String DMRNS = "http://xml.opendap.org/ns/DAP/4.0#";
 
-  // Define reserved attributes
-  public static final String UCARTAGVLEN = "_edu.ucar.isvlen";
-  public static final String UCARTAGOPAQUE = "_edu.ucar.opaque.size";
-  public static final String UCARTAGORIGTYPE = "_edu.ucar.orig.type";
-  public static final String UCARTAGUNLIMITED = "_edu.ucar.isunlimited";
-
-
   protected DapContext context = null;
   protected DapDataset dmr = null;
   protected String location = null;
   private ByteOrder order = null;
-  private ChecksumMode checksummode = ChecksumMode.DAP;
+  private ChecksumMode checksummode = ChecksumMode.NONE;
 
   protected Map<DapVariable, DataCursor> variables = new HashMap<>();
   protected DataCursor rootcursor = null;

@@ -112,7 +112,7 @@ public class DataToCDM {
         array = createStructure(data);
         break;
     }
-    if (d4var.isTopLevel() && this.dsp.getChecksumMode().enabled(dsp.getChecksumMode())) {
+    if (d4var.isTopLevel() && this.dsp.getChecksumMode() == dsp.getChecksumMode()) {
       // transfer the checksum attribute
       int csum = d4var.getChecksum();
       String scsum = String.format("0x%08x", csum);

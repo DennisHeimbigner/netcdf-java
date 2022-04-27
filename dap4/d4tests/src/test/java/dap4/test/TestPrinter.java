@@ -9,7 +9,7 @@ import dap4.cdm.nc2.DapNetcdfFile;
 import dap4.core.dmr.DapDataset;
 import dap4.core.util.*;
 import dap4.core.data.DSP;
-import dap4.dap4lib.DMRPrinter;
+import dap4.core.dmr.DMRPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.*;
