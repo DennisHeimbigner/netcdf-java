@@ -28,7 +28,7 @@ import java.util.List;
  * CDMDSP: tested elsewhere (TestServlet)
  * HttpDSP: tested elsewhere (TestCDMClient)
  * FileDSP: tested here
- * Nc4DSP: tested here
+ * H5DSP: tested here
  * SynDSP: tested here
  * D4DSP: tested because superclass of FileDSP, HttpDSP, and SynDSP
  * ThreddsDSP: not directly tested anywhere yet
