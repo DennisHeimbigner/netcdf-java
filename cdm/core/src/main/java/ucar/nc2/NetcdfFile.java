@@ -1382,7 +1382,6 @@ public class NetcdfFile implements FileCacheable, Closeable {
    * @throws IOException if error
    */
   public void writeNcml(Writer writer, String uri) throws IOException {
-  public void writeNcml(Writer writer, String uri) throws IOException {
     NcmlWriter ncmlWriter = new NcmlWriter();
     Element netcdfElem = ncmlWriter.makeNetcdfElement(this, uri);
     ncmlWriter.writeToWriter(netcdfElem, writer);

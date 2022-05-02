@@ -91,7 +91,7 @@ public class D4DataCompiler {
     } else if (type.isSeqType()) {
       array = compileSequenceArray(dapvar, container);
     }
-    if (dapvar.isTopLevel() && this.checksummode == ChecksumMode.CRC32) {
+    if (dapvar.isTopLevel() && this.checksummode == ChecksumMode.TRUE) {
       // extract the checksum from databuffer src,
       // attach to the array, and make into an attribute
       int checksum = extractChecksum(databuffer);
@@ -232,7 +232,7 @@ public class D4DataCompiler {
   // Utilities
 
   protected int extractChecksum(ByteBuffer data) throws DapException {
-    assert this.checksummode == ChecksumMode.CRC32;
+    assert this.checksummode == ChecksumMode.TRUE;
     if (data.remaining() < DapUtil.CHECKSUMSIZE)
       throw new DapException("Short serialization: missing checksum");
     return data.getInt();
