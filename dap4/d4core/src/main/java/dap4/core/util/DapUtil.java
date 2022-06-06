@@ -587,9 +587,14 @@ public abstract class DapUtil // Should only contain static methods
     prefix = DapUtil.canonicalpath(prefix);
     suffix = DapUtil.canonicalpath(suffix);
     result.append(prefix);
-    if (!prefix.endsWith("/"))
-      result.append("/");
-    result.append(suffix.startsWith("/") ? suffix.substring(1) : suffix);
+    result.append("/");
+    result.append(suffix);
+    // Remove // occurrences
+    while(true) {
+	int pos = result.indexOf("//");
+	if(pos < 0) break;
+	result.deleteCharAt(pos);
+    }
     return result.toString();
   }
 

@@ -133,8 +133,6 @@ public class HttpDSP extends D4DSP {
      * Take from the incoming data
      * String s = xuri.getFragFields().get(Dap4Util.DAP4CSUMTAG);
      * ChecksumMode mode = ChecksumMode.modeFor(s);
-     * if(mode == null)
-     * throw new DapException(String.format("Illegal %s: %s",Dap4Util.DAP4CSUMTAG,s));
      * setChecksumMode(mode);
      * s = xuri.getFragFields().get(Dap4Util.DAP4ENDIANTAG);
      * Integer oz = DapUtil.stringToInteger(s);

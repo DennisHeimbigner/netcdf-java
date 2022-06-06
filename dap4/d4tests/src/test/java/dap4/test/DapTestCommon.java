@@ -27,8 +27,8 @@ abstract public class DapTestCommon extends UnitTestCommon {
   static public final String FILESERVER = "file://localhost:8080";
 
   static public final String CONSTRAINTTAG = "dap4.ce";
+  static public final String CSUMTAG = "dap4.checksum";
   static public final String ORDERTAG = "ucar.littleendian";
-  static public final String NOCSUMTAG = "ucar.nochecksum";
   static public final String TRANSLATETAG = "ucar.translate";
   static public final String TESTTAG = "ucar.testing";
 

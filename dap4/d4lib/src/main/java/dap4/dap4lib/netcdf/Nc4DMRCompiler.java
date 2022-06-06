@@ -30,8 +30,8 @@ public class Nc4DMRCompiler {
   public static final boolean DEBUG = false;
 
   // Define reserved attributes
-  public static final String UCARTAGVLEN = Nc4DSP.UCARTAGVLEN;
-  public static final String UCARTAGOPAQUE = Nc4DSP.UCARTAGOPAQUE;
+  public static final String UCARTAGVLEN = DapAttribute.UCARTAGVLEN;
+  public static final String UCARTAGOPAQUE = DapAttribute.UCARTAGOPAQUE;
 
   static final int NC_FALSE = 0;
   static final int NC_TRUE = 1;
@@ -269,7 +269,7 @@ public class Nc4DMRCompiler {
     assert len == sizep.longValue();
     assert name.equals(Nc4DSP.makeString(namep));
     // Add the netcdf4 name as an xml attribute.
-    ds.addXMLAttribute(UCARTAGORIGTYPE, name);
+    ds.addXMLAttribute(DapAttribute.UCARTAGORIGTYPE, name);
   }
 
   protected void buildfield(TypeNotes ti, int fid, DapStructure container) throws DapException {
@@ -388,7 +388,7 @@ public class Nc4DMRCompiler {
     ds.addXMLAttribute(UCARTAGVLEN, "1");
 
     // Annotate to indicate that the original type name
-    ds.addXMLAttribute(UCARTAGORIGTYPE, ds.getFQN());
+    ds.addXMLAttribute(DapAttribute.UCARTAGORIGTYPE, ds.getFQN());
 
     // Finally, extract the size of the structure, which is the same
     // as the size of the singleton field

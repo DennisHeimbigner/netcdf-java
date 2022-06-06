@@ -29,6 +29,8 @@ import dap4.dap4lib.XURI;
 import ucar.nc2.ffi.netcdf.NetcdfClibrary;
 import ucar.nc2.jni.netcdf.Nc4prototypes;
 import ucar.nc2.jni.netcdf.SizeTByReference;
+
+import javax.annotation.Nullable;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +64,7 @@ public class Nc4DSP extends AbstractDSP {
   static int NC_POINTER_BYTES = (Native.POINTER_SIZE);
   static int NC_SIZET_BYTES = (Native.SIZE_T_SIZE);
 
-  protected static Nc4prototypes nc4 = NetcdfClibrary.getForeignFunctionInterface();
+  protected static Nc4prototypes nc4 = null;
 
   //////////////////////////////////////////////////
   // com.sun.jna.Memory control
@@ -291,9 +293,14 @@ public class Nc4DSP extends AbstractDSP {
 
   public Nc4DSP() throws DapException {
     super();
-    if (nc4 == null) {
-      throw new DapException("Could not load libnetcdf");
+    if(nc4 == null) {// Load the C library via JNI/JNA
+      NetcdfClibrary.setLibraryNameAndPath("c:/tools/netcdf4.8.1/bin", null);
+      if(!NetcdfClibrary.isLibraryPresent()) {
+        throw new DapException("Could not load libnetcdf");
+      }
+      nc4 = NetcdfClibrary.getForeignFunctionInterface();
     }
+    assert(nc4 != null);
     dmrfactory = new DMRFactory();
     allnotesInit();
   }

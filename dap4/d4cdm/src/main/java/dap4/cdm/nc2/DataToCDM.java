@@ -7,6 +7,7 @@
 package dap4.cdm.nc2;
 
 import dap4.cdm.NodeMap;
+import dap4.core.data.ChecksumMode;
 import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
 import dap4.core.dmr.*;
@@ -112,7 +113,7 @@ public class DataToCDM {
         array = createStructure(data);
         break;
     }
-    if (d4var.isTopLevel() && this.dsp.getChecksumMode().enabled(dsp.getChecksumMode())) {
+    if (d4var.isTopLevel() && this.dsp.getChecksumMode() == ChecksumMode.TRUE) {
       // transfer the checksum attribute
       int csum = d4var.getChecksum();
       String scsum = String.format("0x%08x", csum);
