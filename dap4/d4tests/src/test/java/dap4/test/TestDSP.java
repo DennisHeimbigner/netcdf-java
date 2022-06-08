@@ -25,13 +25,10 @@ import java.util.List;
 /**
  * Test some of the DSP classes:
  * AbstractDSP: tested by all the other DSPs
- * CDMDSP: tested elsewhere (TestServlet)
  * HttpDSP: tested elsewhere (TestCDMClient)
  * FileDSP: tested here
- * Nc4DSP: tested here
  * SynDSP: tested here
  * D4DSP: tested because superclass of FileDSP, HttpDSP, and SynDSP
- * ThreddsDSP: not directly tested anywhere yet
  */
 public class TestDSP extends DapTestCommon {
   private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
