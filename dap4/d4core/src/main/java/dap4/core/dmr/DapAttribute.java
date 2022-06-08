@@ -27,8 +27,7 @@ public class DapAttribute extends DapNode {
   //////////////////////////////////////////////////
   // Instance Variables
 
-
-  protected List<String> namespaceList = new ArrayList<String>();
+  protected List<String> namespaceList = new ArrayList<>();
 
   protected DapType basetype = null;
   protected String[] valuelist = null;
