@@ -5,7 +5,7 @@ import dap4.core.util.DapContext;
 import dap4.core.util.DapUtil;
 import dap4.core.dmr.DMRPrinter;
 import dap4.dap4lib.DSPPrinter;
-import dap4.dap4lib.FileDSP;
+import dap4.dap4lib.RawDSP;
 import dap4.dap4lib.HttpDSP;
 import org.junit.Assert;
 import org.junit.Before;
@@ -140,7 +140,7 @@ public class TestDSP extends DapTestCommon {
     if ("file".equals(proto)) {
       // discriminate on the extensions
       if (".raw".equals(ext)) {
-        dsp = new FileDSP();
+        dsp = new RawDSP();
       }
     } else if ("http".equals(proto) || "https".equals(url.getProtocol())) {
       dsp = new HttpDSP();

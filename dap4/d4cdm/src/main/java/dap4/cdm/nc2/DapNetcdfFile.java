@@ -10,8 +10,8 @@ import dap4.core.data.DSP;
 import dap4.core.data.DSPRegistry;
 import dap4.core.util.DapContext;
 import dap4.core.util.DapUtil;
-import dap4.dap4lib.FileDSP;
 import dap4.dap4lib.HttpDSP;
+import dap4.dap4lib.RawDSP;
 import dap4.dap4lib.XURI;
 import ucar.ma2.*;
 import ucar.nc2.NetcdfFile;
@@ -69,7 +69,7 @@ public class DapNetcdfFile extends NetcdfFile {
   protected static DSPRegistry dspregistry = new DSPRegistry();
 
   static {
-    dspregistry.register(FileDSP.class, DSPRegistry.FIRST);
+    dspregistry.register(RawDSP.class, DSPRegistry.FIRST);
     dspregistry.register(HttpDSP.class, DSPRegistry.FIRST);
   }
 

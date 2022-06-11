@@ -18,7 +18,7 @@ import java.net.URISyntaxException;
  * Provide a DSP interface to raw data
  */
 
-public class FileDSP extends D4DSP {
+public class RawDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Constants
 
@@ -33,7 +33,7 @@ public class FileDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public FileDSP() {
+  public RawDSP() {
     super();
   }
 
@@ -67,7 +67,7 @@ public class FileDSP extends D4DSP {
   public void close() {}
 
   @Override
-  public FileDSP open(String filepath) throws DapException {
+  public RawDSP open(String filepath) throws DapException {
     try {
       if (filepath.startsWith("file:"))
         try {
@@ -94,7 +94,7 @@ public class FileDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Extension to access a raw byte stream
 
-  public FileDSP open(byte[] rawdata) throws DapException {
+  public RawDSP open(byte[] rawdata) throws DapException {
     try {
       this.raw = rawdata;
       ByteArrayInputStream stream = new ByteArrayInputStream(this.raw);
