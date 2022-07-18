@@ -15,7 +15,6 @@ import dap4.core.dmr.DapVariable;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.core.util.Slice;
-import dap4.dap4lib.LibTypeFcns;
 import ucar.ma2.*;
 import ucar.nc2.Group;
 import java.nio.ByteBuffer;

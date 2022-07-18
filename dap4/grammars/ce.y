@@ -90,7 +90,7 @@ different names.
 
 /*
 With the introduction of the {...} notation, each clause
-not actually can represent multiple variables to include
+can represent multiple variables to include
 in the output. This complicates parsing actions because
 the constraint now will construct a forest of trees
 with each clause being the root of a tree and each tree

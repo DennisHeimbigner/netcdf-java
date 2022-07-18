@@ -5,7 +5,7 @@ dependencies {
   api enforcedPlatform(project(':netcdf-java-platform'))
 
   compile project(':dap4:d4core')
-  compile project(':dap4:d4lib')
+//  compile project(':dap4:d4lib')
   compile project(':cdm:cdm-core')
-  compile project(':netcdf4')
+//  compile project(':netcdf4')
 }
