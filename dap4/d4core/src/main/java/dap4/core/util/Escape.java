@@ -58,7 +58,8 @@ public class Escape {
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       // XML cannot handle nul char so just suppress it altogether
-      if(c == 0) continue;
+      if (c == 0)
+        continue;
       int index = wrt.indexOf(c);
       if (index < 0)
         escaped.append(c);

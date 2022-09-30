@@ -467,10 +467,11 @@ public class DMRPrinter {
       // except any NULs
       StringBuilder buf = new StringBuilder();
       for (int i = 0; i < svec.length; i++) {
-	String si = svec[i];
-	int end = si.length();
-	if(si.charAt(end-1) == '\0') end--;
-	buf.append(((CharSequence)svec[i]),0,end);
+        String si = svec[i];
+        int end = si.length();
+        if (si.charAt(end - 1) == '\0')
+          end--;
+        buf.append(((CharSequence) svec[i]), 0, end);
       }
       // Still needs XML escaping
       String s = Escape.entityEscape(buf.toString(), null);

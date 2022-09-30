@@ -590,10 +590,11 @@ public abstract class DapUtil // Should only contain static methods
     result.append("/");
     result.append(suffix);
     // Remove // occurrences
-    while(true) {
-	int pos = result.indexOf("//");
-	if(pos < 0) break;
-	result.deleteCharAt(pos);
+    while (true) {
+      int pos = result.indexOf("//");
+      if (pos < 0)
+        break;
+      result.deleteCharAt(pos);
     }
     return result.toString();
   }
