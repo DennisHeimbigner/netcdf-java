@@ -21,7 +21,6 @@ dependencies {
     api project(':cdm-test-utils')
     api project(':dap4:d4core')
     api project(':dap4:d4lib')
-    api project(':dap4:d4cdm')
     api project(':grib')
     api project(':httpservices')
     api project(':legacy')

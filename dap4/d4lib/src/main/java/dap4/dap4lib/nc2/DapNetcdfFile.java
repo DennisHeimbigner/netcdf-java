@@ -3,9 +3,9 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.nc2;
 
-import dap4.cdm.CDMUtil;
+import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.data.DSP;
 import dap4.core.data.DSPRegistry;
 import dap4.core.util.DapContext;
@@ -13,6 +13,7 @@ import dap4.core.util.DapUtil;
 import dap4.dap4lib.HttpDSP;
 import dap4.dap4lib.RawDSP;
 import dap4.dap4lib.XURI;
+import dap4.dap4lib.cdm.nc2.CDMCompiler;
 import ucar.ma2.*;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;

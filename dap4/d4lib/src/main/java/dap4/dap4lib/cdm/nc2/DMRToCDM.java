@@ -3,14 +3,15 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.CDMTypeFcns;
-import dap4.cdm.NodeMap;
+import dap4.dap4lib.cdm.CDMTypeFcns;
+import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.data.DSP;
 import dap4.core.dmr.*;
 import dap4.core.util.Convert;
 import dap4.core.util.DapException;
+import dap4.dap4lib.nc2.DapNetcdfFile;
 import ucar.ma2.DataType;
 import ucar.ma2.ForbiddenConversionException;
 import ucar.nc2.*;

@@ -4,9 +4,9 @@
  */
 
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.NodeMap;
+import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.data.ChecksumMode;
 import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
@@ -15,6 +15,7 @@ import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.core.util.Index;
 import dap4.core.util.Odometer;
+import dap4.dap4lib.nc2.DapNetcdfFile;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.Group;

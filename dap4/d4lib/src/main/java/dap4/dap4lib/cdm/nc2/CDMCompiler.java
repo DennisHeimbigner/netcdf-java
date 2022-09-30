@@ -4,13 +4,14 @@
  */
 
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.NodeMap;
+import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.data.DSP;
 import dap4.core.dmr.DapDataset;
 import dap4.core.dmr.DapNode;
 import dap4.core.util.DapException;
+import dap4.dap4lib.nc2.DapNetcdfFile;
 import ucar.ma2.Array;
 import ucar.nc2.CDMNode;
 import ucar.nc2.Group;
@@ -82,7 +83,7 @@ public class CDMCompiler {
   // Compile DMR and Data into a NetcdfDataset
 
   /* Package access */
-  void compile() throws DapException {
+  public void compile() throws DapException {
     compileDMR();
     compileData();
   }

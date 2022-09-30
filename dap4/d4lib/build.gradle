@@ -5,9 +5,8 @@ dependencies {
   api enforcedPlatform(project(':netcdf-java-platform'))
 
   compile project(':dap4:d4core')
-  compile project(':dap4:d4cdm')
   compile project(':httpservices')
-//  compile project(':netcdf4')
+  compile project(':cdm:cdm-core')
 
   compile 'org.apache.httpcomponents:httpclient'
   compile 'org.apache.httpcomponents:httpcore'

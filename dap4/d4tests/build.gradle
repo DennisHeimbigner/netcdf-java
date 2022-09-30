@@ -9,7 +9,6 @@ dependencies {
 
   testImplementation project(':dap4:d4core')
   testImplementation project(':dap4:d4lib')
-  testImplementation project(':dap4:d4cdm')
   testImplementation project(':cdm:cdm-core')
   testImplementation project(':cdm-test-utils')
   testImplementation project(':httpservices')
