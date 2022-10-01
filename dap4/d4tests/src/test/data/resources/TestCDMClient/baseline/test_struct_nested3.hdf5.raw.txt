@@ -12,7 +12,6 @@ netcdf test_struct_nested3.hdf5 {
       } field3;
 
     } x;
-      string x:_DAP4_Checksum_CRC32 = "0xc9e1efe6";
 
 
   // global attributes:

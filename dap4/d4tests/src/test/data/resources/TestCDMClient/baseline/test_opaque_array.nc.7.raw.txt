@@ -1,7 +1,6 @@
 netcdf test_opaque_array.nc.7 {
   variables:
     opaque vo2(1, 2);
-      string vo2:_DAP4_Checksum_CRC32 = "0xcca386bf";
 
   // global attributes:
   string :_dap4.ce = "/vo2[1][0:1]";

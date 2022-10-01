@@ -4,10 +4,8 @@ netcdf test_struct_array.syn {
     dy = 3;
   variables:
     float z(dx);
-      string z:_DAP4_Checksum_CRC32 = "0xbef06d05";
 
     float t(dy);
-      string t:_DAP4_Checksum_CRC32 = "0x165934f0";
 
 
     Structure {
@@ -16,7 +14,6 @@ netcdf test_struct_array.syn {
       int y;
         string y:_CoordinateAxisType = "GeoY";
     } s(dx, dy);
-      string s:_DAP4_Checksum_CRC32 = "0xd91a250e";
 
 
   // global attributes:

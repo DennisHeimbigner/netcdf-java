@@ -7,7 +7,6 @@ netcdf test_struct_type {
       int y;
         string y:_CoordinateAxisType = "GeoY";
     } s;
-      string s:_DAP4_Checksum_CRC32 = "0xcf8f9871";
 
 
   // global attributes:

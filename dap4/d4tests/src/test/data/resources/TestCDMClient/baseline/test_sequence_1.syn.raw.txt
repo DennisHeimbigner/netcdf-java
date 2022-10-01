@@ -5,7 +5,6 @@ netcdf test_sequence_1.syn {
       int i1;
       short sh1;
     } s(*);
-      string s:_DAP4_Checksum_CRC32 = "0x4ac0ac5e";
 
 
   // global attributes:

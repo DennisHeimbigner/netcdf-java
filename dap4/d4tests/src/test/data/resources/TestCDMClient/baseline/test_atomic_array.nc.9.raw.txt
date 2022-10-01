@@ -1,7 +1,6 @@
 netcdf test_atomic_array.nc.9 {
   variables:
     short v16(3);
-      string v16:_DAP4_Checksum_CRC32 = "0xa0d9e652";
 
   // global attributes:
   string :_dap4.ce = "/v16[3,0:1]";
