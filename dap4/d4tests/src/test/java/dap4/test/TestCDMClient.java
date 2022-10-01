@@ -137,7 +137,7 @@ public class TestCDMClient extends DapTestCommon {
 
   @Before
   public void setup() throws Exception {
-    testSetup();
+    //testSetup();
     this.resourceroot = getResourceRoot();
     TestCase.setRoot(resourceroot);
     defineAllTestcases();
