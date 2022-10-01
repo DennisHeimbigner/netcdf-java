@@ -219,18 +219,18 @@ abstract public class DapTestCommon extends UnitTestCommon {
   }
 
   /*
-   *  static protected void testSetup() {
-   *    try {
-   *      // Always prefer Nc4Iosp over HDF5
-   *      NetcdfFile.iospDeRegister(NC4IOSP);
-   *      NetcdfFile.registerIOProviderPreferred(NC4IOSP, ucar.nc2.iosp.hdf5.H5iosp.class);
-   *      // Print out the library version
-   *      System.err.printf("Netcdf-c library version: %s%n", getCLibraryVersion());
-   *      System.err.flush();
-   *    } catch (Exception e) {
-   *      System.err.println("Cannot load ucar.nc2.jni.netcdf.Nc4Iosp");
-   *    }
-   *  }
+   * static protected void testSetup() {
+   * try {
+   * // Always prefer Nc4Iosp over HDF5
+   * NetcdfFile.iospDeRegister(NC4IOSP);
+   * NetcdfFile.registerIOProviderPreferred(NC4IOSP, ucar.nc2.iosp.hdf5.H5iosp.class);
+   * // Print out the library version
+   * System.err.printf("Netcdf-c library version: %s%n", getCLibraryVersion());
+   * System.err.flush();
+   * } catch (Exception e) {
+   * System.err.println("Cannot load ucar.nc2.jni.netcdf.Nc4Iosp");
+   * }
+   * }
    */
 
   static void printDir(String path) {
@@ -249,19 +249,19 @@ abstract public class DapTestCommon extends UnitTestCommon {
   }
 
   /*
-   *  static public String getCLibraryVersion() {
-   *    Nc4prototypes nc4 = getCLibrary();
-   *    return (nc4 == null ? "Unknown" : nc4.nc_inq_libvers());
-   *  }
+   * static public String getCLibraryVersion() {
+   * Nc4prototypes nc4 = getCLibrary();
+   * return (nc4 == null ? "Unknown" : nc4.nc_inq_libvers());
+   * }
    *
-   *  static public Nc4prototypes getCLibrary() {
-   *    try {
-   *      Method getclib = NC4IOSP.getMethod("getCLibrary");
-   *      return (Nc4prototypes) getclib.invoke(null);
-   *    } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-   *      return null;
-   *    }
-   *  }
+   * static public Nc4prototypes getCLibrary() {
+   * try {
+   * Method getclib = NC4IOSP.getMethod("getCLibrary");
+   * return (Nc4prototypes) getclib.invoke(null);
+   * } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+   * return null;
+   * }
+   * }
    */
 }
 
