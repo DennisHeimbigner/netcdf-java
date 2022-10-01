@@ -3,7 +3,6 @@ netcdf test_opaque_array {
     d2 = 2;
   variables:
     opaque vo2(d2, d2);
-      string vo2:_DAP4_Checksum_CRC32 = "0x91581cda";
 
   // global attributes:
   string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
