@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.constants.CDM;
+import ucar.nc2.iosp.netcdf4.Nc4;
 import ucar.unidata.util.test.TestDir;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -23,7 +24,7 @@ public class TestSpecialAttributes {
     NetcdfFile ncfile = TestDir.openFileLocal("testSpecialAttributes.nc4");
     // Iterate over all top-level attributes and see if it is special
     for (Attribute a : ncfile.getRootGroup().getAttributes()) {
-      Assert.assertFalse("Attribute iteration found special attribute: " + a.getShortName(), Attribute.isspecial(a));
+      Assert.assertFalse("Attribute iteration found special attribute: " + a.getShortName(), Nc4.isspecial(a));
     }
     ncfile.close();
   }
@@ -32,9 +33,9 @@ public class TestSpecialAttributes {
   public void testReadByName() throws IOException {
     NetcdfFile ncfile = TestDir.openFileLocal("testSpecialAttributes.nc4");
     // Attempt to read special attributes by name
-    for (String name : new String[] {CDM.NCPROPERTIES}) {
+    for (String name : new String[] {Nc4.NCPROPERTIES}) {
       Attribute special = ncfile.getRootGroup().findAttribute(name);
-      Assert.assertTrue("Could not access special attribute: " + name, special != null && Attribute.isspecial(special));
+      Assert.assertTrue("Could not access special attribute: " + name, special != null && Nc4.isspecial(special));
     }
     ncfile.close();
   }

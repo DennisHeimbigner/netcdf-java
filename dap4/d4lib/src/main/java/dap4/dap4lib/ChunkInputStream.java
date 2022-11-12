@@ -5,6 +5,7 @@
 
 package dap4.dap4lib;
 
+import dap4.core.util.DapConstants;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import java.io.ByteArrayOutputStream;
@@ -144,13 +145,13 @@ public class ChunkInputStream extends InputStream {
         dmr = dmr + "\r\n";
 
       // Figure out the endian-ness of the response
-      this.remoteorder = (flags & DapUtil.CHUNK_LITTLE_ENDIAN) == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
-      this.nochecksum = (flags & DapUtil.CHUNK_NOCHECKSUM) != 0;
+      this.remoteorder = (flags & DapConstants.CHUNK_LITTLE_ENDIAN) == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
+      this.nochecksum = (flags & DapConstants.CHUNK_NOCHECKSUM) != 0;
 
       // Set the state
-      if ((flags & DapUtil.CHUNK_ERROR) != 0)
+      if ((flags & DapConstants.CHUNK_ERROR) != 0)
         state = State.ERROR;
-      else if ((flags & DapUtil.CHUNK_END) != 0)
+      else if ((flags & DapConstants.CHUNK_END) != 0)
         state = State.END;
       else
         state = State.DATA;
@@ -212,13 +213,13 @@ public class ChunkInputStream extends InputStream {
     if (requestmode == RequestMode.DMR)
       throw new UnsupportedOperationException("Attempt to read databuffer when DMR only"); // Runtime
     if (avail <= 0) {
-      if ((flags & DapUtil.CHUNK_END) != 0)
+      if ((flags & DapConstants.CHUNK_END) != 0)
         return -1; // Treat as EOF
       if (!readHeader(input))
         return -1; // EOF
       // See if we have an error chunk,
       // and if so, turn it into an exception
-      if ((flags & DapUtil.CHUNK_ERROR) != 0) {
+      if ((flags & DapConstants.CHUNK_ERROR) != 0) {
         String document = readError();
         throwError(document);
       }
@@ -257,11 +258,11 @@ public class ChunkInputStream extends InputStream {
     int pos = off;
     while (count > 0) {
       if (avail <= 0) {
-        if ((flags & DapUtil.CHUNK_END) != 0 || !readHeader(input))
+        if ((flags & DapConstants.CHUNK_END) != 0 || !readHeader(input))
           return (len - count); // return # databuffer read
         // See if we have an error chunk,
         // and if so, turn it into an exception
-        if ((flags & DapUtil.CHUNK_ERROR) != 0) {
+        if ((flags & DapConstants.CHUNK_ERROR) != 0) {
           String document = readError();
           throwError(document);
         }
@@ -292,7 +293,7 @@ public class ChunkInputStream extends InputStream {
   public int available() {
     if (this.avail > 0)
       return this.avail;
-    if ((flags & DapUtil.CHUNK_END) != 0)
+    if ((flags & DapConstants.CHUNK_END) != 0)
       return 0;
     return 1; // should be some unknown amount left.
   }

@@ -10,35 +10,26 @@ package dap4.core.data;
  *
  */
 public enum ChecksumMode {
-  NONE, // => serialized data has no checksums
-  IGNORE, // => skip, but ignore any checksumming (client side)
-  DMR, // => compute checksums for DMR requests only
-  DAP, // => compute checksums for Data requests only
-  ALL; // => compute checksums for both kinds of requestsNONE, DMR, DAP, ALL;
+  NONE, // => dap4.checksum was not specified
+  FALSE, // => dap4.checksum=false
+  TRUE; // => dap4.checksum=true
 
-  /**
-   * Return true if the ckm mode is allowed with this, false otherwise
-   * 
-   * @param ckm
-   * @return true, if enabled
-   */
-  public boolean enabled(ChecksumMode ckm) {
-    if (ckm == null || this == NONE)
-      return false;
-    if (this == ckm)
-      return true;
-    if (this == ALL)
-      return true;
-    return false;
-  }
+  static public final ChecksumMode dfalt = NONE;
 
+  static final String[] trues = new String[] {"true", "on", "yes", "1"};
+  static final String[] falses = new String[] {"false", "off", "no", "0"};
+ 
   public static ChecksumMode modeFor(String s) {
     if (s == null || s.length() == 0)
-      return DAP;
-    for (ChecksumMode mode : values()) {
-      if (mode.name().equalsIgnoreCase(s))
-        return mode;
+      return NONE;
+    for (String f : falses) {
+      if (f.equalsIgnoreCase(s))
+        return FALSE;
     }
-    return null;
+    for (String t : trues) {
+      if (t.equalsIgnoreCase(s))
+        return TRUE;
+    }
+    return dfalt;
   }
 }

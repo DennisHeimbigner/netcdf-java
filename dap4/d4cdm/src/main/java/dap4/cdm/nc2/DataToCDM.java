@@ -7,13 +7,11 @@
 package dap4.cdm.nc2;
 
 import dap4.cdm.NodeMap;
+import dap4.core.data.ChecksumMode;
 import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
 import dap4.core.dmr.*;
-import dap4.core.util.DapException;
-import dap4.core.util.DapUtil;
-import dap4.core.util.Index;
-import dap4.core.util.Odometer;
+import dap4.core.util.*;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.Group;
@@ -112,12 +110,12 @@ public class DataToCDM {
         array = createStructure(data);
         break;
     }
-    if (d4var.isTopLevel() && this.dsp.getChecksumMode().enabled(dsp.getChecksumMode())) {
+    if (d4var.isTopLevel() && this.dsp.getChecksumMode() != ChecksumMode.NONE) {
       // transfer the checksum attribute
       int csum = d4var.getChecksum();
       String scsum = String.format("0x%08x", csum);
       Variable cdmvar = (Variable) nodemap.get(d4var);
-      Attribute acsum = new Attribute(DapUtil.CHECKSUMATTRNAME, scsum);
+      Attribute acsum = new Attribute(DapConstants.CHECKSUMATTRNAME, scsum);
       cdmvar.addAttribute(acsum);
     }
     return array;

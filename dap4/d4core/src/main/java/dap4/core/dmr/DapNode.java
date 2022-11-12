@@ -102,8 +102,6 @@ public abstract class DapNode {
       this.sort = DapSort.ATOMICTYPE;
     else if (this instanceof DapEnumConst)
       this.sort = DapSort.ENUMCONST;
-    else if (this instanceof DapEnumeration)
-      this.sort = DapSort.ENUMERATION;
     else if (this instanceof DapMap)
       this.sort = DapSort.MAP;
     else
@@ -240,7 +238,8 @@ public abstract class DapNode {
         assert curr != null;
         next = curr.getGroup();
       } while (curr.getSort() != DapSort.DATASET);
-      setDataset((DapDataset) curr);
+      // setDataset((DapDataset) curr);
+      assert(curr != null);
     }
     return this.dataset;
   }
@@ -311,7 +310,7 @@ public abstract class DapNode {
   /**
    * Set the parent DapNode; may sometimes be same as container,
    * but not always (think attributes or maps).
-   * Invariant: parent must be either a group or a variable.
+   * Invariant: parent must be either a group (including DapDataset) or a variable.
    * We can infer the container, so set that also.
    *
    * @param parent the proposed parent node
@@ -319,7 +318,7 @@ public abstract class DapNode {
   public void setParent(DapNode parent) {
     assert this.parent == null;
     assert ((this.getSort() == DapSort.ENUMCONST && parent.getSort() == DapSort.ENUMERATION)
-        || parent.getSort().isa(DapSort.GROUP) || parent.getSort() == DapSort.VARIABLE
+        || parent.getSort().isa(DapSort.GROUP) || parent.getSort().isa(DapSort.DATASET) || parent.getSort() == DapSort.VARIABLE
         || parent.getSort() == DapSort.STRUCTURE || parent.getSort() == DapSort.SEQUENCE
         || this.getSort() == DapSort.ATTRIBUTE || this.getSort() == DapSort.ATTRIBUTESET);
     this.parent = parent;
@@ -366,9 +365,8 @@ public abstract class DapNode {
   }
 
   /**
-   * Compute the path upto, and including
-   * some specified containing node (null=>root)
-   * The containing node is included as is this node.
+   * Compute the path upto, and including the root Dataset.
+   * This node is included as last element in path.
    *
    * @return ordered list of parent nodes
    */
@@ -430,8 +428,8 @@ public abstract class DapNode {
    * Compute the FQN of this node
    */
   public String computefqn() {
-    List<DapNode> path = getPath(); // excludes root/wrt
-    StringBuilder fqn = new StringBuilder();
+    List<DapNode> path = getPath(); // including root
+    StringBuilder sfqn = new StringBuilder();
     DapNode parent = path.get(0);
     for (int i = 1; i < path.size(); i++) { // start at 1 to skip root
       DapNode current = path.get(i);
@@ -440,23 +438,22 @@ public abstract class DapNode {
         case DATASET:
         case GROUP:
         case ENUMERATION:
-          fqn.append('/');
-          fqn.append(Escape.backslashEscape(current.getShortName(), "/."));
+          sfqn.append('/');
           break;
         // These use '.'
         case STRUCTURE:
         case SEQUENCE:
         case ENUMCONST:
         case VARIABLE:
-          fqn.append('.');
-          fqn.append(current.getEscapedShortName());
+          sfqn.append('.');
           break;
         default: // Others should never happen
           throw new IllegalArgumentException("Illegal FQN parent");
       }
+      sfqn.append(current.getEscapedShortName());
       parent = current;
     }
-    return fqn.toString();
+    return sfqn.toString();
   }
 
   //////////////////////////////////////////////////

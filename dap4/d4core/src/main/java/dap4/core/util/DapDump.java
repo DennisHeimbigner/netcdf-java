@@ -70,6 +70,8 @@ public abstract class DapDump {
     buf.limit(size);
     int i = 0;
     try {
+      System.err.printf("[pos]  X    U   S    C\t       I            UI         XI           Sh       USh%n");
+      System.err.println("-------------------------------------------------------------------------------------");
       for (i = 0; buf.position() < stop; i++) {
         savepos = buf.position();
         int iv = buf.getInt();
@@ -91,9 +93,9 @@ public abstract class DapDump {
           s = "\\n";
         else if (c < ' ' || c >= 0x7f)
           s = "?";
-        System.err.printf("[%03d] %02x %03d %4d '%s'", i, ub, ub, ib, s);
-        System.err.printf("\t%12d 0x%08x", iv, uiv);
-        System.err.printf("\t%5d\t0x%04x", sv, usv);
+        System.err.printf("[%03d] 0x%02x %03d %04d '%s'", i, ub, ub, ib, s);
+        System.err.printf("\t%12d  %12d  0x%08x", iv, uiv, uiv);
+        System.err.printf("  %8d  %8d", sv, usv);
         System.err.println();
         System.err.flush();
       }

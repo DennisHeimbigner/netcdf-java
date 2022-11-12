@@ -6,19 +6,22 @@
 package dap4.dap4lib;
 
 import dap4.core.util.DapContext;
+import dap4.core.util.DapDump;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.dap4lib.serial.D4DSP;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.ByteOrder;
 
 /**
  * Provide a DSP interface to raw data
  */
 
-public class FileDSP extends D4DSP {
+public class RawDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Constants
 
@@ -27,13 +30,10 @@ public class FileDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Instance variables
 
-  // Coverity[FB.URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD]
-  protected byte[] raw = null; // Complete serialized binary databuffer
-
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public FileDSP() {
+  public RawDSP() {
     super();
   }
 
@@ -67,7 +67,7 @@ public class FileDSP extends D4DSP {
   public void close() {}
 
   @Override
-  public FileDSP open(String filepath) throws DapException {
+  public RawDSP open(String filepath) throws DapException {
     try {
       if (filepath.startsWith("file:"))
         try {
@@ -76,16 +76,9 @@ public class FileDSP extends D4DSP {
         } catch (URISyntaxException use) {
           throw new DapException("Malformed filepath: " + filepath).setCode(DapCodes.SC_NOT_FOUND);
         }
-      try (FileInputStream stream = new FileInputStream(filepath)) {
-        this.raw = DapUtil.readbinaryfile(stream);
-      }
       try (FileInputStream stream = new FileInputStream(filepath)) { // == rewind
-        ChunkInputStream rdr = new ChunkInputStream(stream, RequestMode.DAP);
-        String document = rdr.readDMR();
-        byte[] serialdata = DapUtil.readbinaryfile(rdr);
-        super.build(document, serialdata, rdr.getRemoteByteOrder());
+        return open(stream);
       }
-      return this;
     } catch (IOException ioe) {
       throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
     }
@@ -94,18 +87,24 @@ public class FileDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Extension to access a raw byte stream
 
-  public FileDSP open(byte[] rawdata) throws DapException {
+  public RawDSP open(byte[] rawdata) throws DapException {
     try {
-      this.raw = rawdata;
-      ByteArrayInputStream stream = new ByteArrayInputStream(this.raw);
-      ChunkInputStream rdr = new ChunkInputStream(stream, RequestMode.DAP);
-      String document = rdr.readDMR();
-      byte[] serialdata = DapUtil.readbinaryfile(rdr);
-      super.build(document, serialdata, rdr.getRemoteByteOrder());
-      return this;
+      ByteArrayInputStream stream = new ByteArrayInputStream(rawdata);
+      return open(stream);
     } catch (IOException ioe) {
       throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
     }
+  }
+
+  //////////////////////////////////////////////////
+  // Common open of InputStream
+
+  public RawDSP open(InputStream stream) throws IOException {
+    ChunkInputStream rdr = new ChunkInputStream(stream, RequestMode.DAP);
+    String document = rdr.readDMR();
+    byte[] serialdata = DapUtil.readbinaryfile(rdr);
+    super.build(document, serialdata, rdr.getRemoteByteOrder());
+    return this;
   }
 
 }

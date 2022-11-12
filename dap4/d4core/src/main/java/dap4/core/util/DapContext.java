@@ -26,11 +26,11 @@ public class DapContext extends java.util.HashMap<Object, Object> {
       if (!first)
         buf.append(",");
       buf.append("|");
-      buf.append(entry.getKey().toString());
+      buf.append(DapUtil.stringable(entry.getKey()).toString());
       buf.append("|");
       buf.append("=");
       buf.append("|");
-      buf.append(entry.getValue().toString());
+      buf.append(DapUtil.stringable(entry.getValue()).toString());
       buf.append("|");
       first = false;
     }

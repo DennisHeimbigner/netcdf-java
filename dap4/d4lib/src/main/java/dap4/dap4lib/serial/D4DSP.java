@@ -6,6 +6,7 @@
 package dap4.dap4lib.serial;
 
 import dap4.core.dmr.DapDataset;
+import dap4.core.dmr.DMRPrinter;
 import dap4.core.util.DapDump;
 import dap4.core.util.DapException;
 import dap4.dap4lib.AbstractDSP;
@@ -14,7 +15,8 @@ import java.nio.ByteOrder;
 
 /**
  * DAP4 Serial to DSP interface
- * This code should be completely independent of thredds.
+ * It cannot be used standalone. Rather it needs to be fed
+ * the bytes constituting the raw DAP data.
  * Its goal is to provide a DSP interface to
  * a sequence of bytes representing serialized data, possibly
  * including a leading DMR.
@@ -62,7 +64,7 @@ public abstract class D4DSP extends AbstractDSP {
 
     if (DEBUG || DUMPDMR) {
       System.err.println("\n+++++++++++++++++++++");
-      System.err.println(dmr);
+      DMRPrinter.print(dmr, System.err);
       System.err.println("+++++++++++++++++++++\n");
     }
     if (DEBUG || DUMPDAP) {

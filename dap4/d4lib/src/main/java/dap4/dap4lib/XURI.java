@@ -150,15 +150,13 @@ public class XURI {
     // Standardize path part to be absolute
     // => single leading '/' or windows drive letter
     StringBuilder buf = new StringBuilder(remainder);
-    for (int i = 0; i < remainder.length(); i++) { // remove all leading '/'
-      if (buf.charAt(i) != '/')
-        break;
-      buf.deleteCharAt(i);
-    }
+    // Remove all leading '/'
+    while (buf.charAt(0) == '/')
+      buf.deleteCharAt(0);
     // check for drive letter
-    if (DapUtil.DRIVELETTERS.indexOf(buf.charAt(0)) < 0 || buf.charAt(1) != ':') { // no drive letter, prepend '/'
+    boolean hasdriveletter = (DapUtil.DRIVELETTERS.indexOf(buf.charAt(0)) >= 0 && buf.charAt(1) == ':');
+    if (!hasdriveletter)
       buf.insert(0, '/');
-    }
 
     remainder = buf.toString();
     this.path = remainder;

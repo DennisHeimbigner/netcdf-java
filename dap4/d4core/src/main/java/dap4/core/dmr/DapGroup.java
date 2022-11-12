@@ -68,8 +68,14 @@ public class DapGroup extends DapNode implements DapDecl {
     // Look for name conflicts (ignore anonymous dimensions)
     if (newsort != DapSort.DIMENSION || newname != null) {
       for (DapNode decl : decls) {
-        if (newsort == decl.getSort() && newname.equals(decl.getShortName()))
-          throw new DapException("DapGroup: attempt to add duplicate decl: " + newname);
+        if (newsort == decl.getSort() && newname.equals(decl.getShortName())) {
+          if (false) {
+            // If we have duplicate enums, then just use the first one
+            if (newsort != DapSort.ENUMERATION || !DapEnumeration.same((DapEnumeration) decl, (DapEnumeration) newdecl))
+              throw new DapException("DapGroup: attempt to add duplicate decl: " + newname);
+          }
+	  return; // Duplicate enumeration
+        }
       }
     } else { // Anonymous
       DapDimension anon = (DapDimension) newdecl;
@@ -159,6 +165,15 @@ public class DapGroup extends DapNode implements DapDecl {
 
   //////////////////////////////////////////////////
   // Lookup Functions
+
+  // Test for specific decl
+  public boolean containsDecl(DapNode decl) {
+    for (DapNode d : getDecls()) {
+      if (d == decl)
+        return true;
+    }
+    return false;
+  }
 
   public DapNode findByName(String name, DapSort... sortset) {
     return findInGroup(name, sortset);

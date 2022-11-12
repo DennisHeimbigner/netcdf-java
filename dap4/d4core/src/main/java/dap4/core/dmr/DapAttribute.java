@@ -16,8 +16,17 @@ import java.util.List;
 public class DapAttribute extends DapNode {
 
   //////////////////////////////////////////////////
-  // Instance Variables
+  // Constants
 
+  // Define reserved XML attributes
+  public static final String UCARTAGOPAQUE = "_edu.ucar.opaque.size";
+  public static final String UCARTAGUNLIMITED = "_edu.ucar.isunlimited";
+  // Not yet implemented
+  public static final String UCARTAGVLEN = "_edu.ucar.isvlen";
+  public static final String UCARTAGORIGTYPE = "_edu.ucar.orig.type";
+
+  //////////////////////////////////////////////////
+  // Instance Variables
 
   protected List<String> namespaceList = new ArrayList<String>();
 

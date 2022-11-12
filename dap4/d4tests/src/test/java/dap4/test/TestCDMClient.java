@@ -37,13 +37,14 @@ public class TestCDMClient extends DapTestCommon {
   static final String BASEEXTENSION = ".txt";
   static final String INPUTEXTENSION = ".raw";
 
-  static final String DAP4TAG = "#protocol=dap4";
+  static final String DAP4TAG = "#protocol=dap4&dap4.checksum=";
 
   static final String DATADIR = "src/test/data/resources"; // relative to dap4 root
   static final String BASELINEDIR = "TestCDMClient/baseline";
   static final String TESTCDMINPUT = "TestCDMClient/testinput";
   static final String TESTFILESINPUT = "testfiles";
 
+  static final String[] CSUMFILETESTS = new String[] {"test_atomic_array.nc.5.raw", "test_fill.nc.raw"};
   static final String[] EXCLUDEDFILETESTS = new String[] {"test_sequence_2.syn.raw"};
 
   //////////////////////////////////////////////////
@@ -71,7 +72,7 @@ public class TestCDMClient extends DapTestCommon {
     private String url;
 
     TestCase(String url) {
-      this(url, true);
+      this(url, false);
     }
 
     TestCase(String url, boolean csum) {
@@ -99,7 +100,12 @@ public class TestCDMClient extends DapTestCommon {
     }
 
     public String getURL() {
-      return this.url + DAP4TAG;
+      String url = this.url + DAP4TAG;
+      if (this.checksumming)
+        url += "true";
+      else
+        url += false;
+      return url;
     }
 
     public String getPath() {
@@ -137,7 +143,7 @@ public class TestCDMClient extends DapTestCommon {
 
   @Before
   public void setup() throws Exception {
-    testSetup();
+    // testSetup();
     this.resourceroot = getResourceRoot();
     TestCase.setRoot(resourceroot);
     defineAllTestcases();
@@ -162,7 +168,7 @@ public class TestCDMClient extends DapTestCommon {
 
   void chooseTestcases() {
     if (false) {
-      chosentests = locate("file:", "test_atomic_array.nc.raw");
+      chosentests = locate("file:", "test_atomic_array.nc.5.raw");
       prop_visual = true;
       prop_baseline = false;
     } else {
@@ -179,6 +185,13 @@ public class TestCDMClient extends DapTestCommon {
     String dir = TestCase.getRoot() + "/" + TESTCDMINPUT;
     TestFilter.filterfiles(dir, matches, "raw");
     for (String f : matches) {
+      boolean csum = false;
+      for (String x : CSUMFILETESTS) {
+        if (f.endsWith(x)) {
+          csum = true;
+          break;
+        }
+      }
       boolean excluded = false;
       for (String x : EXCLUDEDFILETESTS) {
         if (f.endsWith(x)) {
@@ -187,12 +200,12 @@ public class TestCDMClient extends DapTestCommon {
         }
       }
       if (!excluded) {
-        add(f);
+        add(f,csum);
       }
     }
   }
 
-  protected void add(String path) {
+  protected void add(String path, boolean csum) {
     File f = new File(path);
     if (!f.exists())
       System.err.println("Non existent file test case: " + path);
@@ -206,7 +219,7 @@ public class TestCDMClient extends DapTestCommon {
     } catch (MalformedURLException e) {
       System.err.println("Malformed file test case: " + url);
     }
-    TestCase tc = new TestCase(url);
+    TestCase tc = new TestCase(url,csum);
     for (TestCase t : this.alltestcases) {
       assert !t.getURL().equals(tc.getURL()) : "Duplicate TestCases: " + t;
     }

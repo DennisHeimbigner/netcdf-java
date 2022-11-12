@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.DataType;
+import ucar.nc2.constants.CDM;
 import ucar.nc2.util.EscapeStrings;
 import ucar.nc2.util.Indent;
 import java.util.ArrayList;
@@ -318,7 +319,7 @@ public class Group extends CDMNode implements AttributeContainer {
   /** @deprecated Use attributes() */
   @Deprecated
   public java.util.List<Attribute> getAttributes() {
-    return AttributeContainer.filter(attributes, Attribute.SPECIALS).getAttributes();
+    return attributes().getAttributes();
   }
 
   /** @deprecated Use attributes() */
@@ -394,11 +395,9 @@ public class Group extends CDMNode implements AttributeContainer {
       if (name.equals(d.getShortName()))
         return d;
     }
-    if (searchup) {
-      Group parent = getParentGroup();
-      if (parent != null)
-        return parent.findEnumeration(name, searchup);
-    }
+    Group parent = getParentGroup();
+    if (parent != null && searchup)
+      return parent.findEnumeration(name, searchup);
     return null;
   }
 
@@ -526,7 +525,7 @@ public class Group extends CDMNode implements AttributeContainer {
 
       for (Attribute att : attributes) {
         // String name = strict ? NetcdfFile.escapeNameCDL(getShortName()) : getShortName();
-        if (!Attribute.isspecial(att)) {
+        if (!CDM.isspecial(att)) {
           out.format("%s", indent);
           att.writeCDL(out, strict, null);
           out.format(";");

@@ -7,14 +7,13 @@ ext.title = 'Data Access Protocol (DAP) version 4.0'  // Will be inherited by su
 // ----------------------------------------
 // common:
 //	d4core		nothing
-// 	d4lib	d4core httpservices
+// 	d4lib		d4core httpservices
 // 	d4cdm		d4lib cdm
 // server:
-// 	d4servletshared	d4cdmshared netcdf4
-// 	d4ts		d4servletshared
+// 	d4ts		d4servlet
 // 	d4tswar		d4ts
 // tests:
-// 	d4tests		d4servletshared d4ts
+// 	d4tests		d4servlet d4ts
 
 subprojects {
   // TODO: Give the subprojects real titles.

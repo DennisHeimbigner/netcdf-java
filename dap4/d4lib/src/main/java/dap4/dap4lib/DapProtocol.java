@@ -15,10 +15,6 @@ import java.util.Map;
  */
 
 public abstract class DapProtocol implements DapCodes {
-  public static final String X_DAP_SERVER = "TDS-4";
-  public static final String X_DAP_VERSION = "4.0";
-
-  public static final String CONSTRAINTTAG = "dap4.ce";
 
   public static Map<RequestMode, ContentType> contenttypes;
 

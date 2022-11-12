@@ -3,13 +3,15 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.dap4lib;
+package dap4.core.dmr;
 
 import dap4.core.ce.CEConstraint;
-import dap4.core.dmr.*;
 import dap4.core.util.*;
+
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +44,29 @@ public class DMRPrinter {
   protected static final String[] RESERVEDTAGS = {"_edu.ucar"};
 
   public static final boolean ALLOWFIELDMAPS = false;
+
+  //////////////////////////////////////////////////
+  // Static Methods
+  static public void print(DapDataset dmr, PrintStream stream) {
+    try {
+      PrintWriter pw = new PrintWriter(stream);
+      new DMRPrinter(dmr, pw).print();
+      pw.close();
+    } catch (IOException ioe) {};
+  }
+
+  static public String printAsString(DapDataset dmr) {
+    String s = null;
+    try {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      new DMRPrinter(dmr, pw).print();
+      pw.close();
+      s = sw.toString();
+      sw.close();
+    } catch (IOException ioe) {s = null;};
+    return s;
+  }
 
   //////////////////////////////////////////////////
   // Instance Variables
@@ -199,7 +224,7 @@ public class DMRPrinter {
         printer.marginPrint("<" + dmrname);
         printXMLAttributes(node, ce, NILFLAGS);
         if (dim.isUnlimited())
-          printXMLAttribute(AbstractDSP.UCARTAGUNLIMITED, "1", NILFLAGS);
+          printXMLAttribute(DapAttribute.UCARTAGUNLIMITED, "1", NILFLAGS);
         if (hasMetadata(node)) {
           printer.println(">");
           printMetadata(node);
@@ -230,9 +255,9 @@ public class DMRPrinter {
         break;
 
       case VARIABLE:
-        if (!this.ce.references(node))
-          break;
         DapVariable var = (DapVariable) node;
+        if (!this.ce.references(node) || var.getCount() == 0)
+          break;
         DapType type = var.getBaseType();
         printer.marginPrint("<" + type.getTypeSort().name());
         printXMLAttributes(node, ce, NILFLAGS);

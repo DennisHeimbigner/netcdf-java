@@ -6,10 +6,7 @@
 package dap4.dap4lib;
 
 import dap4.core.dmr.DapDataset;
-import dap4.core.util.DapContext;
-import dap4.core.util.DapDump;
-import dap4.core.util.DapException;
-import dap4.core.util.DapUtil;
+import dap4.core.util.*;
 import dap4.dap4lib.serial.D4DSP;
 import org.apache.http.HttpStatus;
 import ucar.httpservices.HTTPException;
@@ -45,7 +42,6 @@ public class HttpDSP extends D4DSP {
   protected static final String DSRSUFFIX = "dsr";
 
   protected static final String QUERYSTART = "?";
-  protected static final String CONSTRAINTTAG = "dap4.ce";
   protected static final String PROTOTAG = "protocol";
 
   protected static final int DFALTPRELOADSIZE = 50000; // databuffer
@@ -129,23 +125,8 @@ public class HttpDSP extends D4DSP {
     setLocation(url);
     parseURL(url);
 
-    /*
-     * Take from the incoming data
-     * String s = xuri.getFragFields().get(Dap4Util.DAP4CSUMTAG);
-     * ChecksumMode mode = ChecksumMode.modeFor(s);
-     * if(mode == null)
-     * throw new DapException(String.format("Illegal %s: %s",Dap4Util.DAP4CSUMTAG,s));
-     * setChecksumMode(mode);
-     * s = xuri.getFragFields().get(Dap4Util.DAP4ENDIANTAG);
-     * Integer oz = DapUtil.stringToInteger(s);
-     * if(oz == null)
-     * throw new DapException(String.format("Illegal %s: %s",Dap4Util.DAP4ENDIANTAG,s));
-     * ByteOrder order = (oz != 0 ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
-     * setOrder(order);
-     */
-
     // See if this is a local vs remote request
-    this.basece = this.xuri.getQueryFields().get(CONSTRAINTTAG);
+    this.basece = this.xuri.getQueryFields().get(DapConstants.CONSTRAINTTAG);
     build();
     return this;
   }
@@ -297,7 +278,7 @@ public class HttpDSP extends D4DSP {
     }
     if (ce != null && ce.length() > 0) {
       methodurl.append(QUERYSTART);
-      methodurl.append(CONSTRAINTTAG);
+      methodurl.append(DapConstants.CONSTRAINTTAG);
       methodurl.append('=');
       methodurl.append(ce);
     }

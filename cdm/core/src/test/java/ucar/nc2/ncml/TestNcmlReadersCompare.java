@@ -23,6 +23,7 @@ import ucar.nc2.constants.CDM;
 import ucar.nc2.constants._Coordinate;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.internal.ncml.NcmlReader;
+import ucar.nc2.iosp.netcdf4.Nc4;
 import ucar.nc2.util.CompareNetcdf2;
 import ucar.nc2.util.CompareNetcdf2.ObjFilter;
 import ucar.unidata.util.test.TestDir;
@@ -92,7 +93,7 @@ public class TestNcmlReadersCompare {
   public static class CoordsObjFilter implements ObjFilter {
     @Override
     public boolean attCheckOk(Variable v, Attribute att) {
-      return !att.getShortName().equals(_Coordinate._CoordSysBuilder) && !att.getShortName().equals(CDM.NCPROPERTIES);
+      return !att.getShortName().equals(_Coordinate._CoordSysBuilder) && !att.getShortName().equals(Nc4.NCPROPERTIES);
     }
 
     // override att comparision if needed

@@ -8,7 +8,6 @@ package dap4.test;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.jni.netcdf.Nc4prototypes;
 import ucar.unidata.util.test.TestDir;
 import ucar.unidata.util.test.UnitTestCommon;
 import java.io.File;
@@ -26,9 +25,7 @@ abstract public class DapTestCommon extends UnitTestCommon {
 
   static public final String FILESERVER = "file://localhost:8080";
 
-  static public final String CONSTRAINTTAG = "dap4.ce";
   static public final String ORDERTAG = "ucar.littleendian";
-  static public final String NOCSUMTAG = "ucar.nochecksum";
   static public final String TRANSLATETAG = "ucar.translate";
   static public final String TESTTAG = "ucar.testing";
 
@@ -36,7 +33,6 @@ abstract public class DapTestCommon extends UnitTestCommon {
 
   // Equivalent to the path to the webapp/d4ts for testing purposes
   static protected final String DFALTRESOURCEPATH = "/src/test/data/resources";
-  static protected Class NC4IOSP = ucar.nc2.jni.netcdf.Nc4Iosp.class;
 
   static class TestFilter implements FileFilter {
     boolean debug;
@@ -219,19 +215,6 @@ abstract public class DapTestCommon extends UnitTestCommon {
     return this.dap4resourcedir;
   }
 
-  static protected void testSetup() {
-    try {
-      // Always prefer Nc4Iosp over HDF5
-      NetcdfFile.iospDeRegister(NC4IOSP);
-      NetcdfFile.registerIOProviderPreferred(NC4IOSP, ucar.nc2.iosp.hdf5.H5iosp.class);
-      // Print out the library version
-      System.err.printf("Netcdf-c library version: %s%n", getCLibraryVersion());
-      System.err.flush();
-    } catch (Exception e) {
-      System.err.println("Cannot load ucar.nc2.jni.netcdf.Nc4Iosp");
-    }
-  }
-
   static void printDir(String path) {
     File testdirf = new File(path);
     assert (testdirf.canRead());
@@ -246,19 +229,4 @@ abstract public class DapTestCommon extends UnitTestCommon {
     System.err.println("*******************");
     System.err.flush();
   }
-
-  static public String getCLibraryVersion() {
-    Nc4prototypes nc4 = getCLibrary();
-    return (nc4 == null ? "Unknown" : nc4.nc_inq_libvers());
-  }
-
-  static public Nc4prototypes getCLibrary() {
-    try {
-      Method getclib = NC4IOSP.getMethod("getCLibrary");
-      return (Nc4prototypes) getclib.invoke(null);
-    } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-      return null;
-    }
-  }
 }
-

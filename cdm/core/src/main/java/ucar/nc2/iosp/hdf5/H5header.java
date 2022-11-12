@@ -1747,7 +1747,7 @@ public class H5header extends NCheader implements H5headerIF {
           ncGroup.getEnumTypedefs().stream().filter((e) -> e.equalsMapOnly(local)).findFirst().orElse(local);
       if (enumTypedef != null) {
         // if found, make sure it is added to the group
-        ncGroup.addEnumeration(enumTypedef);
+        assert(ncGroup.getEnumTypedefs().contains(enumTypedef));
       } else { // if shared object, wont have a name, shared version gets added later
         enumTypedef = new EnumTypedef(mdt.enumTypeName, mdt.map);
         ncGroup.addEnumeration(enumTypedef);

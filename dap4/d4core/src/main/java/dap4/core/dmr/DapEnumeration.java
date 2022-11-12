@@ -18,6 +18,33 @@ public class DapEnumeration extends DapType {
   public static final DapType DEFAULTBASETYPE = DapType.INT32;
 
   //////////////////////////////////////////////////
+  // Static Methods
+
+  // See if two enumeration objects appear to be identical
+  static public boolean same(DapEnumeration enum1, DapEnumeration enum2) {
+    if (!enum1.getShortName().equals(enum2.getShortName()))
+      return false;
+    if (enum1.getBaseType() != enum2.getBaseType())
+      return false;
+    List<DapEnumConst> list1 = enum1.getEnumConsts();
+    List<DapEnumConst> list2 = enum2.getEnumConsts();
+    if (list1.size() != list2.size())
+      return false;
+    for (DapEnumConst ec1 : list1) {
+      boolean found = false;
+      for (DapEnumConst ec2 : list2) {
+        if (ec1.getShortName().equals(ec2.getShortName()) && ec1.getValue().equals(ec2.getValue())) {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        return false;
+    }
+    return true;
+  }
+
+  //////////////////////////////////////////////////
   // Instance Variables
 
   protected DapType basetype = DEFAULTBASETYPE;
@@ -53,6 +80,10 @@ public class DapEnumeration extends DapType {
 
   public DapType getBaseType() {
     return basetype;
+  }
+
+  public List<DapEnumConst> getEnumConsts() {
+    return constants;
   }
 
   public void setBaseType(DapType basetype) {

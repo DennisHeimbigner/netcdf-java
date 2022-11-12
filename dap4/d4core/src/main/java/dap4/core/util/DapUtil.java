@@ -33,28 +33,9 @@ public abstract class DapUtil // Should only contain static methods
   public static final ByteOrder NETWORK_ORDER = ByteOrder.BIG_ENDIAN;
   public static final ByteOrder NATIVE_ORDER = ByteOrder.nativeOrder();
 
-  // Use Bit flags to avoid heavyweight enumset
-  public static final int CHUNK_DATA = 0; // bit 0 : value 0
-  public static final int CHUNK_END = 1; // bit 0 : value 1
-  public static final int CHUNK_ERROR = 2; // bit 1 : value 1
-  public static final int CHUNK_LITTLE_ENDIAN = 4; // bit 2: value 1
-  public static final int CHUNK_NOCHECKSUM = 8; // bit 2: value 1
-
-  // Construct the union of all flags
-  public static final int CHUNK_ALL = CHUNK_DATA | CHUNK_ERROR | CHUNK_END | CHUNK_LITTLE_ENDIAN;
-
   public static final String LF = "\n";
   public static final String CRLF = "\r\n";
   public static final int CRLFSIZE = 2;
-
-  // static final public int CHECKSUMSIZE = 16; // bytes if MD5
-  // static final public String DIGESTOR = "MD5";
-
-  public static final int CHECKSUMSIZE = 4; // bytes if CRC32
-  public static final String DIGESTER = "CRC32";
-  public static final String CHECKSUMATTRNAME = "_DAP4_Checksum_CRC32";
-  public static final String LITTLEENDIANATTRNAME = "_DAP4_Little_Endian";
-  public static final String CEATTRNAME = "_dap4.ce";
 
   public static final String DRIVELETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -362,6 +343,16 @@ public abstract class DapUtil // Should only contain static methods
   }
 
   /**
+   * Convert null objects to ""
+   *
+   * @param obj
+   * @return obj or ""
+   */
+  public static Object stringable(Object obj) {
+    return (obj == null ? "" : obj);
+  }
+
+  /**
    * Convert "" paths to null
    *
    * @param path
@@ -587,9 +578,15 @@ public abstract class DapUtil // Should only contain static methods
     prefix = DapUtil.canonicalpath(prefix);
     suffix = DapUtil.canonicalpath(suffix);
     result.append(prefix);
-    if (!prefix.endsWith("/"))
-      result.append("/");
-    result.append(suffix.startsWith("/") ? suffix.substring(1) : suffix);
+    result.append("/");
+    result.append(suffix);
+    // Remove // occurrences
+    while (true) {
+      int pos = result.indexOf("//");
+      if (pos < 0)
+        break;
+      result.deleteCharAt(pos);
+    }
     return result.toString();
   }
 
