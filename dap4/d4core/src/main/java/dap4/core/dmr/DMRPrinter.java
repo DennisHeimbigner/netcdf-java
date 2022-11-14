@@ -123,8 +123,8 @@ public class DMRPrinter {
       this.ce = CEConstraint.getUniversal(dmr);
     assert (this.ce != null);
     this.printer.setIndent(0);
-    printNode(dmr); // start printing at the root
-    printer.eol();
+    if(printNode(dmr)) // start printing at the root
+        printer.eol();
   }
 
 
@@ -158,21 +158,33 @@ public class DMRPrinter {
    * printDimrefs, printMaps
    *
    * @param node - the node to print
+   * @return true if anything was printed -- needed to control eol output
    * @throws IOException Note that the PrintWriter is global.
    */
 
-  public void printNode(DapNode node) throws IOException {
+  public boolean printNode(DapNode node) throws IOException {
     if (node == null)
-      return;
+      return false;
 
+    // Do first level suppression check
     DapSort sort = node.getSort();
+    switch (sort) {
+    case DATASET:
+    case GROUP:
+    case DIMENSION:
+    case ENUMERATION:
+    case VARIABLE:
+      if (!this.ce.references(node)) return false;
+      break;
+    default:
+      break;
+    }
+
     String dmrname = sort.getName();
 
     switch (sort) {
       case DATASET:// treat like group
       case GROUP:
-        if (!this.ce.references(node))
-          break;
         DapGroup group = (DapGroup) node;
         printer.marginPrint("<" + dmrname);
         int flags = (sort == DapSort.DATASET ? PERLINE : NILFLAGS);
@@ -184,43 +196,41 @@ public class DMRPrinter {
           for (DapNode subnode : group.getDimensions()) {
             if (!this.ce.references(subnode))
               continue;
-            printNode(subnode);
-            printer.eol();
+            if(printNode(subnode))
+              printer.eol();
           }
         }
         if (group.getEnums().size() > 0) {
           for (DapNode subnode : group.getEnums()) {
             if (!this.ce.references(subnode))
               continue;
-            printNode(subnode);
-            printer.eol();
+            if(printNode(subnode))
+              printer.eol();
           }
         }
         if (group.getVariables().size() > 0)
           for (DapNode subnode : group.getVariables()) {
             if (!this.ce.references(subnode))
               continue;
-            printNode(subnode);
-            printer.eol();
+            if(printNode(subnode))
+              printer.eol();
           }
         printMetadata(node);
         if (group.getGroups().size() > 0)
           for (DapNode subnode : group.getGroups()) {
             if (!this.ce.references(subnode))
               continue;
-            printNode(subnode);
-            printer.eol();
+            if(printNode(subnode))
+              printer.eol();
           }
         printer.outdent();
         printer.marginPrint("</" + dmrname + ">");
         break;
 
       case DIMENSION:
-        if (!this.ce.references(node))
-          break;
         DapDimension dim = (DapDimension) node;
         if (!dim.isShared())
-          break; // ignore, here, anonymous dimensions
+          return false; // ignore, here, anonymous dimensions
         printer.marginPrint("<" + dmrname);
         printXMLAttributes(node, ce, NILFLAGS);
         if (dim.isUnlimited())
@@ -235,8 +245,6 @@ public class DMRPrinter {
         break;
 
       case ENUMERATION:
-        if (!this.ce.references(node))
-          break;
         DapEnumeration en = (DapEnumeration) node;
         printer.marginPrint("<" + dmrname);
         printXMLAttributes(en, ce, NILFLAGS);
@@ -256,8 +264,8 @@ public class DMRPrinter {
 
       case VARIABLE:
         DapVariable var = (DapVariable) node;
-        if (!this.ce.references(node) || var.getCount() == 0)
-          break;
+        if (var.getCount() == 0) // Has zero-length dimension
+          return false;
         DapType type = var.getBaseType();
         printer.marginPrint("<" + type.getTypeSort().name());
         printXMLAttributes(node, ce, NILFLAGS);
@@ -282,8 +290,8 @@ public class DMRPrinter {
           for (DapVariable field : struct.getFields()) {
             if (!this.ce.references(field))
               continue;
-            printNode(field);
-            printer.eol();
+            if(printNode(field))
+              printer.eol();
           }
           printDimrefs(var);
           printMetadata(var);
@@ -298,7 +306,7 @@ public class DMRPrinter {
         assert (false) : "Unexpected sort: " + sort.name();
         break;
     }
-
+    return true;
   }
 
   /**
