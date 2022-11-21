@@ -45,6 +45,8 @@ public class DMRPrinter {
 
   public static final boolean ALLOWFIELDMAPS = false;
 
+  static public final String XMLDOCUMENTHEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
+
   //////////////////////////////////////////////////
   // Static Methods
   static public void print(DapDataset dmr, PrintStream stream) {
@@ -123,6 +125,10 @@ public class DMRPrinter {
       this.ce = CEConstraint.getUniversal(dmr);
     assert (this.ce != null);
     this.printer.setIndent(0);
+    if(this.format == ResponseFormat.XML) {
+      // Print XML Document Header
+      this.printer.marginPrintln(XMLDOCUMENTHEADER);
+    }
     if(printNode(dmr)) // start printing at the root
         printer.eol();
   }

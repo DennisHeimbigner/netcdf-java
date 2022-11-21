@@ -26,8 +26,6 @@ public abstract class DapProtocol implements DapCodes {
         new ContentType(RequestMode.DAP, "application/vnd.opendap.dap4.data", "text/xml", "text/plain", "text/html"));
     contenttypes.put(RequestMode.DSR, new ContentType(RequestMode.DSR,
         "application/vnd.opendap.dap4.dataset-services+xml", "text/xml", "text/plain", "text/html"));
-    contenttypes.put(RequestMode.CAPABILITIES,
-        new ContentType(RequestMode.CAPABILITIES, "text/xml", "text/xml", "text/plain", "text/html"));
     contenttypes.put(RequestMode.ERROR, new ContentType(RequestMode.ERROR, "application/vnd.opendap.dap4.error+xml",
         "text/xml", "text/plain", "text/html"));
   }

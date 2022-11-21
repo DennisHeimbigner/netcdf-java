@@ -91,17 +91,13 @@ public class HttpDSP extends D4DSP {
       if (true) {
         boolean found = false;
         for (String scheme : DAP4SCHEMES) {
-          if (scheme.equalsIgnoreCase(xuri.getBaseProtocol()) || scheme.equalsIgnoreCase(xuri.getFormatProtocol())) {
+          if (scheme.equalsIgnoreCase(xuri.getScheme())) {
             found = true;
             break;
           }
         }
         if (!found)
           return false;
-        // Might still be a non-dap4 url
-        String formatproto = xuri.getFormatProtocol();
-        if (DAP4PROTO.equalsIgnoreCase(formatproto))
-          return true;
         for (String[] pair : DAP4QUERYMARKERS) {
           String tag = xuri.getQueryFields().get(pair[0]);
           if (tag != null && (pair[1] == null || pair[1].equalsIgnoreCase(tag)))
