@@ -4,13 +4,13 @@ apply from: "$rootDir/gradle/any/java-library.gradle"
 dependencies {
   api enforcedPlatform(project(':netcdf-java-platform'))
 
-  compile project(':dap4:d4core')
-  compile project(':httpservices')
-  compile project(':netcdf4')
+  implementation project(':dap4:d4core')
+  implementation project(':httpservices')
+  implementation project(':netcdf4')
 
-  compile 'org.apache.httpcomponents:httpclient'
-  compile 'org.apache.httpcomponents:httpcore'
-  compile 'net.java.dev.jna:jna'
-  compile 'com.beust:jcommander'
-  compile 'org.slf4j:slf4j-api'
+  implementation 'org.apache.httpcomponents:httpclient'
+  compileOnly 'org.apache.httpcomponents:httpcore'
+  compileOnly 'net.java.dev.jna:jna'
+  compileOnly 'com.beust:jcommander'
+  compileOnly 'org.slf4j:slf4j-api'
 }

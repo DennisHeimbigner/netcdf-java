@@ -26,7 +26,7 @@ public abstract class DapConstants
   // Constants
 
   // XML Tags for DAP4
-  public static final String X_DAP_SERVER = "TDS-4";
+  public static final String X_DAP_SERVER = "TDS-5";
   public static final String X_DAP_VERSION = "4.0";
 
   // Known dap4 specific query tags

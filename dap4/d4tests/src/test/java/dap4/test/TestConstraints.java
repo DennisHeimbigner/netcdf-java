@@ -136,9 +136,6 @@ public class TestConstraints extends DapTestCommon {
     if (root == null)
       throw new Exception("dap4 root cannot be located");
     testSetup();
-    if (DEBUGSERVER)
-      HTTPMethod.MOCKEXECUTOR = new MockExecutor(getResourceRoot());
-    TestCase.setRoots(SERVLETPATH, canonjoin(getResourceRoot(), BASELINEDIR), TdsTestDir.dap4TestServer);
     defineAllTestcases();
     chooseTestcases();
   }

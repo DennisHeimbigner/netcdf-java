@@ -231,7 +231,9 @@ public abstract class DapUtil // Should only contain static methods
   }
 
   public static String relativize(String path) {
-    if (path != null) {
+    if (path == null) return path;
+    path = path.replace('\\','/');
+    if (path.length() > 0) {
       if (path.startsWith("/"))
         path = path.substring(1);
       if (hasDriveLetter(path))
