@@ -419,7 +419,7 @@ abstract public class DapUtil // Should only contain static methods
    *
    * @param slices the set of slices
    * @param dimset the list of DapDimension
-   * @result true if slices is whole wrt dimset; false otherwise
+   * @return true if slices is whole wrt dimset; false otherwise
    */
   static public boolean isWhole(List<Slice> slices, List<DapDimension> dimset) {
     if (slices.size() != dimset.size())
@@ -483,7 +483,7 @@ abstract public class DapUtil // Should only contain static methods
    * Relativizing a path => remove any leading '/' and cleaning it
    *
    * @param path
-   * @return
+   * @return Relativized path
    */
   static public String xrelpath(String path) {
     return DapUtil.canonicalpath(path);
@@ -493,7 +493,7 @@ abstract public class DapUtil // Should only contain static methods
    * return true if this path appears to start with a windows drive letter
    *
    * @param path
-   * @return
+   * @return true, if path has drive letter
    */
   static public boolean hasDriveLetter(String path) {
     boolean hasdr = false;
@@ -642,10 +642,11 @@ abstract public class DapUtil // Should only contain static methods
    * Provide a helper function to convert an offset to
    * a slice list.
    *
-   * @param offset
+   * @param offset offset
    * @param template variable template
-   * @return
-   * @throws dap4.core.util.DapException
+   *
+   * @return slices
+   * @throws DapException
    */
   static public List<Slice> offsetToSlices(long offset, DapVariable template) throws DapException {
     List<DapDimension> dims = template.getDimensions();
@@ -693,7 +694,7 @@ abstract public class DapUtil // Should only contain static methods
    * This is equivalent to saying all strides are one
    *
    * @param slices
-   * @return
+   * @return true, if contiguous
    */
   static public boolean isContiguous(List<Slice> slices) {
     for (Slice sl : slices) {
@@ -707,7 +708,7 @@ abstract public class DapUtil // Should only contain static methods
    * Test if a set of slices represent a single position
    *
    * @param slices
-   * @return
+   * @return true, if single position
    */
   static public boolean isSinglePoint(List<Slice> slices) {
     for (Slice sl : slices) {

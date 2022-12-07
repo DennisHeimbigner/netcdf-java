@@ -4,14 +4,20 @@
  */
 package ucar.nc2.iosp;
 
-import ucar.ma2.Section;
-import ucar.ma2.InvalidRangeException;
-import ucar.ma2.StructureDataIterator;
-import ucar.nc2.ParsedSectionSpec;
-import ucar.nc2.Structure;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.WritableByteChannel;
+import javax.annotation.Nullable;
+import ucar.ma2.Section;
+import ucar.ma2.InvalidRangeException;
+import ucar.ma2.StructureDataIterator;
+import ucar.nc2.Group;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.ParsedSectionSpec;
+import ucar.nc2.Structure;
+import ucar.nc2.Variable;
+import ucar.nc2.util.CancelTask;
+import ucar.unidata.io.RandomAccessFile;
 
 /**
  * This is the service provider interface for the low-level I/O access classes (read only).
@@ -20,14 +26,12 @@ import java.nio.channels.WritableByteChannel;
  * An implementation must have a no-argument constructor.
  *
  * The NetcdfFile class manages all registered IOServiceProvider classes.
- * When NetcdfFile.open() is called:
+ * When NetcdfFiles.open() is called:
  * <ol>
  * <li>the file is opened as a ucar.unidata.io.RandomAccessFile;</li>
  * <li>the file is handed to the isValidFile() method of each registered
  * IOServiceProvider class (until one returns true, which means it can read the file).</li>
  * <li>the open() method on the resulting IOServiceProvider class is handed the file.</li>
- *
- * @see ucar.nc2.NetcdfFile#registerIOProvider(Class) ;
  *
  * @author caron
  */
@@ -41,7 +45,7 @@ public interface IOServiceProvider {
    * @return true if valid.
    * @throws java.io.IOException if read error
    */
-  boolean isValidFile(ucar.unidata.io.RandomAccessFile raf) throws IOException;
+  boolean isValidFile(RandomAccessFile raf) throws IOException;
 
   /**
    * Open existing file, and populate ncfile with it. This method is only called by the
@@ -53,25 +57,45 @@ public interface IOServiceProvider {
    * @param ncfile add objects to this empty NetcdfFile
    * @param cancelTask used to monitor user cancellation; may be null.
    * @throws IOException if read error
+   * @deprecated Use build(RandomAccessFile raf, Group.Builder rootGroup, CancelTask cancelTask)
    */
-  void open(ucar.unidata.io.RandomAccessFile raf, ucar.nc2.NetcdfFile ncfile, ucar.nc2.util.CancelTask cancelTask)
-      throws IOException;
+  @Deprecated
+  void open(RandomAccessFile raf, NetcdfFile ncfile, CancelTask cancelTask) throws IOException;
 
   /**
-   * Read data from a top level Variable and return a memory resident Array.
-   * This Array has the same element type as the Variable, and the requested shape.
+   * If this iosp implements build().
+   */
+  boolean isBuilder();
+
+  /**
+   * Open existing file, and populate it. Note that you cannot reference the NetcdfFile within this routine.
+   * This is the bridge to immutable objects that will be used exclusively in version 6.
+   *
+   * @param raf the file to work on, it has already passed the isValidFile() test.
+   * @param rootGroup add objects to the root group.
+   * @param cancelTask used to monitor user cancellation; may be null.
+   * @throws IOException if read error
+   */
+  void build(RandomAccessFile raf, Group.Builder rootGroup, CancelTask cancelTask) throws IOException;
+
+  /** Sometimes the builder needs access to the finished objects. This is called after ncfile.build() */
+  void buildFinish(NetcdfFile ncfile);
+
+  /**
+   * Read data from a top level Variable and return a memory resident Array. This Array has the same element type as the
+   * Variable, and the
+   * requested shape.
    *
    * @param v2 a top-level Variable
-   * @param section the section of data to read.
-   *        There must be a Range for each Dimension in the variable, in order.
-   *        Note: no nulls allowed. IOSP may not modify.
+   * @param section the section of data to read. There must be a Range for each Dimension in the variable, in order.
+   *        Note: no nulls allowed.
+   *        IOSP may not modify.
    * @return the requested data in a memory-resident Array
    * @throws java.io.IOException if read error
    * @throws ucar.ma2.InvalidRangeException if invalid section
    * @see ucar.ma2.Range
    */
-  ucar.ma2.Array readData(ucar.nc2.Variable v2, Section section)
-      throws java.io.IOException, ucar.ma2.InvalidRangeException;
+  ucar.ma2.Array readData(Variable v2, Section section) throws java.io.IOException, ucar.ma2.InvalidRangeException;
 
   /**
    * Read data from a top level Variable and send data to a WritableByteChannel.
@@ -85,14 +109,33 @@ public interface IOServiceProvider {
    * @return the number of bytes written to the channel
    * @throws java.io.IOException if read error
    * @throws ucar.ma2.InvalidRangeException if invalid section
+   * @deprecated do not use
    */
-  long readToByteChannel(ucar.nc2.Variable v2, Section section, WritableByteChannel channel)
+  @Deprecated
+  long readToByteChannel(Variable v2, Section section, WritableByteChannel channel)
       throws java.io.IOException, ucar.ma2.InvalidRangeException;
 
-  long streamToByteChannel(ucar.nc2.Variable v2, Section section, WritableByteChannel channel)
+  /** @deprecated do not use */
+  @Deprecated
+  long streamToByteChannel(Variable v2, Section section, WritableByteChannel channel)
       throws java.io.IOException, ucar.ma2.InvalidRangeException;
 
-  long readToOutputStream(ucar.nc2.Variable v2, Section section, OutputStream out)
+  /**
+   * Read data from a top level Variable and send data to a OutputStream.
+   * Must be in big-endian order, following ncstream conventions.
+   * Default implementation just reads to memory and writes to stream.
+   * Allow override for possible performance improvements.
+   *
+   * @param v2 a top-level Variable
+   * @param section the section of data to read.
+   *        There must be a Range for each Dimension in the variable, in order.
+   *        Note: no nulls allowed. IOSP may not modify.
+   * @param out write data to this OutputStream
+   * @return the number of bytes written to the channel
+   * @throws java.io.IOException if read error
+   * @throws ucar.ma2.InvalidRangeException if invalid section
+   */
+  long readToOutputStream(Variable v2, Section section, OutputStream out)
       throws java.io.IOException, ucar.ma2.InvalidRangeException;
 
   /**
@@ -132,7 +175,9 @@ public interface IOServiceProvider {
    *
    * @return true if the NetcdfFile was extended.
    * @throws IOException if a read error occured when accessing the underlying dataset.
+   * @deprecated Do not use.
    */
+  @Deprecated
   boolean syncExtend() throws IOException;
 
   /**
@@ -151,12 +196,13 @@ public interface IOServiceProvider {
   // public long getLastModified(); LOOK: dont add this for backwards compatibility. Probably add back in in version 5
 
   /**
-   * A way to communicate arbitrary information to an iosp.
+   * A way to communicate arbitrary information to and from an iosp.
    * 
    * @param message opaque message sent to the IOSP object when its opened (not when isValidFile() is called)
-   * @return opaque return, may be null.
+   * @return opaque Object, may be null.
    */
-  Object sendIospMessage(Object message);
+  @Nullable
+  Object sendIospMessage(@Nullable Object message);
 
   /**
    * Debug info for this object.
@@ -177,7 +223,7 @@ public interface IOServiceProvider {
    * Get a unique id for this file type.
    * 
    * @return registered id of the file type
-   * @see "http://www.unidata.ucar.edu/software/netcdf-java/formats/FileTypes.html"
+   * @see "https://www.unidata.ucar.edu/software/netcdf-java/formats/FileTypes.html"
    */
   String getFileTypeId();
 
@@ -185,7 +231,7 @@ public interface IOServiceProvider {
    * Get the version of this file type.
    * 
    * @return version of the file type
-   * @see "http://www.unidata.ucar.edu/software/netcdf-java/formats/FileTypes.html"
+   * @see "https://www.unidata.ucar.edu/software/netcdf-java/formats/FileTypes.html"
    */
   String getFileTypeVersion();
 
@@ -193,7 +239,7 @@ public interface IOServiceProvider {
    * Get a human-readable description for this file type.
    * 
    * @return description of the file type
-   * @see "http://www.unidata.ucar.edu/software/netcdf-java/formats/FileTypes.html"
+   * @see "https://www.unidata.ucar.edu/software/netcdf-java/formats/FileTypes.html"
    */
   String getFileTypeDescription();
 

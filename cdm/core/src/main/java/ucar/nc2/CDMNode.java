@@ -19,8 +19,9 @@ import java.util.Map;
  * Also move various common fields and methods to here.
  *
  * @author Heimbigner
+ * @deprecated Will move to Dap4 module in version 6.
  */
-
+@Deprecated
 public abstract class CDMNode {
 
   protected CDMSort sort;
@@ -69,11 +70,14 @@ public abstract class CDMNode {
     setShortName(name);
   }
 
-  // Get/Set
+  /** @deprecated do not use */
+  @Deprecated
   public CDMSort getSort() {
     return this.sort;
   }
 
+  /** @deprecated do not use */
+  @Deprecated
   public void setSort(CDMSort sort) {
     if (!immutable)
       this.sort = sort;
@@ -90,7 +94,9 @@ public abstract class CDMNode {
    * Set the short name of this Variable. The name is unique within its parent group.
    *
    * @param name new short name
+   * @deprecated Do not use.
    */
+  @Deprecated
   public void setShortName(String name) {
     if (!immutable)
       this.shortName = NetcdfFile.makeValidCdmObjectName(name);
@@ -100,7 +106,9 @@ public abstract class CDMNode {
    * Get its parent Group, or null if its the root group.
    *
    * @return parent Group
+   * @deprecated Do not use for Dimension or Attribute
    */
+  @Deprecated
   public Group getParentGroup() {
     return this.group;
   }
@@ -109,7 +117,9 @@ public abstract class CDMNode {
    * Alias for getParentGroup
    *
    * @return parent Group
+   * @deprecated Do not use.
    */
+  @Deprecated
   public Group getGroup() {
     return getParentGroup();
   }
@@ -118,7 +128,9 @@ public abstract class CDMNode {
    * Set the parent Group
    *
    * @param parent The new parent group
+   * @deprecated Do not use.
    */
+  @Deprecated
   public void setParentGroup(Group parent) {
     if (!immutable)
       this.group = parent;
@@ -128,7 +140,9 @@ public abstract class CDMNode {
    * Get its parent structure, or null if not in structure
    *
    * @return parent structure
+   * @deprecated Do not use.
    */
+  @Deprecated
   public Structure getParentStructure() {
     return this.parentstruct;
   }
@@ -137,7 +151,9 @@ public abstract class CDMNode {
    * Set the parent Structure
    *
    * @param parent The new parent structure
+   * @deprecated Do not use.
    */
+  @Deprecated
   public void setParentStructure(Structure parent) {
     if (!immutable)
       this.parentstruct = parent;
@@ -147,8 +163,9 @@ public abstract class CDMNode {
    * Test for presence of parent Structure
    *
    * @return true iff struct != null
+   * @deprecated Do not use.
    */
-
+  @Deprecated
   public boolean isMemberOfStructure() {
     return this.parentstruct != null;
   }
@@ -158,7 +175,9 @@ public abstract class CDMNode {
    * As a rule, subclasses will access directly
    *
    * @return Immutable flag
+   * @deprecated Do not use.
    */
+  @Deprecated
   public boolean getImmutable() {
     return this.immutable;
   }
@@ -166,7 +185,10 @@ public abstract class CDMNode {
   /**
    * Set the immutable flag to true.
    * Once set, cannot be unset
+   * 
+   * @deprecated Do not use.
    */
+  @Deprecated
   public CDMNode setImmutable() {
     this.immutable = true;
     return this;
@@ -178,7 +200,9 @@ public abstract class CDMNode {
    *
    * @return the original names from the DDS or DAS; if null,
    *         then return the short name
+   * @deprecated Do not use.
    */
+  @Deprecated
   public String getDODSName() {
     if (dodsname == null)
       return this.shortName;
@@ -190,32 +214,30 @@ public abstract class CDMNode {
    * Store the original dods name
    *
    * @param name The original name from the DDS/DAS
+   * @deprecated Do not use.
    */
+  @Deprecated
   public void setDODSName(String name) {
     this.dodsname = name;
   }
-
 
   /**
    * Get the Full name of this object. Certain characters are
    * backslash escaped (see NetcdfFile)
    *
    * @return full name with backslash escapes
+   * @deprecated use NetcdfFiles.makeFullName(*)
    */
+  @Deprecated
   public String getFullName() {
     return NetcdfFile.makeFullName(this);
-    /*
-     * getting called before complete
-     * if (this.fullName == null)
-     * this.fullName = NetcdfFile.makeFullName(this);
-     * return this.fullName;
-     */
   }
 
   /**
    * Alias for getFullName
    *
    * @return full name with backslash escapes
+   * @deprecated use getFullName() when it exists in ver6.
    */
   public String getFullNameEscaped() {
     return getFullName();
@@ -252,6 +274,7 @@ public abstract class CDMNode {
 
   // Override the node's hashCode for subclasses of CDMNode.
 
+  /** @deprecated do not use */
   public int localhash() {
     return super.hashCode();
   }
@@ -264,7 +287,9 @@ public abstract class CDMNode {
    *
    * @param node possibly wrapped ode
    * @return the lowest level node instance
+   * @deprecated Do not use.
    */
+  @Deprecated
   public static CDMNode unwrap(CDMNode node) {
     if (!(node instanceof Variable))
       return node;
@@ -290,10 +315,13 @@ public abstract class CDMNode {
     return inner;
   }
 
+  /** @deprecated do not use */
+  @Deprecated
   public Object annotation(Object id) {
     return (this.annotations == null ? null : this.annotations.get(id));
   }
 
+  /** @deprecated do not use */
   public Object annotate(Object id, Object value) {
     if (annotations == null)
       annotations = new HashMap<>();

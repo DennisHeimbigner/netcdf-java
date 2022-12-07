@@ -14,13 +14,13 @@ import ucar.ma2.DataType;
 import ucar.ma2.IndexIterator;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.NCdumpW;
 import ucar.nc2.Structure;
 import ucar.nc2.Variable;
 import ucar.nc2.constants.CDM;
 import ucar.nc2.dt.radial.RadialCoordSys;
 import ucar.nc2.ft2.coverage.adapter.DtCoverageCSBuilder;
 import ucar.nc2.time.*;
+import ucar.nc2.write.Ncdump;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
 import ucar.ui.widget.PopupMenu;
@@ -136,7 +136,7 @@ public class CoordSysTable extends JPanel {
         infoTA.clear();
         infoTA.appendLine("Coordinate System = " + coordSys.getName());
         for (CoordinateAxis axis : coordSys.getCoordinateAxes()) {
-          infoTA.appendLine("  " + axis.getAxisType() + " " + axis.writeCDL(true, false));
+          infoTA.appendLine("  " + axis.getAxisType() + " " + axis.getNameAndDimensions());
         }
         infoTA.appendLine(" Coordinate Transforms");
         for (CoordinateTransform ct : coordSys.getCoordinateTransforms()) {
@@ -303,11 +303,11 @@ public class CoordSysTable extends JPanel {
         }
 
       } else if (axis instanceof CoordinateAxis2D && axis.isNumeric()) {
-        infoTA.appendLine(NCdumpW.printVariableData(axis, null));
+        infoTA.appendLine(Ncdump.printVariableData(axis, null));
         showValues2D((CoordinateAxis2D) axis);
 
       } else {
-        infoTA.appendLine(NCdumpW.printVariableData(axis, null));
+        infoTA.appendLine(Ncdump.printVariableData(axis, null));
       }
 
     } catch (IOException e1) {
@@ -381,7 +381,7 @@ public class CoordSysTable extends JPanel {
             diffx.set(j, i, diff);
           }
         }
-        infoTA.appendLine(NCdumpW.toString(diffx, "diff in x", null));
+        infoTA.appendLine(Ncdump.printArray(diffx, "diff in x", null));
 
         ArrayDouble.D2 diffy = (ArrayDouble.D2) Array.factory(DataType.DOUBLE, new int[] {shape[0] - 1, shape[1]});
         for (int j = 0; j < shape[0] - 1; j++) {
@@ -391,7 +391,7 @@ public class CoordSysTable extends JPanel {
           }
         }
         infoTA.appendLine("\n\n\n");
-        infoTA.appendLine(NCdumpW.toString(diffy, "diff in y", null));
+        infoTA.appendLine(Ncdump.printArray(diffy, "diff in y", null));
 
       }
 
@@ -408,7 +408,7 @@ public class CoordSysTable extends JPanel {
 
     try {
       infoTA.appendLine(units);
-      infoTA.appendLine(NCdumpW.printVariableData(axis, null));
+      infoTA.appendLine(Ncdump.printVariableData(axis, null));
 
       if (axis.getDataType().isNumeric()) {
         if (axis instanceof CoordinateAxis2D) {
@@ -495,7 +495,7 @@ public class CoordSysTable extends JPanel {
     return cdu.makeCalendarDate(value).toString();
   }
 
-  private String getCalendarAttribute(VariableEnhanced vds) {
+  private String getCalendarAttribute(Variable vds) {
     Attribute cal = vds.findAttribute("calendar");
     return (cal == null) ? null : cal.getStringValue();
   }
@@ -577,8 +577,8 @@ public class CoordSysTable extends JPanel {
 
   private void setVariables(List<Variable> varList, List<AxisBean> axisList, List<VariableBean> beanList,
       List<CoordinateSystemBean> csList) {
-    for (Variable aVarList : varList) {
-      VariableEnhanced v = (VariableEnhanced) aVarList;
+    for (Variable aVar : varList) {
+      VariableEnhanced v = (VariableEnhanced) aVar;
       if (v instanceof CoordinateAxis)
         axisList.add(new AxisBean((CoordinateAxis) v));
       else
@@ -666,6 +666,7 @@ public class CoordSysTable extends JPanel {
   public class VariableBean {
     // static public String editableProperties() { return "title include logging freq"; }
 
+    Variable v;
     VariableEnhanced ve;
     CoordinateSystemBean coordSysBean;
     String name, desc, units;
@@ -677,8 +678,9 @@ public class CoordSysTable extends JPanel {
 
     // create from a dataset
 
-    public VariableBean(VariableEnhanced v, List<CoordinateSystemBean> csList) {
-      this.ve = v;
+    public VariableBean(VariableEnhanced ve, List<CoordinateSystemBean> csList) {
+      this.v = (Variable) ve;
+      this.ve = ve;
 
       name = v.getFullName();
       desc = v.getDescription();
@@ -702,8 +704,8 @@ public class CoordSysTable extends JPanel {
       shape = lens.toString();
 
       // sort by largest size first
-      if (!v.getCoordinateSystems().isEmpty()) {
-        List<CoordinateSystem> css = new ArrayList<>(v.getCoordinateSystems());
+      if (!ve.getCoordinateSystems().isEmpty()) {
+        List<CoordinateSystem> css = new ArrayList<>(ve.getCoordinateSystems());
         css.sort((o1, o2) -> o2.getCoordinateAxes().size() - o1.getCoordinateAxes().size());
         CoordinateSystem cs = css.get(0);
         for (CoordinateSystemBean csBean : csList)
@@ -734,24 +736,21 @@ public class CoordSysTable extends JPanel {
 
     @Nullable
     public String getAbbrev() {
-      Attribute att = ve.findAttributeIgnoreCase(CDM.ABBREV);
-      return (att == null) ? null : att.getStringValue();
+      return v.attributes().findAttributeString(CDM.ABBREV, null);
     }
 
     public String getCoordSys() {
       return (coordSysBean == null) ? "" : coordSysBean.getCoordSys();
     }
 
-
     public String getDataType() {
-      return (coordSysBean == null) ? "" : coordSysBean.getDataType();
+      return v.getDataType().toString();
     }
-
 
     public String getCoverage() {
       if (coordSysBean == null)
         return "";
-      boolean complete = coordSysBean.coordSys.isComplete(ve);
+      boolean complete = coordSysBean.coordSys.isComplete(v);
       return complete ? coordSysBean.getCoverage() : "Incomplete " + coordSysBean.getCoverage();
     }
 
@@ -907,7 +906,7 @@ public class CoordSysTable extends JPanel {
 
     public String getValue() {
       Array value = att.getValues();
-      return NCdumpW.toString(value, null, null);
+      return Ncdump.printArray(value, null, null);
     }
 
   }

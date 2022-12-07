@@ -5,6 +5,7 @@
 package ucar.nc2.iosp.bufr;
 
 import java.util.Objects;
+import ucar.nc2.Sequence;
 import ucar.nc2.iosp.bufr.tables.TableC;
 import ucar.nc2.iosp.bufr.tables.TableB;
 import java.util.List;
@@ -28,9 +29,10 @@ public class DataDescriptor {
   // from the TableB.Descriptor
   short fxy;
   int f, x, y;
-  String name, units, desc, source;
+  String name;
+  private String units, desc, source;
+  private boolean localOverride;
   boolean bad; // no descriptor found
-  boolean localOverride;
 
   // may get modified by TableC operators
   int scale;
@@ -45,7 +47,7 @@ public class DataDescriptor {
   int repetitionCountSize; // for delayed repetition
 
   AssociatedField assField; // associated field == 02 04 Y, Y number of extra bits
-  Object refersTo; // temporary place to put a sequence object
+  Sequence refersTo; // needed for nested sequence objects
   DataDescriptorTreeConstructor.DataPresentIndicator dpi;
 
   DataDescriptor() {}
@@ -75,6 +77,46 @@ public class DataDescriptor {
     }
   }
 
+  /**
+   * Test if unit string indicates that the data are 7-bit coded characters following
+   * the International Reference Alphabet (formally known as the International Alphabet
+   * No.5 (IA5)) Recommendation/International Standard from the International Telegraph
+   * and Telephone Consultative Committee (CCITT)
+   *
+   * https://www.itu.int/rec/T-REC-T.50/en
+   *
+   * @param unitString unit
+   * @return If true, treat the data as 7-bit coded International Reference Alphabet Characters
+   */
+  public static boolean isInternationalAlphabetUnit(String unitString) {
+    String testUnitString = unitString.toLowerCase();
+    return testUnitString.startsWith("ccitt");
+  }
+
+  /**
+   * Test if the unit string indicates that we are dealing with data associated with a code table
+   *
+   * @param unitString unit
+   * @return If true, the unit indicates we are working with data associated with a code table
+   */
+  public static boolean isCodeTableUnit(String unitString) {
+    String testUnitString = unitString.toLowerCase();
+    return testUnitString.equalsIgnoreCase("Code Table") || testUnitString.equalsIgnoreCase("Code_Table")
+        || testUnitString.startsWith("codetable");
+  }
+
+  /**
+   * Test if the unit string indicates that we are dealing with data associated with a flag table
+   *
+   * @param unitString unit
+   * @return If true, the unit indicates we are working with data associated with a flag table
+   */
+  public static boolean isFlagTableUnit(String unitString) {
+    String testUnitString = unitString.toLowerCase();
+    return testUnitString.equalsIgnoreCase("Flag Table") || testUnitString.equalsIgnoreCase("Flag_Table")
+        || testUnitString.startsWith("flagtable");
+  }
+
   private void setDescriptor(TableB.Descriptor d) {
     this.name = d.getName().trim();
     this.units = d.getUnits().trim();
@@ -85,13 +127,12 @@ public class DataDescriptor {
     this.localOverride = d.getLocalOverride();
     this.source = d.getSource();
 
-    if (units.equalsIgnoreCase("CCITT IA5") || units.equalsIgnoreCase("CCITT_IA5")) {
+    if (isInternationalAlphabetUnit(units)) {
       this.type = 1; // String
-      // this.bitWidth *= 8;
     }
 
     // LOOK what about flag table ??
-    if (units.equalsIgnoreCase("Code Table") || units.equalsIgnoreCase("Code_Table")) {
+    if (isCodeTableUnit(units)) {
       this.type = 2; // enum
     }
   }
@@ -140,7 +181,7 @@ public class DataDescriptor {
     return subKeys;
   }
 
-  public boolean isOkForVariable() {
+  boolean isOkForVariable() {
     return (f == 0) || (f == 1) || ((f == 2) && (x == 5) || ((f == 2) && (x == 24) && (y == 255)));
   }
 
@@ -220,8 +261,8 @@ public class DataDescriptor {
    * @param fromList transfer from here
    * @param toList to here
    */
-  public static void transferInfo(List<DataDescriptor> fromList, List<DataDescriptor> toList) { // get info from proto
-                                                                                                // message
+  static void transferInfo(List<DataDescriptor> fromList, List<DataDescriptor> toList) { // get info from proto
+                                                                                         // message
     if (fromList.size() != toList.size())
       throw new IllegalArgumentException("list sizes dont match " + fromList.size() + " != " + toList.size());
 
@@ -278,7 +319,7 @@ public class DataDescriptor {
    *
    * @return the number of bytes the CDM datatype will take
    */
-  public int getByteWidthCDM() {
+  int getByteWidthCDM() {
     if (type == 1) // string
       return bitWidth / 8;
 

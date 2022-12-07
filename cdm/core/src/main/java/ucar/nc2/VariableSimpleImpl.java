@@ -16,7 +16,9 @@ import java.util.List;
  *
  * @author caron
  * @since 6/10/14
+ * @deprecated use VariableSimpleBuilder
  */
+@Deprecated
 public class VariableSimpleImpl implements VariableSimpleIF {
 
   public static VariableSimpleImpl makeScalar(String name, String desc, String units, DataType dt) {
@@ -24,7 +26,7 @@ public class VariableSimpleImpl implements VariableSimpleIF {
   }
 
   public static VariableSimpleImpl makeString(String name, String desc, String units, int str_len) {
-    Dimension d = new Dimension(name + "_strlen", str_len, false, false, false);
+    Dimension d = Dimension.builder(name + "_strlen", str_len).setIsShared(false).build();
     // String dimString = Dimension.makeDimensionsString(new int[] {str_len});
     return new VariableSimpleImpl(name, desc, units, DataType.CHAR, Collections.singletonList(d));
   }
@@ -104,6 +106,11 @@ public class VariableSimpleImpl implements VariableSimpleIF {
   @Override
   public DataType getDataType() {
     return dt;
+  }
+
+  @Override
+  public AttributeContainer attributes() {
+    return new AttributeContainerMutable(name, atts).toImmutable();
   }
 
   @Override

@@ -1,7 +1,8 @@
 /*
- * Copyright (c) 1998-2018 John Caron and University Corporation for Atmospheric Research/Unidata
+ * Copyright (c) 1998-2022 John Caron and University Corporation for Atmospheric Research/Unidata
  * See LICENSE for license information.
  */
+
 package ucar.nc2.dt.grid;
 
 import java.io.IOException;
@@ -11,8 +12,10 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import ucar.nc2.Attribute;
+import ucar.nc2.AttributeContainer;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.VariableSimpleIF;
@@ -22,6 +25,7 @@ import ucar.nc2.dataset.*;
 import ucar.nc2.dataset.NetcdfDataset.Enhance;
 import ucar.nc2.dt.GridCoordSystem;
 import ucar.nc2.dt.GridDatatype;
+import ucar.nc2.dt.grid.internal.spi.GridDatasetProvider;
 import ucar.nc2.ft.FeatureDataset;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
@@ -88,6 +92,41 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
   }
 
   /**
+   * Open a netcdf dataset, using NetcdfDataset.defaultEnhanceMode plus CoordSystems
+   * and return a ucar.nc2.dt.GridDataset interface.
+   *
+   * @param location netcdf dataset to open, using NetcdfDataset.acquireDataset().
+   * @return ucar.nc2.dt.GridDataset
+   * @throws java.io.IOException on read error
+   * @see ucar.nc2.dataset.NetcdfDataset#acquireDataset
+   */
+  public static ucar.nc2.dt.GridDataset openIfce(String location) throws java.io.IOException {
+    return openIfce(location, NetcdfDataset.getDefaultEnhanceMode());
+  }
+
+  /**
+   * Open a netcdf dataset, using NetcdfDataset.defaultEnhanceMode plus CoordSystems
+   * and return a ucar.nc2.dt.GridDataset interface.
+   *
+   * @param location netcdf dataset to open, using NetcdfDataset.acquireDataset().
+   * @param enhanceMode open netcdf dataset with this enhanceMode
+   * @return ucar.nc2.dt.GridDataset
+   * @throws java.io.IOException on read error
+   * @see ucar.nc2.dataset.NetcdfDataset#acquireDataset
+   */
+  public static ucar.nc2.dt.GridDataset openIfce(String location, Set<NetcdfDataset.Enhance> enhanceMode)
+      throws java.io.IOException {
+    for (GridDatasetProvider gdsProvider : ServiceLoader.load(GridDatasetProvider.class)) {
+      if (gdsProvider.isMine(location, enhanceMode)) {
+        return gdsProvider.open(location, enhanceMode);
+      }
+    }
+    NetcdfDataset ds = ucar.nc2.dataset.NetcdfDataset.acquireDataset(null, DatasetUrl.findDatasetUrl(location),
+        enhanceMode, -1, null, null);
+    return new GridDataset(ds, null);
+  }
+
+  /**
    * Create a GridDataset from a NetcdfDataset.
    *
    * @param ncd underlying NetcdfDataset, will do Enhance.CoordSystems if not already done.
@@ -111,7 +150,6 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
     if (enhance == null || enhance.isEmpty())
       enhance = NetcdfDataset.getDefaultEnhanceMode();
     ncd.enhance(enhance);
-
     // look for geoGrids
     if (parseInfo != null)
       parseInfo.format("GridDataset look for GeoGrids%n");
@@ -132,7 +170,6 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
         constructCoordinateSystems(ds, (VariableEnhanced) nested, parseInfo);
       }
     } else {
-
       // see if it has a GridCS
       // LOOK: should add geogrid it multiple times if there are multiple geoCS ??
       GridCoordSys gcs = null;
@@ -187,16 +224,16 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
   public String getTitle() {
     String title = ncd.getTitle();
     if (title == null)
-      title = ncd.findAttValueIgnoreCase(null, CDM.TITLE, null);
+      title = ncd.getRootGroup().findAttributeString(CDM.TITLE, null);
     if (title == null)
       title = getName();
     return title;
   }
 
   public String getDescription() {
-    String desc = ncd.findAttValueIgnoreCase(null, "description", null);
+    String desc = ncd.getRootGroup().findAttributeString("description", null);
     if (desc == null)
-      desc = ncd.findAttValueIgnoreCase(null, CDM.HISTORY, null);
+      desc = ncd.getRootGroup().findAttributeString(CDM.HISTORY, null);
     return (desc == null) ? getName() : desc;
   }
 
@@ -262,14 +299,22 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
     // not needed
   }
 
+  @Override
+  public AttributeContainer attributes() {
+    return ncd.getRootGroup().attributes();
+  }
+
+  @Override
   public List<Attribute> getGlobalAttributes() {
     return ncd.getGlobalAttributes();
   }
 
+  @Override
   public Attribute findGlobalAttributeIgnoreCase(String name) {
     return ncd.findGlobalAttributeIgnoreCase(name);
   }
 
+  @Override
   public List<VariableSimpleIF> getDataVariables() {
     List<VariableSimpleIF> result = new ArrayList<>(grids.size());
     for (GridDatatype grid : getGrids()) {
@@ -279,10 +324,12 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
     return result;
   }
 
+  @Override
   public VariableSimpleIF getDataVariable(String shortName) {
-    return ncd.getRootGroup().findVariable(shortName);
+    return ncd.getRootGroup().findVariableLocal(shortName);
   }
 
+  @Override
   public NetcdfFile getNetcdfFile() {
     return ncd;
   }
@@ -507,13 +554,15 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
     }
   }
 
-  // release any resources like file handles
+  /** @deprecated do not use */
+  @Deprecated
   public void release() throws IOException {
     if (ncd != null)
       ncd.release();
   }
 
-  // reacquire any resources like file handles
+  /** @deprecated do not use */
+  @Deprecated
   public void reacquire() throws IOException {
     if (ncd != null)
       ncd.reacquire();
@@ -526,6 +575,8 @@ public class GridDataset implements ucar.nc2.dt.GridDataset, FeatureDataset {
 
   protected FileCacheIF fileCache;
 
+  /** @deprecated do not use */
+  @Deprecated
   @Override
   public synchronized void setFileCache(FileCacheIF fileCache) {
     this.fileCache = fileCache;

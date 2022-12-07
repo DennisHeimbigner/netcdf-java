@@ -6,6 +6,7 @@ package ucar.nc2.ft2.coverage.writer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import org.jdom2.Document;
@@ -23,9 +24,9 @@ import ucar.nc2.ft2.coverage.CoverageCoordAxis;
 import ucar.nc2.ft2.coverage.CoverageCoordSys;
 import ucar.nc2.ft2.coverage.CoverageCollection;
 import ucar.nc2.ft2.coverage.CoverageTransform;
-import ucar.nc2.ncml.NcMLWriter;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.nc2.util.Misc;
+import ucar.nc2.write.NcmlWriter;
 import ucar.unidata.geoloc.LatLonRect;
 import ucar.unidata.geoloc.ProjectionRect;
 
@@ -36,10 +37,9 @@ import ucar.unidata.geoloc.ProjectionRect;
  * @since 5/7/2015
  */
 public class CoverageDatasetCapabilities {
-  private CoverageCollection gcd;
-  private String path;
-
-  private final NcMLWriter ncmlWriter = new NcMLWriter();
+  private final CoverageCollection gcd;
+  private final String path;
+  private final NcmlWriter ncmlWriter = new NcmlWriter();
 
   public CoverageDatasetCapabilities(CoverageCollection gds, String path) {
     this.gcd = gds;
@@ -125,7 +125,7 @@ public class CoverageDatasetCapabilities {
   private Element writeAxis(CoverageCoordAxis axis) {
     Element varElem = new Element("axis");
     varElem.setAttribute("name", axis.getName());
-    varElem.setAttribute("shape", Misc.showInts(axis.getShape()));
+    varElem.setAttribute("shape", Arrays.toString(axis.getShape()));
 
     DataType dt = axis.getDataType();
     varElem.setAttribute("type", dt.toString());
@@ -278,7 +278,7 @@ public class CoverageDatasetCapabilities {
     Element ctElem = new Element("coordTransform");
     ctElem.setAttribute("name", ct.getName());
     ctElem.setAttribute("transformType", ct.isHoriz() ? "Projection" : "Vertical");
-    for (Attribute param : ct.getAttributes()) {
+    for (Attribute param : ct.attributes()) {
       Element pElem = ncmlWriter.makeAttributeElement(param);
       pElem.setName("parameter");
       ctElem.addContent(pElem);
@@ -316,7 +316,7 @@ public class CoverageDatasetCapabilities {
     // varElem.setAttribute("coordSys", cs.getName());
 
     // attributes
-    for (ucar.nc2.Attribute att : grid.getAttributes()) {
+    for (ucar.nc2.Attribute att : grid.attributes()) {
       varElem.addContent(ncmlWriter.makeAttributeElement(att));
     }
 

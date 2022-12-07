@@ -5,10 +5,14 @@
 
 package ucar.nc2.iosp;
 
+import javax.annotation.Nullable;
+import thredds.inventory.MFile;
+import thredds.inventory.MFiles;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
 import ucar.ma2.StructureDataIterator;
+import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
 import ucar.nc2.Structure;
@@ -24,11 +28,9 @@ import java.util.Formatter;
 /**
  * Abstract base class for IOSP implementations that provides default implementations
  * of readToByteChannel(...) and readSection(...).
- *
  * <p>
  * Implementations should make sure to handle the RandomAccessFile properly by
  * doing one of the following:
- *
  * <ol>
  * <li>Write your own open(...) and close() methods that keep track of the
  * RandomAccessFile, be sure to close the RandomAccessFile in your close()
@@ -39,10 +41,8 @@ import java.util.Formatter;
  * <li>Don't write an open(...) or close() method, so that those defined
  * here are used.</li>
  * </ol>
- *
  */
 public abstract class AbstractIOServiceProvider implements IOServiceProvider {
-
   /**
    * Subclasses that use AbstractIOServiceProvider.open(...) or .close()
    * should use this (instead of their own private variable).
@@ -50,6 +50,9 @@ public abstract class AbstractIOServiceProvider implements IOServiceProvider {
   protected ucar.unidata.io.RandomAccessFile raf;
   protected String location;
   protected int rafOrder = RandomAccessFile.BIG_ENDIAN;
+
+  // In general, ncfile doesnt exist until after open is called.
+  // That argues for open() changing to a builder.
   protected NetcdfFile ncfile;
 
   @Override
@@ -57,6 +60,27 @@ public abstract class AbstractIOServiceProvider implements IOServiceProvider {
     this.raf = raf;
     this.location = (raf != null) ? raf.getLocation() : null;
     this.ncfile = ncfile;
+  }
+
+  // TODO: Is there an alternative to making this method public? Maybe in 6?
+  public void setNetcdfFile(NetcdfFile ncfile) {
+    this.ncfile = ncfile;
+  }
+
+  @Override
+  public boolean isBuilder() {
+    return false;
+  }
+
+  @Override
+  public void build(RandomAccessFile raf, Group.Builder rootGroup, CancelTask cancelTask) throws IOException {
+    throw new UnsupportedOperationException(
+        String.format("Class %s does not implement build() method", this.getClass().getName()));
+  }
+
+  @Override
+  public void buildFinish(NetcdfFile ncfile) {
+    // No op
   }
 
   @Override
@@ -90,6 +114,7 @@ public abstract class AbstractIOServiceProvider implements IOServiceProvider {
     return IospHelper.copyToByteChannel(data, channel);
   }
 
+  @Override
   public long readToOutputStream(ucar.nc2.Variable v2, Section section, OutputStream out)
       throws java.io.IOException, ucar.ma2.InvalidRangeException {
 
@@ -97,6 +122,7 @@ public abstract class AbstractIOServiceProvider implements IOServiceProvider {
     return IospHelper.copyToOutputStream(data, out);
   }
 
+  @Override
   public long streamToByteChannel(ucar.nc2.Variable v2, Section section, WritableByteChannel channel)
       throws java.io.IOException, ucar.ma2.InvalidRangeException {
 
@@ -115,7 +141,8 @@ public abstract class AbstractIOServiceProvider implements IOServiceProvider {
   }
 
   @Override
-  public Object sendIospMessage(Object message) {
+  @Nullable
+  public Object sendIospMessage(@Nullable Object message) {
     if (message == NetcdfFile.IOSP_MESSAGE_RANDOM_ACCESS_FILE) {
       return raf;
     }
@@ -136,8 +163,8 @@ public abstract class AbstractIOServiceProvider implements IOServiceProvider {
    */
   public long getLastModified() {
     if (location != null) {
-      File file = new File(location);
-      return file.lastModified();
+      MFile file = MFiles.create(location);
+      return file != null ? file.getLastModified() : 0;
     } else {
       return 0;
     }

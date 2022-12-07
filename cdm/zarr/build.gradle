@@ -1,0 +1,31 @@
+description = 'Reading Zarr files with the NetCDF-java library.'
+ext.title = 'CDM Zarr support library'
+
+apply from: "$rootDir/gradle/any/dependencies.gradle"
+apply from: "$rootDir/gradle/any/java-library.gradle"
+
+dependencies {
+    api enforcedPlatform(project(':netcdf-java-platform'))
+    testImplementation enforcedPlatform(project(':netcdf-java-testing-platform'))
+
+    api project(':cdm:cdm-core')
+
+    implementation 'org.slf4j:slf4j-api'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    testImplementation('software.amazon.awssdk:s3') {
+        // exclude netty nio client due to open CVEs. See
+        // https://github.com/aws/aws-sdk-java-v2/issues/1632
+        // we don't use the nio http client in our S3 related code,
+        // so we should be ok here (others may need to add it specifically to
+        // their code if they are using our S3 stuff, but then it's their
+        // explicit decision to run it).
+        exclude group: 'software.amazon.awssdk', module: 'netty-nio-client'
+    }
+
+    testImplementation project(':cdm:cdm-s3')
+    testImplementation project(':cdm-test-utils')
+
+    testImplementation 'com.google.truth:truth'
+}

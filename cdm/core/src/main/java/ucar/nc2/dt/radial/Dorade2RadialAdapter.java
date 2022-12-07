@@ -17,6 +17,7 @@ import ucar.nc2.Variable;
 import ucar.ma2.*;
 import java.io.IOException;
 import java.util.*;
+import ucar.unidata.geoloc.EarthLocation;
 
 /**
  * Make a Dorade 2 NetcdfDataset into a RadialDataset.
@@ -32,9 +33,9 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
 
   /////////////////////////////////////////////////
   public Object isMine(FeatureType wantFeatureType, NetcdfDataset ncd, Formatter errlog) {
-    String convention = ncd.findAttValueIgnoreCase(null, "Conventions", null);
+    String convention = ncd.getRootGroup().findAttributeString("Conventions", null);
     if (_Coordinate.Convention.equals(convention)) {
-      String format = ncd.findAttValueIgnoreCase(null, "Format", null);
+      String format = ncd.getRootGroup().findAttributeString("Format", null);
       if ("Unidata/netCDF/Dorade".equals(format))
         return this;
     }
@@ -102,7 +103,7 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
 
   public ucar.unidata.geoloc.EarthLocation getCommonOrigin() {
     if (isStationary())
-      return new ucar.unidata.geoloc.EarthLocationImpl(latv[0], lonv[0], elev[0]);
+      return EarthLocation.create(latv[0], lonv[0], elev[0]);
     return null;
   }
 
@@ -122,26 +123,24 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
 
   protected void setEarthLocation() {
     if (isStationary())
-      origin = new ucar.unidata.geoloc.EarthLocationImpl(latv[0], lonv[0], elev[0]);
+      origin = EarthLocation.create(latv[0], lonv[0], elev[0]);
     origin = null;
   }
 
   protected void addRadialVariable(NetcdfDataset nds, Variable var) {
     RadialVariable rsvar = null;
-    String vName = var.getShortName();
     int rnk = var.getRank();
 
     if (rnk == 2) {
-      VariableSimpleIF v = new MyRadialVariableAdapter(vName, var.getAttributes());
-      rsvar = makeRadialVariable(nds, v, var);
+      rsvar = makeRadialVariable(nds, var);
     }
 
     if (rsvar != null)
       dataVariables.add(rsvar);
   }
 
-  protected RadialVariable makeRadialVariable(NetcdfDataset nds, VariableSimpleIF v, Variable v0) {
-    return new Dorade2Variable(nds, v, v0);
+  protected RadialVariable makeRadialVariable(NetcdfDataset nds, Variable v0) {
+    return new Dorade2Variable(nds, v0);
   }
 
   protected void setStartDate() {
@@ -194,16 +193,9 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
     }
   }
 
-  private class Dorade2Variable extends MyRadialVariableAdapter implements RadialDatasetSweep.RadialVariable {// extends
-                                                                                                              // VariableSimpleAdapter
-                                                                                                              // {
+  private class Dorade2Variable extends MyRadialVariableAdapter implements RadialDatasetSweep.RadialVariable {
     ArrayList<Dorade2Sweep> sweeps;
-    String name;
-
     float azi;
-    // float rt;
-    // RadialDatasetSweep.Sweep sweep;
-
 
     public int getNumSweeps() {
       return 1;
@@ -213,10 +205,9 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
       return (Sweep) sweeps.get(nsw);
     }
 
-    private Dorade2Variable(NetcdfDataset nds, VariableSimpleIF v, Variable v0) {
-      super(v.getShortName(), v0.getAttributes());
+    private Dorade2Variable(NetcdfDataset nds, Variable v0) {
+      super(v0.getShortName(), v0);
       sweeps = new ArrayList<>();
-      name = v.getShortName();
 
       int[] shape = v0.getShape();
       int count = v0.getRank() - 1;
@@ -234,7 +225,7 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
 
     public float[] readAllData() throws java.io.IOException {
       Array allData;
-      Sweep spn = (Sweep) sweeps.get(0);
+      Sweep spn = sweeps.get(0);
       Variable v = spn.getsweepVar();
 
       try {
@@ -254,7 +245,6 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
       int nrays, ngates;
       double meanElevation = Double.NaN;
       Variable sweepVar;
-      // int[] shape, origi;
 
       Dorade2Sweep(Variable v, int sweepno, int rays, int gates) {
         this.sweepVar = v;
@@ -374,7 +364,7 @@ public class Dorade2RadialAdapter extends AbstractRadialAdapter {
        * Location of the origin of the radial
        */
       public ucar.unidata.geoloc.EarthLocation getOrigin(int ray) {
-        return new ucar.unidata.geoloc.EarthLocationImpl(latv[ray], lonv[ray], altv[ray]);
+        return EarthLocation.create(latv[ray], lonv[ray], altv[ray]);
       }
 
       public float getMeanAzimuth() {

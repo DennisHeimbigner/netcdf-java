@@ -19,7 +19,7 @@ import java.util.Formatter;
 
 /**
  * A remote CDM dataset (extending NetcdfFile), using cdmremote protocol to communicate.
- * Similar to Opendap in that it is a remote access protocol using indexed data acess.
+ * Similar to Opendap in that it is a remote access protocol using indexed data access.
  * Supports full CDM / netcdf-4 data model.
  *
  * @author caron
@@ -51,8 +51,11 @@ public class CdmRemote extends ucar.nc2.NetcdfFile {
    * @return canonical form
    */
   public static String canonicalURL(String urlName) {
-    if (urlName.startsWith("http:"))
+    if (urlName.startsWith("http:")) {
       return SCHEME + urlName.substring(5);
+    } else if (urlName.startsWith("https:")) {
+      return SCHEME + urlName.substring(6);
+    }
     return urlName;
   }
 
@@ -68,10 +71,11 @@ public class CdmRemote extends ucar.nc2.NetcdfFile {
     // get http URL
     String temp = _remoteURI;
     try {
-      if (temp.startsWith(SCHEME))
+      if (temp.startsWith(SCHEME)) {
         temp = temp.substring(SCHEME.length());
-      if (!temp.startsWith("http:"))
+      } else if (!(temp.startsWith("http:") | temp.startsWith("https:"))) {
         temp = "http:" + temp;
+      }
     } catch (Exception e) {
       throw new IOException(e);
     }
@@ -240,15 +244,16 @@ public class CdmRemote extends ucar.nc2.NetcdfFile {
     return "ncstreamRemote";
   }
 
-  public void writeToFile(String filename) throws IOException {
+  public long writeToFile(String filename) throws IOException {
     File file = new File(filename);
     String url = remoteURI + "?req=header";
     Escaper urlParamEscaper = UrlEscapers.urlFormParameterEscaper();
 
+    long size = 0;
     try (FileOutputStream fos = new FileOutputStream(file)) {
 
-      long size = 4;
       fos.write(NcStream.MAGIC_START);
+      size += 4;
 
       // header
       try (HTTPMethod method = HTTPFactory.Get(httpClient, url)) {
@@ -286,7 +291,7 @@ public class CdmRemote extends ucar.nc2.NetcdfFile {
           int wantSize = (int) (v.getSize());
 
           Optional<String> contentLength = method.getResponseHeaderValue("Content-Length");
-          if (contentLength != null) {
+          if (contentLength.isPresent()) {
             int readLen = Integer.parseInt(contentLength.get());
             if (readLen != wantSize)
               throw new IOException("content-length= " + readLen + " not equal expected Size= " + wantSize);
@@ -299,6 +304,7 @@ public class CdmRemote extends ucar.nc2.NetcdfFile {
 
       fos.flush();
     }
+    return size;
   }
 
   @Override

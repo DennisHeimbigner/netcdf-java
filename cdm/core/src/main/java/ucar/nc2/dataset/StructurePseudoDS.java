@@ -38,9 +38,8 @@ public class StructurePseudoDS extends StructureDS {
   protected static final Set<NetcdfDataset.Enhance> enhanceScaleMissing =
       EnumSet.of(NetcdfDataset.Enhance.ApplyScaleOffset, NetcdfDataset.Enhance.ConvertMissing);
 
-
-  private List<Variable> orgVariables = new ArrayList<>(); // the underlying original variables
-
+  /** @deprecated Use StructurePseudoDS.builder() */
+  @Deprecated
   protected StructurePseudoDS(NetcdfDataset ncfile, Group group, String shortName) {
     super(ncfile, group, shortName);
   }
@@ -55,7 +54,9 @@ public class StructurePseudoDS extends StructureDS {
    * @param varNames limited to these variables, all must have dim as outer dimension. If null, use all Variables
    *        with that outer dimension
    * @param outerDim existing, outer dimension
+   * @deprecated Use StructurePseudoDS.builder()
    */
+  @Deprecated
   public StructurePseudoDS(NetcdfDataset ncfile, Group group, String shortName, List<String> varNames,
       Dimension outerDim) {
     super(ncfile, group, shortName); // cant do this for nested structures
@@ -78,7 +79,7 @@ public class StructurePseudoDS extends StructureDS {
     }
 
     for (String name : varNames) {
-      Variable orgV = group.findVariable(name);
+      Variable orgV = group.findVariableLocal(name);
       if (orgV == null) {
         log.warn("StructurePseudoDS cannot find variable " + name);
         continue;
@@ -92,7 +93,7 @@ public class StructurePseudoDS extends StructureDS {
       VariableDS memberV = new VariableDS(ncfile, group, this, orgV.getShortName(), orgV.getDataType(), null,
           orgV.getUnitsString(), orgV.getDescription());
       memberV.setSPobject(orgV.getSPobject()); // ??
-      memberV.addAll(orgV.getAttributes());
+      memberV.addAll(orgV.attributes());
 
       List<Dimension> dims = new ArrayList<>(orgV.getDimensions());
       dims.remove(0); // remove outer dimension
@@ -108,19 +109,21 @@ public class StructurePseudoDS extends StructureDS {
   }
 
   @Override
-  protected Variable copy() {
+  protected StructureDS copy() {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public Structure select(List<String> memberNames) {
-    StructurePseudoDS result =
-        new StructurePseudoDS((NetcdfDataset) ncfile, getParentGroup(), getShortName(), memberNames, getDimension(0));
+    StructurePseudoDS result = new StructurePseudoDS((NetcdfDataset) ncfile, getParentGroupOrRoot(), getShortName(),
+        memberNames, getDimension(0));
     result.isSubset = true;
     return result;
   }
 
+  /** @deprecated Use StructurePseudoDS.builder() */
   @Override
+  @Deprecated
   public boolean removeMemberVariable(Variable v) {
     if (super.removeMemberVariable(v)) {
       java.util.Iterator<Variable> iter = orgVariables.iterator();
@@ -180,5 +183,58 @@ public class StructurePseudoDS extends StructureDS {
     return asma;
   }
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  protected List<Variable> orgVariables = new ArrayList<>(); // the underlying original variables
+
+  protected StructurePseudoDS(Builder<?> builder, Group parentGroup) {
+    super(builder, parentGroup);
+    this.orgVariables = builder.orgVariables;
+  }
+
+  @Override
+  public Builder<?> toBuilder() {
+    return addLocalFieldsToBuilder(builder());
+  }
+
+  // Add local fields to the passed - in builder.
+  protected Builder<?> addLocalFieldsToBuilder(Builder<? extends Builder<?>> b) {
+    b.addOriginalVariables(this.orgVariables);
+    return (Builder<?>) super.addLocalFieldsToBuilder(b);
+  }
+
+  public static Builder<?> builder() {
+    return new Builder2();
+  }
+
+  private static class Builder2 extends Builder<Builder2> {
+    @Override
+    protected Builder2 self() {
+      return this;
+    }
+  }
+
+  public static abstract class Builder<T extends Builder<T>> extends StructureDS.Builder<T> {
+    private List<Variable> orgVariables = new ArrayList<>(); // the underlying original variables
+    private boolean built;
+
+    public T addOriginalVariable(Variable orgVar) {
+      orgVariables.add(orgVar);
+      return self();
+    }
+
+    public T addOriginalVariables(List<Variable> orgVars) {
+      orgVariables.addAll(orgVars);
+      return self();
+    }
+
+    /** Normally this is called by Group.build() */
+    public StructurePseudoDS build(Group parentGroup) {
+      if (built)
+        throw new IllegalStateException("already built");
+      built = true;
+      this.setDataType(DataType.STRUCTURE);
+      return new StructurePseudoDS(this, parentGroup);
+    }
+  }
 
 }

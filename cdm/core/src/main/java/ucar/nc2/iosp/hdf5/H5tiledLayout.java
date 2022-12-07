@@ -18,7 +18,7 @@ import java.io.IOException;
  *
  * @author caron
  */
-class H5tiledLayout implements Layout {
+public class H5tiledLayout implements Layout {
   private LayoutTiled delegate;
 
   private Section want;
@@ -36,17 +36,18 @@ class H5tiledLayout implements Layout {
    * @param wantSection the wanted section of data, contains a List of Range objects, must be complete
    * @throws java.io.IOException on io error
    */
-  H5tiledLayout(H5header.Vinfo vinfo, DataType dtype, Section wantSection) throws IOException {
+  public H5tiledLayout(H5header.Vinfo vinfo, DataType dtype, Section wantSection) throws IOException {
     assert vinfo.isChunked;
     assert vinfo.btree != null;
 
     // we have to translate the want section into the same rank as the storageSize, in order to be able to call
-    // Section.intersect(). It appears that storageSize (actually msl.chunkSize) may have an extra dimension, reletive
+    // Section.intersect(). It appears that storageSize (actually msl.chunkSize) may have an extra dimension, relative
     // to the Variable.
-    if ((dtype == DataType.CHAR) && (wantSection.getRank() < vinfo.storageSize.length))
-      this.want = new Section(wantSection).appendRange(1);
-    else
+    if ((dtype == DataType.CHAR) && (wantSection.getRank() < vinfo.storageSize.length)) {
+      this.want = Section.builder().appendRanges(wantSection.getRanges()).appendRange(1).build();
+    } else {
       this.want = wantSection;
+    }
 
     // one less chunk dimension, except in the case of char
     int nChunkDims = (dtype == DataType.CHAR) ? vinfo.storageSize.length : vinfo.storageSize.length - 1;

@@ -17,11 +17,8 @@ import java.io.IOException;
  * @author caron
  * @since Oct 21, 2009
  */
-
-
 public class StructurePseudo2Dim extends StructurePseudoDS {
   private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StructurePseudo2Dim.class);
-  private List<Variable> orgVariables = new ArrayList<>();
   private static final boolean debugRecord = false;
 
   /**
@@ -33,7 +30,9 @@ public class StructurePseudo2Dim extends StructurePseudoDS {
    * @param varNames limited to these variables. all must var(outer, inner, ...). If null, then find all such variables.
    * @param outer the outer dimension, may not be null
    * @param inner the inner dimension, may not be null
+   * @deprecated Use StructureDS.builder()
    */
+  @Deprecated
   public StructurePseudo2Dim(NetcdfDataset ncfile, Group group, String shortName, List<String> varNames,
       Dimension outer, Dimension inner) {
     super(ncfile, group, shortName);
@@ -59,7 +58,7 @@ public class StructurePseudo2Dim extends StructurePseudoDS {
     }
 
     for (String name : varNames) {
-      Variable orgV = group.findVariable(name);
+      Variable orgV = group.findVariableLocal(name);
       if (orgV == null) {
         log.warn("StructurePseudo2Dim cannot find variable " + name);
         continue;
@@ -76,7 +75,7 @@ public class StructurePseudo2Dim extends StructurePseudoDS {
           orgV.getUnitsString(), orgV.getDescription());
       memberV.setDataType(orgV.getDataType());
       memberV.setSPobject(orgV.getSPobject()); // ??
-      memberV.addAll(orgV.getAttributes());
+      memberV.addAll(orgV.attributes());
 
       List<Dimension> dimList = new ArrayList<>(orgV.getDimensions());
       memberV.setDimensions(dimList.subList(2, dimList.size())); // remove first 2 dimensions
@@ -91,7 +90,7 @@ public class StructurePseudo2Dim extends StructurePseudoDS {
 
   @Override
   public Structure select(List<String> memberNames) {
-    StructurePseudo2Dim result = new StructurePseudo2Dim((NetcdfDataset) ncfile, getParentGroup(), getShortName(),
+    StructurePseudo2Dim result = new StructurePseudo2Dim((NetcdfDataset) ncfile, getParentGroupOrRoot(), getShortName(),
         memberNames, getDimension(0), getDimension(1));
     result.isSubset = true;
     return result;
@@ -127,5 +126,38 @@ public class StructurePseudo2Dim extends StructurePseudoDS {
     return asma;
   }
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  protected StructurePseudo2Dim(Builder<?> builder, Group parentGroup) {
+    super(builder, parentGroup);
+  }
+
+  @Override
+  public Builder<?> toBuilder() {
+    return (Builder<?>) super.addLocalFieldsToBuilder(builder());
+  }
+
+  public static Builder<?> builder() {
+    return new Builder2();
+  }
+
+  private static class Builder2 extends Builder<Builder2> {
+    @Override
+    protected Builder2 self() {
+      return this;
+    }
+  }
+
+  public static abstract class Builder<T extends Builder<T>> extends StructurePseudoDS.Builder<T> {
+    private boolean built;
+
+    /** Normally this is called by Group.build() */
+    public StructurePseudo2Dim build(Group parentGroup) {
+      if (built)
+        throw new IllegalStateException("already built");
+      built = true;
+      this.setDataType(DataType.STRUCTURE);
+      return new StructurePseudo2Dim(this, parentGroup);
+    }
+  }
 }

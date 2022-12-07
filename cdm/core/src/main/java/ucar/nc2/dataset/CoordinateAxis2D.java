@@ -5,8 +5,7 @@
 package ucar.nc2.dataset;
 
 import ucar.ma2.*;
-import ucar.nc2.Attribute;
-import ucar.nc2.Variable;
+import ucar.nc2.Group;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.constants.CF;
 import ucar.nc2.time.CalendarDate;
@@ -27,15 +26,14 @@ public class CoordinateAxis2D extends CoordinateAxis {
   private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CoordinateAxis2D.class);
   private static final boolean debug = false;
 
-  private ArrayDouble.D2 coords; // LOOK maybe optional for large arrays, or maybe eliminate all together, and
-                                 // read each time ??
-
   /**
    * Create a 2D coordinate axis from an existing VariableDS
    *
    * @param ncd the containing dataset
    * @param vds create it from here
+   * @deprecated Use CoordinateAxis2D.builder()
    */
+  @Deprecated
   public CoordinateAxis2D(NetcdfDataset ncd, VariableDS vds) {
     super(ncd, vds);
     isContiguous = false;
@@ -43,7 +41,7 @@ public class CoordinateAxis2D extends CoordinateAxis {
 
   // for section and slice
   @Override
-  protected Variable copy() {
+  protected CoordinateAxis2D copy() {
     return new CoordinateAxis2D(this.ncd, this);
   }
 
@@ -78,9 +76,6 @@ public class CoordinateAxis2D extends CoordinateAxis {
     if (this.axisType == AxisType.Lon)
       makeConnectedLon(coords);
   }
-
-  private boolean isInterval;
-  private boolean intervalWasComputed;
 
   public boolean isInterval() {
     if (!intervalWasComputed)
@@ -318,13 +313,11 @@ public class CoordinateAxis2D extends CoordinateAxis {
   private ArrayDouble.D3 makeBoundsFromAux() {
     if (!computeIsInterval())
       return null;
-
-    Attribute boundsAtt = findAttributeIgnoreCase(CF.BOUNDS);
-    if (boundsAtt == null)
+    String boundsVarName = attributes().findAttributeString(CF.BOUNDS, null);
+    if (boundsVarName == null) {
       return null;
-
-    String boundsVarName = boundsAtt.getStringValue();
-    VariableDS boundsVar = (VariableDS) ncd.findVariable(getParentGroup(), boundsVarName);
+    }
+    VariableDS boundsVar = (VariableDS) getParentGroupOrRoot().findVariableLocal(boundsVarName);
 
     Array data;
     try {
@@ -349,12 +342,11 @@ public class CoordinateAxis2D extends CoordinateAxis {
 
   private boolean computeIsInterval() {
     intervalWasComputed = true;
-
-    Attribute boundsAtt = findAttributeIgnoreCase(CF.BOUNDS);
-    if ((null == boundsAtt) || !boundsAtt.isString())
+    String boundsVarName = attributes().findAttributeString(CF.BOUNDS, null);
+    if (boundsVarName == null) {
       return false;
-    String boundsVarName = boundsAtt.getStringValue();
-    VariableDS boundsVar = (VariableDS) ncd.findVariable(getParentGroup(), boundsVarName);
+    }
+    VariableDS boundsVar = (VariableDS) getParentGroupOrRoot().findVariableLocal(boundsVarName);
     if (null == boundsVar)
       return false;
     if (3 != boundsVar.getRank())
@@ -442,5 +434,52 @@ public class CoordinateAxis2D extends CoordinateAxis {
     return b1 >= target && target >= b2;
   }
 
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  // These are all calculated, I think?
+  private ArrayDouble.D2 coords;
+  private boolean isInterval;
+  private boolean intervalWasComputed;
 
+  protected CoordinateAxis2D(Builder<?> builder, Group parentGroup) {
+    super(builder, parentGroup);
+  }
+
+  public Builder<?> toBuilder() {
+    return addLocalFieldsToBuilder(builder());
+  }
+
+  // Add local fields to the passed - in builder.
+  protected Builder<?> addLocalFieldsToBuilder(Builder<? extends Builder<?>> b) {
+    return (Builder<?>) super.addLocalFieldsToBuilder(b);
+
+  }
+
+  /**
+   * Get Builder for this class that allows subclassing.
+   * 
+   * @see "https://community.oracle.com/blogs/emcmanus/2010/10/24/using-builder-pattern-subclasses"
+   */
+  public static Builder<?> builder() {
+    return new Builder2();
+  }
+
+  private static class Builder2 extends Builder<Builder2> {
+    @Override
+    protected Builder2 self() {
+      return this;
+    }
+  }
+
+  public static abstract class Builder<T extends Builder<T>> extends CoordinateAxis.Builder<T> {
+    private boolean built;
+
+    protected abstract T self();
+
+    public CoordinateAxis2D build(Group parentGroup) {
+      if (built)
+        throw new IllegalStateException("already built");
+      built = true;
+      return new CoordinateAxis2D(this, parentGroup);
+    }
+  }
 }

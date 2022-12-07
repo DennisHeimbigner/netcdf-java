@@ -22,7 +22,7 @@ public class NetcdfFileSubclass extends NetcdfFile {
   public NetcdfFileSubclass() {}
 
   public NetcdfFileSubclass(IOServiceProvider iosp, String location) {
-    spi = iosp;
+    this.iosp = iosp;
     this.location = location;
   }
 
@@ -39,7 +39,4 @@ public class NetcdfFileSubclass extends NetcdfFile {
 
     super(iospClassName, iospParam, location, buffer_size, cancelTask);
   }
-
-
-
 }

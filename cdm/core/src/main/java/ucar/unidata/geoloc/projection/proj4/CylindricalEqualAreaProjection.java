@@ -50,8 +50,9 @@ public class CylindricalEqualAreaProjection extends ProjectionImpl {
   private double qp;
   private double[] apa;
 
+  // default WSG ellipsoid
   public CylindricalEqualAreaProjection() {
-    this(0.0, 0.0, 0.0, 0.0, new Earth());
+    this(0.0, 1.0, 0.0, 0.0, EarthEllipsoid.WGS84);
   }
 
   public CylindricalEqualAreaProjection(double lon0, double trueScaleLatitude, double falseEasting,
@@ -63,7 +64,7 @@ public class CylindricalEqualAreaProjection extends ProjectionImpl {
     this.lon0 = lon0;
 
     this.projectionLongitude = Math.toRadians(lon0);
-    this.trueScaleLatitude = trueScaleLatitude;
+    this.trueScaleLatitude = trueScaleLatitude; // LOOK not used
 
     this.falseEasting = falseEasting;
     this.falseNorthing = falseNorthing;
@@ -77,14 +78,14 @@ public class CylindricalEqualAreaProjection extends ProjectionImpl {
     double t = Math.toRadians(trueScaleLatitude);
     scaleFactor = Math.cos(t);
 
-    if (es != 0) {
+    if (!earth.isSpherical()) {
       t = Math.sin(t);
       scaleFactor /= Math.sqrt(1. - es * t * t);
       apa = MapMath.authset(es);
       qp = MapMath.qsfn(1., e, one_es);
     }
 
-    addParameter(CF.GRID_MAPPING_NAME, CF.ALBERS_CONICAL_EQUAL_AREA);
+    addParameter(CF.GRID_MAPPING_NAME, CF.LAMBERT_CYLINDRICAL_EQUAL_AREA);
     addParameter(CF.LONGITUDE_OF_CENTRAL_MERIDIAN, lon0);
     addParameter(CF.STANDARD_PARALLEL, trueScaleLatitude);
 

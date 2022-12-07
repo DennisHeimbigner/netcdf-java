@@ -1,21 +1,36 @@
 /*
- * Copyright (c) 1998-2018 John Caron and University Corporation for Atmospheric Research/Unidata
+ * Copyright (c) 1998-2020 John Caron and University Corporation for Atmospheric Research/Unidata
  * See LICENSE for license information.
  */
 
 package ucar.nc2.dataset;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Formatter;
+import java.util.List;
+import java.util.StringTokenizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ucar.nc2.time.*;
+import ucar.ma2.Array;
+import ucar.ma2.ArrayChar;
+import ucar.ma2.ArrayObject;
+import ucar.ma2.DataType;
+import ucar.ma2.Index;
+import ucar.ma2.IndexIterator;
+import ucar.ma2.InvalidRangeException;
+import ucar.ma2.Range;
+import ucar.nc2.Group;
+import ucar.nc2.constants.AxisType;
+import ucar.nc2.constants._Coordinate;
+import ucar.nc2.time.CalendarDate;
+import ucar.nc2.time.CalendarDateFormatter;
+import ucar.nc2.time.CalendarDateRange;
 import ucar.nc2.units.TimeUnit;
-import ucar.nc2.Variable;
 import ucar.nc2.Dimension;
 import ucar.nc2.Attribute;
 import ucar.nc2.util.NamedAnything;
 import ucar.nc2.util.NamedObject;
-import ucar.ma2.*;
-import java.util.*;
 import java.io.IOException;
 import ucar.nc2.units.DateRange;
 
@@ -48,15 +63,15 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
 
   ////////////////////////////////////////////////////////////////
-  private final CoordinateAxisTimeHelper helper;
-  private List<CalendarDate> cdates;
 
   // for section and slice
   @Override
-  protected Variable copy() {
+  protected CoordinateAxis1DTime copy() {
     return new CoordinateAxis1DTime(this.ncd, this);
   }
 
+  /** @deprecated Use CoordinateAxis1DTime.toBuilder() */
+  @Deprecated
   // copy constructor
   private CoordinateAxis1DTime(NetcdfDataset ncd, CoordinateAxis1DTime org) {
     super(ncd, org);
@@ -79,7 +94,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Get the the ith CalendarDate.
-   * 
+   *
    * @param idx index
    * @return the ith CalendarDate
    */
@@ -90,7 +105,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Get calendar date range
-   * 
+   *
    * @return calendar date range
    */
   public CalendarDateRange getCalendarDateRange() {
@@ -163,7 +178,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Get the list of datetimes in this coordinate as CalendarDate objects.
-   * 
+   *
    * @return list of CalendarDates.
    */
   public List<CalendarDate> getCalendarDates() {
@@ -184,6 +199,19 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
     return helper.makeCalendarDateFromOffset(midpoint);
   }
 
+  @Override
+  protected void readValues() {
+    // if orgVar DataType is not numeric (e.g. Char or String), read from the cdates array that was created when
+    // the axis was created by this classes factory.
+    if (this.orgDataType != null && !this.orgDataType.isNumeric()) {
+      this.coords = cdates.stream().mapToDouble(cdate -> (double) cdate.getDifferenceInMsecs(cdates.get(0))).toArray();
+      // make sure parent methods do not try to read from the orgVar again
+      this.wasRead = true;
+    } else {
+      super.readValues();
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////////
 
   /**
@@ -196,15 +224,22 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
    * @param dims list of dimensions
    * @throws IOException on read error
    * @throws IllegalArgumentException if cant convert coordinate values to a Date
+   * @deprecated Use CoordinateAxis1DTime.builder()
    */
+  @Deprecated
   private CoordinateAxis1DTime(NetcdfDataset ncd, VariableDS org, Formatter errMessages, String dims)
       throws IOException {
-    super(ncd, org.getParentGroup(), org.getShortName(), DataType.STRING, dims, org.getUnitsString(),
+    // Although we are dealing with a string or char variable, we're going to make a numeric valued time
+    // coordinate axis, as long as we can transform the string values into a UDUNITS time value (e.g.
+    // transform an ISO date/time string into something like "seconds since 1970-01-01 00:00:00 UTC)
+    super(ncd, org.getParentGroupOrRoot(), org.getShortName(), DataType.DOUBLE, dims, org.getUnitsString(),
         org.getDescription());
 
-    // Gotta set the original var. Otherwise it would be unable to read the values
+    // Need to set the original var its DataType, that way we can treat this coordinate axis as numeric properly
+    // when we override the readValues() method and encounter a 1D time coordinate axis backing variable that is
+    // of type String.
     this.orgVar = org;
-
+    this.orgDataType = org.getDataType();
     this.orgName = org.orgName;
     this.helper = new CoordinateAxisTimeHelper(getCalendarFromAttribute(), null);
 
@@ -213,10 +248,23 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
     else
       cdates = makeTimesFromStrings(org, errMessages);
 
-    List<Attribute> atts = org.getAttributes();
-    for (Attribute att : atts) {
+    for (Attribute att : org.attributes()) {
       addAttribute(att);
     }
+
+    // look for _CoordinateAxisType attribute and use it if it is time or runtime
+    Attribute coordAxisTypeAttr = org.attributes().findAttributeIgnoreCase(_Coordinate.AxisType);
+    String attributeTypeName = coordAxisTypeAttr != null ? coordAxisTypeAttr.getStringValue() : null;
+    if (attributeTypeName != null) {
+      if (attributeTypeName.equalsIgnoreCase(AxisType.Time.name())
+          || attributeTypeName.equalsIgnoreCase(AxisType.RunTime.name())) {
+        this.axisType = AxisType.getType(attributeTypeName);
+      } else {
+        logger.info("Attribute {} on variable {} is not a recognized time axis type.", _Coordinate.AxisType,
+            org.getFullName());
+      }
+    }
+    this.setUnitsString("milliseconds since " + cdates.get(0).toString());
   }
 
   private List<CalendarDate> makeTimesFromChar(VariableDS org, Formatter errMessages) throws IOException {
@@ -272,11 +320,13 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Constructor for numeric values - must have units
-   * 
+   *
    * @param ncd the containing dataset
    * @param org the underlying Variable
    * @throws IOException on read error
+   * @deprecated Use CoordinateAxis1DTime.builder()
    */
+  @Deprecated
   private CoordinateAxis1DTime(NetcdfDataset ncd, VariableDS org, Formatter errMessages) throws IOException {
     super(ncd, org);
     this.helper = new CoordinateAxisTimeHelper(getCalendarFromAttribute(), getUnitsString());
@@ -299,7 +349,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
     // if we encountered NaNs, shorten it up
     if (count != ncoords) {
-      Dimension localDim = new Dimension(getShortName(), count, false);
+      Dimension localDim = Dimension.builder(getShortName(), count).setIsShared(false).build();
       setDimension(0, localDim);
 
       // set the shortened values
@@ -315,8 +365,8 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
         count2++;
       }
 
-      // here we have to decouple from the original variable
-      cache = new Cache();
+      // we have to decouple from the original variable
+      cache.reset();
       setCachedData(shortData, true);
     }
 
@@ -327,7 +377,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Does not handle non-standard Calendars
-   * 
+   *
    * @deprecated use getCalendarDates() to correctly interpret calendars
    */
   public java.util.Date[] getTimeDates() {
@@ -341,7 +391,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Does not handle non-standard Calendars
-   * 
+   *
    * @deprecated use getCalendarDate()
    */
   public java.util.Date getTimeDate(int idx) {
@@ -350,7 +400,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Does not handle non-standard Calendars
-   * 
+   *
    * @deprecated use getCalendarDateRange()
    */
   public DateRange getDateRange() {
@@ -360,7 +410,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Does not handle non-standard Calendars
-   * 
+   *
    * @deprecated use findTimeIndexFromCalendarDate
    */
   public int findTimeIndexFromDate(java.util.Date d) {
@@ -369,7 +419,7 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
 
   /**
    * Does not handle non-standard Calendars
-   * 
+   *
    * @deprecated use hasCalendarDate
    */
   public boolean hasTime(Date date) {
@@ -379,5 +429,51 @@ public class CoordinateAxis1DTime extends CoordinateAxis1D {
         return true;
     }
     return false;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  private CoordinateAxisTimeHelper helper;
+  private List<CalendarDate> cdates;
+
+  protected CoordinateAxis1DTime(Builder<?> builder, Group parentGroup) {
+    super(builder, parentGroup);
+  }
+
+  public Builder<?> toBuilder() {
+    return addLocalFieldsToBuilder(builder());
+  }
+
+  // Add local fields to the passed - in builder.
+  protected Builder<?> addLocalFieldsToBuilder(Builder<? extends Builder<?>> b) {
+    return (Builder<?>) super.addLocalFieldsToBuilder(b);
+  }
+
+  /**
+   * Get Builder for this class that allows subclassing.
+   *
+   * @see "https://community.oracle.com/blogs/emcmanus/2010/10/24/using-builder-pattern-subclasses"
+   */
+  public static Builder<?> builder() {
+    return new Builder2();
+  }
+
+  private static class Builder2 extends Builder<Builder2> {
+    @Override
+    protected Builder2 self() {
+      return this;
+    }
+  }
+
+  public static abstract class Builder<T extends Builder<T>> extends CoordinateAxis1D.Builder<T> {
+    private boolean built;
+
+    protected abstract T self();
+
+    public CoordinateAxis1DTime build(Group parentGroup) {
+      if (built)
+        throw new IllegalStateException("already built");
+      built = true;
+      return new CoordinateAxis1DTime(this, parentGroup);
+    }
   }
 }

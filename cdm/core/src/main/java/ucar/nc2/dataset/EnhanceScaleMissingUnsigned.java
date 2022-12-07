@@ -187,13 +187,28 @@ public interface EnhanceScaleMissingUnsigned extends IsMissingEvaluator {
   /** return true if val equals a missing_value (low-level) */
   boolean isMissingValue(double val);
 
-  /** set if _FillValue is considered isMissing(); better set in constructor if possible */
+  /**
+   * Set if _FillValue is considered isMissing().
+   * 
+   * @deprecated Do not use.
+   */
+  @Deprecated
   void setFillValueIsMissing(boolean b);
 
-  /** set if valid_range is considered isMissing(); better set in constructor if possible */
+  /**
+   * set if valid_range is considered isMissing(); better set in constructor if possible
+   * 
+   * @deprecated Do not use.
+   */
+  @Deprecated
   void setInvalidDataIsMissing(boolean b);
 
-  /** set if missing_data is considered isMissing(); better set in constructor if possible */
+  /**
+   * set if missing_data is considered isMissing(); better set in constructor if possible
+   * 
+   * @deprecated Do not use.
+   */
+  @Deprecated
   void setMissingDataIsMissing(boolean b);
 
   /**

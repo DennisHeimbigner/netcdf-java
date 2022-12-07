@@ -13,12 +13,13 @@ import ucar.ma2.Section;
 import java.util.List;
 
 /**
- * Parsed Section Expression, allows nesting for subsetting of Structure member variables.
+ * A String expression for denoting a section of a Variable to be read.
+ * Allows nesting for subsetting of Structure member variables.
  *
  * @author caron
  * @since May 8, 2008
  * @see <a href=
- *      "http://www.unidata.ucar.edu/software/netcdf-java/reference/SectionSpecification.html">SectionSpecification</a>
+ *      "https://www.unidata.ucar.edu/software/netcdf-java/reference/SectionSpecification.html">SectionSpecification</a>
  */
 public class ParsedSectionSpec {
   private static final boolean debugSelector = false;
@@ -45,11 +46,9 @@ public class ParsedSectionSpec {
    *
    * @param ncfile look for variable in here
    * @param variableSection the string to parse, eg "record(12).wind(1:20,:,3)"
-   * @return return ParsedSectionSpec, aprsed representation of the variableSection String
+   * @return return ParsedSectionSpec, parsed representation of the variableSection String
    * @throws IllegalArgumentException when token is misformed, or variable name doesnt exist in ncfile
    * @throws ucar.ma2.InvalidRangeException if section does not match variable shape
-   * @see <a href=
-   *      "http://www.unidata.ucar.edu/software/netcdf-java/reference/SectionSpecification.html">SectionSpecification</a>
    */
   public static ParsedSectionSpec parseVariableSection(NetcdfFile ncfile, String variableSection)
       throws InvalidRangeException {
@@ -94,7 +93,7 @@ public class ParsedSectionSpec {
 
     } else if (parent instanceof Structure) { // then varNameEsc = memberNameEsc (i.e. includes groups)
       Structure s = (Structure) parent;
-      v = s.findVariable(NetcdfFile.makeNameUnescaped(varNameEsc)); // s.findVariable wants unescaped version
+      v = s.findVariable(NetcdfFiles.makeNameUnescaped(varNameEsc)); // s.findVariable wants unescaped version
     }
     if (v == null)
       throw new IllegalArgumentException(" cant find variable: " + varNameEsc + " in selector=" + selector);
@@ -136,8 +135,8 @@ public class ParsedSectionSpec {
 
     List<Range> ranges = (orgRanges == null) ? v.getRanges() : orgRanges;
 
-    sb.append(v.isMemberOfStructure() ? NetcdfFile.makeValidSectionSpecName(v.getShortName())
-        : NetcdfFile.makeFullNameSectionSpec(v));
+    sb.append(v.isMemberOfStructure() ? NetcdfFiles.makeValidSectionSpecName(v.getShortName())
+        : NetcdfFiles.makeFullNameSectionSpec(v));
 
     if (!v.isVariableLength() && !v.isScalar()) { // sequences cant be sectioned
       sb.append('(');
@@ -178,5 +177,9 @@ public class ParsedSectionSpec {
   @Override
   public String toString() {
     return "ParsedSectionSpec{" + "v=" + v.getFullName() + ", section=" + section + ", child=" + child + '}';
+  }
+
+  public String makeSectionSpecString() {
+    return ParsedSectionSpec.makeSectionSpecString(this.v, this.section.getRanges());
   }
 }

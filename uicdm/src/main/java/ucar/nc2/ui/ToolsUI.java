@@ -20,6 +20,7 @@ import ucar.nc2.ft.point.PointDatasetImpl;
 import ucar.nc2.ft2.coverage.*;
 import ucar.nc2.grib.GribIndexCache;
 import ucar.nc2.grib.collection.GribCdmIndex;
+import ucar.nc2.internal.ncml.NcmlReader;
 import ucar.nc2.iosp.hdf5.H5iosp;
 import ucar.nc2.jni.netcdf.Nc4Iosp;
 import ucar.nc2.ncml.Aggregation;
@@ -31,6 +32,7 @@ import ucar.nc2.ui.op.*;
 import ucar.nc2.ui.util.SocketMessage;
 import ucar.nc2.ui.widget.URLDumpPane;
 import ucar.nc2.ui.widget.UrlAuthenticatorDialog;
+import ucar.nc2.write.NetcdfCopier;
 import ucar.ui.widget.*;
 import ucar.ui.widget.ProgressMonitor;
 import ucar.nc2.util.CancelTask;
@@ -53,11 +55,7 @@ import java.lang.reflect.Proxy;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
-/**
- * Netcdf Tools user interface.
- *
- * @author caron
- */
+/** Netcdf Tools user interface. */
 public class ToolsUI extends JPanel {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -70,7 +68,7 @@ public class ToolsUI extends JPanel {
   public static final String GRIDVIEW_FRAME_SIZE = "GridUIWindowSize";
   public static final String GRIDIMAGE_FRAME_SIZE = "GridImageWindowSize";
 
-  private static boolean debugListen;
+  private static boolean debugListen = false;
 
   private static ToolsUI ui;
   private static JFrame frame;
@@ -83,6 +81,7 @@ public class ToolsUI extends JPanel {
   private final JFrame parentFrame; // redundant? will equal static "frame" defined just above
 
   private final FileManager fileChooser;
+  private final FileManager dirChooser;
   private FileManager bufrFileChooser;
 
   private final JTabbedPane tabbedPane;
@@ -109,6 +108,7 @@ public class ToolsUI extends JPanel {
   private BufrCodePanel bufrCodePanel;
   private CdmrFeatureOpPanel cdmremotePanel;
   private CdmIndexOpPanel cdmIndexPanel;
+  private CdmIndexScanOp cdmIndexScanOp;
   private ReportOpPanel cdmIndexReportPanel;
   private CollectionSpecPanel fcPanel;
   private CoordSysPanel coordSysPanel;
@@ -119,7 +119,7 @@ public class ToolsUI extends JPanel {
   private DirectoryPartitionPanel dirPartPanel;
   private FeatureScanOpPanel ftPanel;
   private FmrcPanel fmrcPanel;
-  private GeoGridPanel gridPanel;
+  private GeoGridPanel geoGridPanel;
   private GeotiffPanel geotiffPanel;
   private GribCodePanel gribCodePanel;
   private GribFilesOpPanel gribFilesPanel;
@@ -155,21 +155,20 @@ public class ToolsUI extends JPanel {
   private final DataFactory threddsDataFactory = new DataFactory();
 
   private boolean useRecordStructure;
+  private boolean useBuilders = true;
   private DiskCache2Form diskCache2Form;
 
   // debugging
   private final DebugFlags debugFlags;
 
-  /**
-   *
-   */
   private ToolsUI(PreferencesExt prefs, JFrame parentFrame) {
     this.mainPrefs = prefs;
     this.parentFrame = parentFrame;
 
-    // FileChooser is shared
+    // FileChoosers are shared
     FileFilter[] filters = {new FileManager.HDF5ExtFilter(), new FileManager.NetcdfExtFilter()};
     fileChooser = new FileManager(parentFrame, null, filters, (PreferencesExt) prefs.node("FileManager"));
+    dirChooser = new FileManager(parentFrame, null, null, (PreferencesExt) prefs.node("FeatureScanFileManager"));
 
     OpPanel.setFileChooser(fileChooser);
 
@@ -236,8 +235,8 @@ public class ToolsUI extends JPanel {
     addListeners(bufrTabPane);
 
     // nested-2 tab - grib
-    // gribTabPane.addTab("CdmIndex", new JLabel("CdmIndex"));
     gribTabPane.addTab("CdmIndex4", new JLabel("CdmIndex4"));
+    gribTabPane.addTab("CdmIndexScan", new JLabel("CdmIndexScan"));
     gribTabPane.addTab("CdmIndexReport", new JLabel("CdmIndexReport"));
     gribTabPane.addTab("GribIndex", new JLabel("GribIndex"));
     gribTabPane.addTab("WMO-COMMON", new JLabel("WMO-COMMON"));
@@ -268,6 +267,7 @@ public class ToolsUI extends JPanel {
     addListeners(hdf5TabPane);
 
     // nested tab - features
+    ftTabPane.addTab("FeatureScan", new JLabel("FeatureScan"));
     ftTabPane.addTab("Grids", new JLabel("Grids"));
     ftTabPane.addTab("Coverages", new JLabel("Coverages"));
     ftTabPane.addTab("SimpleGeometry", new JLabel("SimpleGeometry"));
@@ -305,9 +305,6 @@ public class ToolsUI extends JPanel {
     setDebugFlags();
   }
 
-  /**
-   *
-   */
   private void addListeners(JTabbedPane tabPane) {
     tabPane.addChangeListener(e -> {
       Component c = tabPane.getSelectedComponent();
@@ -445,6 +442,11 @@ public class ToolsUI extends JPanel {
         c = cdmIndexPanel;
         break;
 
+      case "CdmIndexScan":
+        cdmIndexScanOp = new CdmIndexScanOp((PreferencesExt) mainPrefs.node("cdmIndexScan"), dirChooser);
+        c = cdmIndexScanOp;
+        break;
+
       case "CdmIndexReport": {
         PreferencesExt prefs = (PreferencesExt) mainPrefs.node("CdmIndexReport");
         ReportPanel rp = new CdmIndexReportPanel(prefs);
@@ -510,7 +512,7 @@ public class ToolsUI extends JPanel {
         break;
 
       case "FeatureScan":
-        ftPanel = new FeatureScanOpPanel((PreferencesExt) mainPrefs.node("ftPanel"));
+        ftPanel = new FeatureScanOpPanel((PreferencesExt) mainPrefs.node("ftPanel"), dirChooser);
         c = ftPanel;
         break;
 
@@ -520,8 +522,8 @@ public class ToolsUI extends JPanel {
         break;
 
       case "Grids":
-        gridPanel = new GeoGridPanel((PreferencesExt) mainPrefs.node("grid"));
-        c = gridPanel;
+        geoGridPanel = new GeoGridPanel((PreferencesExt) mainPrefs.node("grid"));
+        c = geoGridPanel;
         break;
 
       case "SimpleGeometry":
@@ -535,12 +537,12 @@ public class ToolsUI extends JPanel {
         break;
 
       case "HDF5-Objects":
-        hdf5ObjectPanel = new Hdf5ObjectPanel((PreferencesExt) mainPrefs.node("hdf5"));
+        hdf5ObjectPanel = new Hdf5ObjectPanel((PreferencesExt) mainPrefs.node("hdf5"), useBuilders);
         c = hdf5ObjectPanel;
         break;
 
       case "HDF5-Data":
-        hdf5DataPanel = new Hdf5DataPanel((PreferencesExt) mainPrefs.node("hdf5data"));
+        hdf5DataPanel = new Hdf5DataPanel((PreferencesExt) mainPrefs.node("hdf5data"), useBuilders);
         c = hdf5DataPanel;
         break;
 
@@ -550,7 +552,7 @@ public class ToolsUI extends JPanel {
         break;
 
       case "HDF4":
-        hdf4Panel = new Hdf4Panel((PreferencesExt) mainPrefs.node("hdf4"));
+        hdf4Panel = new Hdf4Panel((PreferencesExt) mainPrefs.node("hdf4"), useBuilders);
         c = hdf4Panel;
         break;
 
@@ -641,9 +643,7 @@ public class ToolsUI extends JPanel {
     log.trace("tabbedPane changed {} added ", title);
   }
 
-  /**
-   *
-   */
+
   private JMenuBar makeMenuBar() {
     JMenuBar mb = new JMenuBar();
 
@@ -666,42 +666,41 @@ public class ToolsUI extends JPanel {
     return mb;
   }
 
-  /**
-   *
-   */
+
   public DatasetViewerPanel getDatasetViewerPanel() {
     return viewerPanel;
   }
 
-  /**
-   *
-   */
+
   public void setDebugFlags() {
     log.debug("setDebugFlags");
 
     NetcdfFile.setDebugFlags(debugFlags);
     H5iosp.setDebugFlags(debugFlags);
-    ucar.nc2.ncml.NcMLReader.setDebugFlags(debugFlags);
+    NcmlReader.setDebugFlags(debugFlags);
     DODSNetcdfFile.setDebugFlags(debugFlags);
     CdmRemote.setDebugFlags(debugFlags);
     Nc4Iosp.setDebugFlags(debugFlags);
     DataFactory.setDebugFlags(debugFlags);
 
-    ucar.nc2.FileWriter2.setDebugFlags(debugFlags);
+    NetcdfCopier.setDebugFlags(debugFlags);
     ucar.nc2.ft.point.standard.PointDatasetStandardFactory.setDebugFlags(debugFlags);
     ucar.nc2.grib.collection.Grib.setDebugFlags(debugFlags);
   }
 
-  /**
-   *
-   */
+
   public void setUseRecordStructure(boolean use) {
     useRecordStructure = use;
   }
 
-  /**
-   *
-   */
+  public void setUseBuilders(boolean use) {
+    useBuilders = use;
+  }
+
+  public boolean getUseBuilders() {
+    return useBuilders;
+  }
+
   public void setGribDiskCache() {
     if (diskCache2Form == null) {
       diskCache2Form = new DiskCache2Form(parentFrame, GribIndexCache.getDiskCache2());
@@ -709,9 +708,7 @@ public class ToolsUI extends JPanel {
     diskCache2Form.setVisible(true);
   }
 
-  /**
-   *
-   */
+
   private void save() {
     fileChooser.save();
     if (aggPanel != null) {
@@ -743,6 +740,9 @@ public class ToolsUI extends JPanel {
     }
     if (cdmIndexPanel != null) {
       cdmIndexPanel.save();
+    }
+    if (cdmIndexScanOp != null) {
+      cdmIndexScanOp.save();
     }
     if (cdmIndexReportPanel != null) {
       cdmIndexReportPanel.save();
@@ -807,8 +807,8 @@ public class ToolsUI extends JPanel {
     if (gribRewritePanel != null) {
       gribRewritePanel.save();
     }
-    if (gridPanel != null) {
-      gridPanel.save();
+    if (geoGridPanel != null) {
+      geoGridPanel.save();
     }
     if (hdf5ObjectPanel != null) {
       hdf5ObjectPanel.save();
@@ -873,16 +873,12 @@ public class ToolsUI extends JPanel {
   /// The following are hooks and shortcuts allowing OpPanel classes to interact with the UI.
   ///
 
-  /**
-   *
-   */
+
   public static ToolsUI getToolsUI() {
     return ui;
   }
 
-  /**
-   *
-   */
+
   public static JFrame getToolsFrame() {
     return ui.getFramePriv();
   }
@@ -891,9 +887,7 @@ public class ToolsUI extends JPanel {
     return parentFrame;
   }
 
-  /**
-   *
-   */
+
   public static DataFactory getThreddsDataFactory() {
     return ui.getThreddsDataFactoryPriv();
   }
@@ -902,9 +896,7 @@ public class ToolsUI extends JPanel {
     return threddsDataFactory;
   }
 
-  /**
-   *
-   */
+
   public static FileManager getBufrFileChooser() {
     return ui.getBufrFileChooserPriv();
   }
@@ -917,9 +909,7 @@ public class ToolsUI extends JPanel {
     return bufrFileChooser;
   }
 
-  /**
-   *
-   */
+
   public static void setNCdumpPanel(NetcdfFile ds) {
     ui.setNCdumpPanelPriv(ds);
   }
@@ -935,9 +925,7 @@ public class ToolsUI extends JPanel {
     tabbedPane.setSelectedComponent(ncdumpPanel);
   }
 
-  /**
-   *
-   */
+
   public static Object getPrefsBean(String key, Object defaultVal) {
     return ui.getPrefsBeanPriv(key, defaultVal);
   }
@@ -946,9 +934,7 @@ public class ToolsUI extends JPanel {
     return mainPrefs.getBean(key, defaultVal);
   }
 
-  /**
-   *
-   */
+
   public static void putPrefsBeanObject(String key, Object newVal) {
     ui.putPrefsBeanObjectPriv(key, newVal);
   }
@@ -957,49 +943,31 @@ public class ToolsUI extends JPanel {
     mainPrefs.putBean(key, newVal);
   }
 
-  ///
-  ///
-  ///
-
-  /**
-   *
-   */
   public void openNetcdfFile(String datasetName) {
     makeComponent(tabbedPane, "Viewer");
     viewerPanel.doit(datasetName);
     tabbedPane.setSelectedComponent(viewerPanel);
   }
 
-  /**
-   *
-   */
   public void openNetcdfFile(NetcdfFile ncfile) {
     makeComponent(tabbedPane, "Viewer");
     viewerPanel.setDataset(ncfile);
     tabbedPane.setSelectedComponent(viewerPanel);
   }
 
-  /**
-   *
-   */
   public void openCoordSystems(String datasetName) {
     makeComponent(tabbedPane, "CoordSys");
     coordSysPanel.doit(datasetName);
     tabbedPane.setSelectedComponent(coordSysPanel);
   }
 
-  /**
-   *
-   */
   public void openCoordSystems(NetcdfDataset dataset) {
     makeComponent(tabbedPane, "CoordSys");
     coordSysPanel.setDataset(dataset);
     tabbedPane.setSelectedComponent(coordSysPanel);
   }
 
-  /**
-   *
-   */
+
   public void openNcML(String datasetName) {
     makeComponent(ncmlTabPane, "NcmlEditor");
     ncmlEditorPanel.doit(datasetName);
@@ -1007,9 +975,7 @@ public class ToolsUI extends JPanel {
     ncmlTabPane.setSelectedComponent(ncmlEditorPanel);
   }
 
-  /**
-   *
-   */
+
   public void openPointFeatureDataset(String datasetName) {
     makeComponent(ftTabPane, "PointFeature");
     pointFeaturePanel.setPointFeatureDataset(FeatureType.ANY_POINT, datasetName);
@@ -1017,9 +983,7 @@ public class ToolsUI extends JPanel {
     ftTabPane.setSelectedComponent(pointFeaturePanel);
   }
 
-  /**
-   *
-   */
+
   public void openGrib1Collection(String collection) {
     makeComponent(grib1TabPane, "GRIB1collection"); // LOOK - does this aleays make component ?
     grib1CollectionPanel.setCollection(collection);
@@ -1028,9 +992,7 @@ public class ToolsUI extends JPanel {
     grib1TabPane.setSelectedComponent(grib1CollectionPanel);
   }
 
-  /**
-   *
-   */
+
   public void openGrib2Collection(String collection) {
     makeComponent(grib2TabPane, "GRIB2collection");
     grib2CollectionPanel.setCollection(collection);
@@ -1039,9 +1001,7 @@ public class ToolsUI extends JPanel {
     grib2TabPane.setSelectedComponent(grib2CollectionPanel);
   }
 
-  /**
-   *
-   */
+
   public void openGrib2Data(String datasetName) {
     makeComponent(grib2TabPane, "GRIB2data");
     grib2DataPanel.doit(datasetName);
@@ -1050,9 +1010,7 @@ public class ToolsUI extends JPanel {
     grib2TabPane.setSelectedComponent(grib2DataPanel);
   }
 
-  /**
-   *
-   */
+
   public void openGrib1Data(String datasetName) {
     makeComponent(grib1TabPane, "GRIB1data");
     grib1DataPanel.doit(datasetName);
@@ -1061,19 +1019,15 @@ public class ToolsUI extends JPanel {
     grib1TabPane.setSelectedComponent(grib1DataPanel);
   }
 
-  /**
-   *
-   */
+
   public void openGridDataset(String datasetName) {
     makeComponent(ftTabPane, "Grids");
-    gridPanel.doit(datasetName);
+    geoGridPanel.doit(datasetName);
     tabbedPane.setSelectedComponent(ftTabPane);
-    ftTabPane.setSelectedComponent(gridPanel);
+    ftTabPane.setSelectedComponent(geoGridPanel);
   }
 
-  /**
-   *
-   */
+
   public void openCoverageDataset(String datasetName) {
     makeComponent(ftTabPane, "Coverages");
     coveragePanel.doit(datasetName);
@@ -1081,29 +1035,23 @@ public class ToolsUI extends JPanel {
     ftTabPane.setSelectedComponent(coveragePanel);
   }
 
-  /**
-   *
-   */
+
   public void openGridDataset(NetcdfDataset dataset) {
     makeComponent(ftTabPane, "Grids");
-    gridPanel.setDataset(dataset);
+    geoGridPanel.setDataset(dataset);
     tabbedPane.setSelectedComponent(ftTabPane);
-    ftTabPane.setSelectedComponent(gridPanel);
+    ftTabPane.setSelectedComponent(geoGridPanel);
   }
 
-  /**
-   *
-   */
+
   public void openGridDataset(GridDataset dataset) {
     makeComponent(ftTabPane, "Grids");
-    gridPanel.setDataset(dataset);
+    geoGridPanel.setDataset(dataset);
     tabbedPane.setSelectedComponent(ftTabPane);
-    ftTabPane.setSelectedComponent(gridPanel);
+    ftTabPane.setSelectedComponent(geoGridPanel);
   }
 
-  /**
-   *
-   */
+
   public void openRadialDataset(String datasetName) {
     makeComponent(ftTabPane, "Radial");
     radialPanel.doit(datasetName);
@@ -1111,14 +1059,20 @@ public class ToolsUI extends JPanel {
     ftTabPane.setSelectedComponent(radialPanel);
   }
 
-  /**
-   *
-   */
+
   private void openWMSDataset(String datasetName) {
     makeComponent(ftTabPane, "WMS");
     wmsPanel.doit(datasetName);
     tabbedPane.setSelectedComponent(ftTabPane);
     ftTabPane.setSelectedComponent(wmsPanel);
+  }
+
+  public void openIndexFile(String datasetName) {
+    makeComponent(ftTabPane, "WMS");
+    cdmIndexPanel.doit(datasetName);
+    tabbedPane.setSelectedComponent(iospTabPane);
+    iospTabPane.setSelectedComponent(gribTabPane);
+    gribTabPane.setSelectedComponent(cdmIndexPanel);
   }
 
   /**
@@ -1141,7 +1095,8 @@ public class ToolsUI extends JPanel {
 
       if (wantsCoordSys) {
         NetcdfDataset ncd = threddsDataFactory.openDataset(invDataset, true, null, null);
-        ncd.enhance(); // make sure its enhanced
+        // make sure its enhanced
+        ncd = NetcdfDatasets.enhance(ncd, NetcdfDataset.getDefaultEnhanceMode(), null);
         openCoordSystems(ncd);
         return;
       }
@@ -1232,9 +1187,9 @@ public class ToolsUI extends JPanel {
         ftTabPane.setSelectedComponent(coveragePanel);
       } else if (threddsData.featureDataset instanceof GridDataset) {
         makeComponent(ftTabPane, "Grids");
-        gridPanel.setDataset((GridDataset) threddsData.featureDataset);
+        geoGridPanel.setDataset((GridDataset) threddsData.featureDataset);
         tabbedPane.setSelectedComponent(ftTabPane);
-        ftTabPane.setSelectedComponent(gridPanel);
+        ftTabPane.setSelectedComponent(geoGridPanel);
       }
     } else if (threddsData.featureType == FeatureType.IMAGE) {
       makeComponent(ftTabPane, "Images");
@@ -1259,22 +1214,22 @@ public class ToolsUI extends JPanel {
     }
   }
 
-  /**
-   *
-   */
   public NetcdfFile openFile(String location, boolean addCoords, CancelTask task) {
 
     NetcdfFile ncfile = null;
+    Object iospMessage = useRecordStructure ? NetcdfFile.IOSP_MESSAGE_ADD_RECORD_STRUCTURE : null;
     try {
       DatasetUrl durl = DatasetUrl.findDatasetUrl(location);
       if (addCoords) {
-        ncfile = NetcdfDataset.acquireDataset(durl, true, task);
+        ncfile = useBuilders
+            ? NetcdfDatasets.acquireDataset(null, durl, NetcdfDataset.getDefaultEnhanceMode(), -1, task, iospMessage)
+            : NetcdfDataset.acquireDataset(durl, true, task);
       } else {
-        ncfile = NetcdfDataset.acquireFile(durl, task);
+        ncfile = useBuilders ? NetcdfDatasets.acquireFile(durl, task) : NetcdfDataset.acquireFile(durl, task);
       }
 
       if (ncfile == null) {
-        JOptionPane.showMessageDialog(null, "NetcdfDataset.open cannot open " + location);
+        JOptionPane.showMessageDialog(null, "NetcdfDatasets.open cannot open " + location);
       } else if (useRecordStructure) {
         ncfile.sendIospMessage(NetcdfFile.IOSP_MESSAGE_ADD_RECORD_STRUCTURE);
       }
@@ -1283,15 +1238,20 @@ public class ToolsUI extends JPanel {
       if ((null == message) && (ioe instanceof EOFException)) {
         message = "Premature End of File";
       }
-      JOptionPane.showMessageDialog(null, "NetcdfDataset.open cannot open " + location + "%n" + message);
+      JOptionPane.showMessageDialog(null, "NetcdfDatasets.open cannot open " + location + "\n" + message);
       if (!(ioe instanceof FileNotFoundException)) {
         ioe.printStackTrace();
       }
       ncfile = null;
     } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "NetcdfDataset.open cannot open " + location + "%n" + e.getMessage());
-      log.error("NetcdfDataset.open cannot open " + location, e);
-      e.printStackTrace();
+      StringWriter sw = new StringWriter(5000);
+      if (e.getCause() != null) {
+        e.getCause().printStackTrace(new PrintWriter(sw));
+      } else {
+        e.printStackTrace(new PrintWriter(sw));
+      }
+      JOptionPane.showMessageDialog(null, "NetcdfDatasets.open cannot open " + location + "\n" + sw.toString());
+      log.error("NetcdfDatasets.open cannot open " + location, e);
 
       try {
         if (ncfile != null) {
@@ -1349,17 +1309,13 @@ public class ToolsUI extends JPanel {
   ///////////////////////////////////////////////////////////////////////////////////////
   ///
 
-  /**
-   *
-   */
+
   public static void exit() {
     doSavePrefsAndUI();
     System.exit(0);
   }
 
-  /**
-   *
-   */
+
   private static void doSavePrefsAndUI() {
     ui.save();
     Rectangle bounds = frame.getBounds();
@@ -1371,9 +1327,13 @@ public class ToolsUI extends JPanel {
     }
 
     done = true; // on some systems, still get a window close event
-    ucar.nc2.util.cache.FileCacheIF cache = NetcdfDataset.getNetcdfFileCache();
-    if (cache != null) {
-      cache.clearCache(true);
+    ucar.nc2.util.cache.FileCacheIF cache1 = NetcdfDataset.getNetcdfFileCache();
+    ucar.nc2.util.cache.FileCacheIF cache2 = NetcdfDatasets.getNetcdfFileCache();
+    if (cache1 != null) {
+      cache1.clearCache(true);
+    }
+    if (cache2 != null) {
+      cache2.clearCache(true);
     }
     FileCache.shutdown(); // shutdown threads
     DiskCache2.exit(); // shutdown threads
@@ -1571,7 +1531,6 @@ public class ToolsUI extends JPanel {
       if (f.exists()) {
         try (FileInputStream fis = new FileInputStream(filename)) {
           StringBuilder errlog = new StringBuilder();
-          RuntimeConfigParser.read(fis, errlog);
           System.out.println(errlog);
         } catch (IOException ioe) {
           log.warn("Error reading {} = {}", filename, ioe.getMessage());

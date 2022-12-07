@@ -28,20 +28,22 @@ import ucar.unidata.util.Parameter;
  * Creates a "netcdfDatasetInfo" XML document, used by the TDS "Common Data Model Coordinate System Validation".
  *
  * @author john caron
+ * @deprecated This will move to another package.
  */
+@Deprecated
 public class NetcdfDatasetInfo implements Closeable {
   private NetcdfDataset ds;
   private CoordSysBuilderIF builder;
 
   public NetcdfDatasetInfo(String location) throws IOException {
-    ds = NetcdfDataset.openDataset(location, false, null);
+    ds = NetcdfDatasets.openDataset(location, false, null);
     builder = ds.enhance();
   }
 
   public NetcdfDatasetInfo(NetcdfDataset ds) throws IOException {
     File loc = new File(ds.getLocation());
     if (loc.exists()) {
-      this.ds = NetcdfDataset.openDataset(ds.getLocation(), false, null); // fresh enhancement
+      this.ds = NetcdfDatasets.openDataset(ds.getLocation(), false, null); // fresh enhancement
       builder = this.ds.enhance();
     } else { // Aggregation, fc may not exist
       this.ds = ds; // LOOK what can we do thats better ?
@@ -196,8 +198,8 @@ public class NetcdfDatasetInfo implements Closeable {
         Element gridElem = new Element("grid");
         rootElem.addContent(gridElem);
 
-        gridElem.setAttribute("name", ve.getFullName());
-        gridElem.setAttribute("decl", getDecl(ve));
+        gridElem.setAttribute("name", var.getFullName());
+        gridElem.setAttribute("decl", getDecl(var));
         if (ve.getUnitsString() != null) {
           gridElem.setAttribute(CDM.UNITS, ve.getUnitsString());
           gridElem.setAttribute("udunits", isUdunits(ve.getUnitsString()));
@@ -216,8 +218,8 @@ public class NetcdfDatasetInfo implements Closeable {
         Element elem = new Element("variable");
         rootElem.addContent(elem);
 
-        elem.setAttribute("name", ve.getFullName());
-        elem.setAttribute("decl", getDecl(ve));
+        elem.setAttribute("name", var.getFullName());
+        elem.setAttribute("decl", getDecl(var));
         if (ve.getUnitsString() != null) {
           elem.setAttribute(CDM.UNITS, ve.getUnitsString());
           elem.setAttribute("udunits", isUdunits(ve.getUnitsString()));
@@ -248,7 +250,7 @@ public class NetcdfDatasetInfo implements Closeable {
     return doc;
   }
 
-  private String getDecl(VariableEnhanced ve) {
+  private String getDecl(Variable ve) {
     Formatter sb = new Formatter();
     sb.format("%s ", ve.getDataType().toString());
     ve.getNameAndDimensions(sb, true, true);

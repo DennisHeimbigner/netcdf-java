@@ -22,29 +22,21 @@ import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
-import javax.swing.JSplitPane;
 
-/**
- *
- */
 public class DatasetViewerPanel extends OpPanel {
-
   private static final org.slf4j.Logger logger =
       org.slf4j.LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private DatasetViewer dsViewer;
-  private JSplitPane split;
   private NetcdfFile ncfile;
   private boolean jni;
 
-  /**
-  *
-  */
   public DatasetViewerPanel(PreferencesExt dbPrefs, boolean jni) {
     super(dbPrefs, "dataset:");
     this.jni = jni;
 
     dsViewer = new DatasetViewer(dbPrefs, fileChooser);
+    dsViewer.setUseCoords(this.useCoords);
     add(dsViewer, BorderLayout.CENTER);
 
     AbstractButton infoButton = BAMutil.makeButtcon("Information", "Detail Info", false);
@@ -73,7 +65,6 @@ public class DatasetViewerPanel extends OpPanel {
     dsViewer.addActions(buttPanel);
   }
 
-  /** */
   @Override
   public boolean process(Object o) {
     String location = (String) o;
@@ -95,7 +86,7 @@ public class DatasetViewerPanel extends OpPanel {
         RandomAccessFile raf = new RandomAccessFile(location, "r");
         iosp.open(raf, ncnew, null);
       } else {
-        ncnew = ToolsUI.getToolsUI().openFile(location, addCoords, null);
+        ncnew = ToolsUI.getToolsUI().openFile(location, useCoords, null);
       }
       if (ncnew != null) {
         setDataset(ncnew);
@@ -111,7 +102,6 @@ public class DatasetViewerPanel extends OpPanel {
     return !err;
   }
 
-  /** */
   @Override
   public void closeOpenFiles() throws IOException {
     if (ncfile != null) {
@@ -121,9 +111,6 @@ public class DatasetViewerPanel extends OpPanel {
     dsViewer.clear();
   }
 
-  /**
-   *
-   */
   public void setDataset(NetcdfFile nc) {
     try {
       if (ncfile != null) {
@@ -141,23 +128,21 @@ public class DatasetViewerPanel extends OpPanel {
     }
   }
 
-  /** */
   @Override
   public void save() {
     super.save();
     dsViewer.save();
   }
 
-  /**
-   *
-   */
+  @Override
+  protected void setUseCoords(boolean useCoords) {
+    dsViewer.setUseCoords(useCoords);
+  }
+
   public void setText(String text) {
     detailTA.setText(text);
   }
 
-  /**
-   *
-   */
   public void appendLine(String text) {
     detailTA.appendLine(text);
   }

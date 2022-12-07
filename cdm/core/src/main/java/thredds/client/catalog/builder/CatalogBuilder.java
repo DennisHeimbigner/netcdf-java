@@ -287,30 +287,22 @@ public class CatalogBuilder {
   private void readXML(String location) {
     try {
       SAXBuilder saxBuilder = new SAXBuilder();
+      saxBuilder.setExpandEntities(false);
       Document jdomDoc = saxBuilder.build(location);
       readCatalog(jdomDoc.getRootElement());
     } catch (Exception e) {
-      errlog.format("failed to read catalog at '%s' err='%s'%n", location, e);
-      logger.error("failed to read catalog at {}, {}", location, e.toString());
-      if (logger.isTraceEnabled()) {
-        e.printStackTrace();
-      }
-      fatalError = true;
+      logError(e, "failed to read xml catalog at " + location);
     }
   }
 
   private void readXML(URI uri) {
     try {
       SAXBuilder saxBuilder = new SAXBuilder();
+      saxBuilder.setExpandEntities(false);
       Document jdomDoc = saxBuilder.build(uri.toURL());
       readCatalog(jdomDoc.getRootElement());
     } catch (Exception e) {
-      errlog.format("failed to read catalog at '%s' err='%s'%n", uri.toString(), e);
-      logger.error("failed to read catalog at {}, {}", uri, e.toString());
-      if (logger.isTraceEnabled()) {
-        e.printStackTrace();
-      }
-      fatalError = true;
+      logError(e, "failed to read xml catalog at " + uri);
     }
   }
 
@@ -318,31 +310,32 @@ public class CatalogBuilder {
     try {
       StringReader in = new StringReader(catalogAsString);
       SAXBuilder saxBuilder = new SAXBuilder(); // LOOK non-validating
+      saxBuilder.setExpandEntities(false);
       Document jdomDoc = saxBuilder.build(in);
       readCatalog(jdomDoc.getRootElement());
     } catch (Exception e) {
-      errlog.format("failed to read catalogAsString err='%s'%n", e);
-      logger.error("failed to read catalogAsString at {}, {}", baseURI, e.toString());
-      if (logger.isTraceEnabled()) {
-        e.printStackTrace();
-      }
-      fatalError = true;
+      logError(e, "failed to read xml catalog at " + baseURI);
     }
   }
 
   private void readXML(InputStream stream) {
     try {
       SAXBuilder saxBuilder = new SAXBuilder();
+      saxBuilder.setExpandEntities(false);
       Document jdomDoc = saxBuilder.build(stream);
       readCatalog(jdomDoc.getRootElement());
     } catch (Exception e) {
-      errlog.format("failed to read catalogAsString err='%s'%n", e);
-      logger.error("failed to read catalogAsString at {}, {}", baseURI, e.toString());
-      if (logger.isTraceEnabled()) {
-        e.printStackTrace();
-      }
-      fatalError = true;
+      logError(e, "failed to read xml catalog at " + baseURI);
     }
+  }
+
+  private void logError(Exception e, String message) {
+    errlog.format(message + ", err=" + e);
+    logger.error(message);
+    if (logger.isTraceEnabled()) {
+      e.printStackTrace();
+    }
+    fatalError = true;
   }
 
   /*
@@ -1015,6 +1008,7 @@ public class CatalogBuilder {
 
   private Element readMetadataFromUrl(java.net.URI uri) throws java.io.IOException {
     SAXBuilder saxBuilder = new SAXBuilder();
+    saxBuilder.setExpandEntities(false);
     Document doc;
     try {
       doc = saxBuilder.build(uri.toURL());

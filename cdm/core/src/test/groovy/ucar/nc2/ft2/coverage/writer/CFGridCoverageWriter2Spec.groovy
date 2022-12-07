@@ -8,6 +8,7 @@ import ucar.ma2.Array
 import ucar.ma2.DataType
 import ucar.ma2.MAMath
 import ucar.nc2.NetcdfFile
+import ucar.nc2.NetcdfFiles
 import ucar.nc2.NetcdfFileWriter
 import ucar.nc2.ft2.coverage.CoverageCollection
 import ucar.nc2.ft2.coverage.CoverageDatasetFactory
@@ -65,7 +66,7 @@ class CFGridCoverageWriter2Spec extends Specification {
         featDsetCov?.close()
     }
     
-    @Rule public final TemporaryFolder tempFolder = new TemporaryFolder()
+    @Rule public TemporaryFolder tempFolder = new TemporaryFolder()
     
     def "CFGridCoverageWriter2 properly adds 2D lat/lon variables"() {
         setup: "Open test resource as FeatureDatasetCoverage"
@@ -86,7 +87,7 @@ class CFGridCoverageWriter2Spec extends Specification {
         CFGridCoverageWriter2.write(covColl, null, null, true, writer)
 
         and: "open output file"
-        NetcdfFile ncFile = NetcdfFile.open(outputFile.absolutePath)
+        NetcdfFile ncFile = NetcdfFiles.open(outputFile.absolutePath)
         
         and: "declare expected lats"
         def expectedShape = [4, 4] as int[]

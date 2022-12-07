@@ -4,6 +4,7 @@
  */
 package ucar.nc2;
 
+import javax.annotation.concurrent.Immutable;
 import ucar.ma2.DataType;
 import ucar.ma2.StructureMembers;
 import java.util.List;
@@ -15,9 +16,12 @@ import java.util.stream.Collectors;
  * 
  * @author caron
  * @since Apr 20, 2008
+ * @deprecated use VariableSimpleBuilder
  */
+@Deprecated
+@Immutable
 public class VariableSimpleAdapter implements VariableSimpleIF {
-  private StructureMembers.Member m;
+  private final StructureMembers.Member m;
 
   public static List<VariableSimpleIF> convert(StructureMembers sm) {
     List<StructureMembers.Member> mlist = sm.getMembers();
@@ -49,6 +53,11 @@ public class VariableSimpleAdapter implements VariableSimpleIF {
     return m.getDataType();
   }
 
+  @Override
+  public AttributeContainer attributes() {
+    return new AttributeContainerMutable(getShortName(), getAttributes());
+  }
+
   public String getDescription() {
     return m.getDescription();
   }
@@ -68,7 +77,7 @@ public class VariableSimpleAdapter implements VariableSimpleIF {
   public List<Dimension> getDimensions() {
     List<Dimension> result = new ArrayList<>(getRank());
     for (int aShape : getShape())
-      result.add(new Dimension(null, aShape, false));
+      result.add(Dimension.builder().setLength(aShape).setIsShared(false).build());
     return result;
   }
 

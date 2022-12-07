@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import ucar.nc2.write.ChunkingIndex;
 
 /**
  * Write a NetcdfFile to a WritableByteChannel using ncstream protocol.
@@ -21,7 +22,9 @@ import java.nio.channels.WritableByteChannel;
  *
  * @author caron
  * @since 7/10/12
+ * @deprecated do not use
  */
+@Deprecated
 public class NcStreamWriterChannel {
   private static final long maxChunk = 1000 * 1000; // 1 MByte
   private static final int sizeToCache = 100; // when to store a variable's data in the header, ie "immediate" mode
@@ -179,7 +182,7 @@ public class NcStreamWriterChannel {
   private long copyChunks(WritableByteChannel wbc, Variable oldVar, long maxChunkSize, NcStreamCompression compress)
       throws IOException {
     long maxChunkElems = maxChunkSize / oldVar.getElementSize();
-    FileWriter2.ChunkingIndex index = new FileWriter2.ChunkingIndex(oldVar.getShape());
+    ChunkingIndex index = new ChunkingIndex(oldVar.getShape());
     long size = 0;
     while (index.currentElement() < index.getSize()) {
       try {
@@ -199,7 +202,7 @@ public class NcStreamWriterChannel {
   public static void main2(String[] args) throws InvalidRangeException {
     int[] totalShape = {1, 40, 530, 240};
     int[] chunkShape = {1, 1, 530, 240};
-    FileWriter2.ChunkingIndex index = new FileWriter2.ChunkingIndex(totalShape);
+    ChunkingIndex index = new ChunkingIndex(totalShape);
     while (index.currentElement() < index.getSize()) {
       int[] chunkOrigin = index.getCurrentCounter();
       System.out.printf(" %s%n", new Section(chunkOrigin, chunkShape));

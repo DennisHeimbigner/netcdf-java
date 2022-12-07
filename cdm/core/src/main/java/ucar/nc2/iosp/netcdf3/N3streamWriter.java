@@ -7,6 +7,7 @@
 
 package ucar.nc2.iosp.netcdf3;
 
+import com.google.common.collect.Iterables;
 import java.nio.charset.StandardCharsets;
 import ucar.nc2.*;
 import java.util.List;
@@ -21,7 +22,9 @@ import java.io.DataOutputStream;
  * Experimental
  * 
  * @author john
+ * @deprecated do not use
  */
+@Deprecated
 public abstract class N3streamWriter {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +203,7 @@ public abstract class N3streamWriter {
     vsize += pad;
 
     // variable attributes
-    hsize += writeAtts(stream, var.getAttributes());
+    hsize += writeAtts(stream, var.attributes());
 
     // data type, variable size, beginning file position
     int type = N3header.getType(var.getDataType());
@@ -215,8 +218,8 @@ public abstract class N3streamWriter {
     return new Vinfo(var, hsize, vsize, offset, pad, var.isUnlimited());
   }
 
-  private int writeAtts(DataOutputStream stream, List<Attribute> atts) throws IOException {
-    int natts = atts.size();
+  private int writeAtts(DataOutputStream stream, Iterable<Attribute> atts) throws IOException {
+    int natts = Iterables.size(atts);
     if (null != stream) {
       if (natts == 0) {
         stream.writeInt(0);

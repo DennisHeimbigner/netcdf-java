@@ -5,21 +5,21 @@
 
 package ucar.nc2.ui.op;
 
-import ucar.nc2.NCdumpW;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.DatasetUrl;
 import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 import ucar.nc2.ui.GetDataRunnable;
 import ucar.nc2.ui.GetDataTask;
 import ucar.nc2.ui.OpPanel;
+import ucar.nc2.ui.ToolsUI;
+import ucar.nc2.write.Ncdump;
 import ucar.ui.widget.TextHistoryPane;
 import ucar.util.prefs.PreferencesExt;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import java.io.StringWriter;
 
-/**
- *
- */
 public class NCdumpPanel extends OpPanel implements GetDataRunnable {
   private GetDataTask task;
   private NetcdfFile ncfile;
@@ -28,9 +28,6 @@ public class NCdumpPanel extends OpPanel implements GetDataRunnable {
   private String result;
   private TextHistoryPane ta;
 
-  /**
-   *
-   */
   public NCdumpPanel(PreferencesExt prefs) {
     super(prefs, "command:");
 
@@ -52,7 +49,6 @@ public class NCdumpPanel extends OpPanel implements GetDataRunnable {
     });
   }
 
-  /** */
   @Override
   public void closeOpenFiles() throws IOException {
     if (ncfile != null) {
@@ -61,7 +57,6 @@ public class NCdumpPanel extends OpPanel implements GetDataRunnable {
     ncfile = null;
   }
 
-  /** */
   @Override
   public boolean process(Object o) {
     int pos;
@@ -91,19 +86,19 @@ public class NCdumpPanel extends OpPanel implements GetDataRunnable {
     return true;
   }
 
-  /**
-   *
-   */
   public void run(Object o) throws IOException {
     try {
-      if (addCoords) {
-        ncfile = NetcdfDataset.openDataset(filename, true, null);
+      boolean useBuilders = ToolsUI.getToolsUI().getUseBuilders();
+      if (useCoords) {
+        ncfile = useBuilders ? NetcdfDatasets.openDataset(filename, true, null)
+            : NetcdfDataset.openDataset(filename, true, null);
       } else {
-        ncfile = NetcdfDataset.openFile(filename, null);
+        DatasetUrl durl = DatasetUrl.findDatasetUrl(filename);
+        ncfile = useBuilders ? NetcdfDatasets.openFile(durl, -1, null, null) : NetcdfDataset.openFile(filename, null);
       }
 
       StringWriter sw = new StringWriter(50000);
-      NCdumpW.print(ncfile, command, sw, task);
+      Ncdump.ncdump(ncfile, command, sw, task);
       result = sw.toString();
     } finally {
       try {
@@ -127,7 +122,7 @@ public class NCdumpPanel extends OpPanel implements GetDataRunnable {
     GetDataRunnable runner = new GetDataRunnable() {
       public void run(Object o) throws IOException {
         StringWriter sw = new StringWriter(50000);
-        NCdumpW.print(ncfile, command, sw, task);
+        Ncdump.ncdump(ncfile, command, sw, task);
         result = sw.toString();
       }
     };

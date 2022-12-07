@@ -4,13 +4,13 @@
  */
 package ucar.nc2.ft2.coverage.writer;
 
-import ucar.nc2.AttributeContainerHelper;
+import ucar.nc2.AttributeContainerMutable;
 import ucar.nc2.ft2.coverage.*;
 import java.util.*;
 
 /**
  * Helper class to create logical subsets.
- * Used by CFGridCoverageWriter2
+ * Used by CFGridCoverageWriter
  *
  * @author caron
  * @since 7/12/2015
@@ -40,11 +40,11 @@ public class CoverageSubsetter2 {
     Map<String, CoverageCoordAxis> subsetCoordAxes = new HashMap<>();
     Map<String, CoverageCoordSys> subsetCFCoordSys = new HashMap<>();
     for (CoverageCoordSys orgCs : orgCoordSys.values()) {
-      ucar.nc2.util.Optional<CoverageCoordSys> opt = orgCs.subset(params, true, false); // subsetCF make do some CF
-                                                                                        // tweaks, not needed in regular
-                                                                                        // subset
-      if (!opt.isPresent())
+      // subsetCF make do some CF tweaks, not needed in regular subset
+      ucar.nc2.util.Optional<CoverageCoordSys> opt = orgCs.subset(params, true, false);
+      if (!opt.isPresent()) {
         return ucar.nc2.util.Optional.empty(opt.getErrorMessage());
+      }
 
       CoverageCoordSys subsetCoordSys = opt.get();
       subsetCFCoordSys.put(orgCs.getName(), subsetCoordSys);
@@ -78,7 +78,7 @@ public class CoverageSubsetter2 {
 
     // put it all together
     return ucar.nc2.util.Optional.of(new CoverageCollection(org.getName(), org.getCoverageType(),
-        new AttributeContainerHelper(org.getName(), org.getGlobalAttributes()), null, null, null, coordSys,
+        new AttributeContainerMutable(org.getName(), org.getGlobalAttributes()), null, null, null, coordSys,
         coordTransforms, coordAxes, coverages, org.getReader())); // use org.reader -> subset always in coord space !
   }
 

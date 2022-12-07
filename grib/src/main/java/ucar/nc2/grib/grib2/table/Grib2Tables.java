@@ -30,7 +30,7 @@ import java.util.*;
 /**
  * Grib 2 Tables - allows local overrides and augmentation of WMO tables.
  * This class serves the standard WMO tables, local tables are subclasses that override.
- * Methods are placed here because they may be overrided by local Tables.
+ * Methods are placed here because they may be overridden by local Tables.
  *
  * Tables include code, flag and parameter tables.
  *
@@ -38,9 +38,10 @@ import java.util.*;
  * @since 4/3/11
  */
 @Immutable
+// TODO version 6: remove implements TimeUnitConverter
 public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter {
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Grib2Tables.class);
-  private static Map<Grib2TablesId, Grib2Tables> tables = new HashMap<>();
+  private static final Map<Grib2TablesId, Grib2Tables> tables = new HashMap<>();
   private static Grib2Tables wmoStandardTable;
 
   public static Grib2Tables factory(Grib2Record gr) {
@@ -54,8 +55,9 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
   public static Grib2Tables factory(int center, int subCenter, int masterVersion, int localVersion, int genProcessId) {
     Grib2TablesId id = new Grib2TablesId(center, subCenter, masterVersion, localVersion, genProcessId);
     Grib2Tables cust = tables.get(id);
-    if (cust != null)
+    if (cust != null) {
       return cust;
+    }
 
     // note that we match on id, so same Grib2Customizer may be mapped to multiple id's (eg match on -1)
     Grib2TableConfig config = Grib2TableConfig.matchTable(id);
@@ -139,7 +141,6 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
 
   ///////////////////////////////////////////////////////////////
   protected final Grib2TableConfig config;
-  private boolean timeUnitWarnWasSent;
 
   protected Grib2Tables(Grib2TableConfig config) {
     this.config = config;
@@ -170,12 +171,13 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
   }
 
   /**
-   * Make a IOSP Variable name, using the Parameter name is available, otherwise a synthezized name.
+   * Make a IOSP Variable name, using the Parameter name is available, otherwise a synthesized name.
    */
   public String getVariableName(int discipline, int category, int parameter) {
     String s = WmoParamTable.getParameterName(discipline, category, parameter);
-    if (s == null)
+    if (s == null) {
       s = "U" + discipline + "-" + category + "-" + parameter;
+    }
     return s;
   }
 
@@ -236,8 +238,9 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
 
   public String getStatisticName(int id) {
     String result = getCodeTableValue("4.10", id); // WMO
-    if (result == null)
+    if (result == null) {
       result = getStatisticNameShort(id);
+    }
     return result;
   }
 
@@ -348,6 +351,9 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
       case 109:
         return new VertCoordType(code, "K m2 kg-1 s-1", null, true); // positive?
 
+      case 111:
+        return new VertCoordType(code, "eta", null, false);
+
       case 114:
         return new VertCoordType(code, "numeric", null, false);// ??
 
@@ -457,16 +463,26 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
 
   private TimeUnitConverter timeUnitConverter; // LOOK not really immutable
 
+  /**
+   * @deprecated Remove in version 6, functionality moved to Grib2CollectionBuilder
+   */
+  @Deprecated
   public void setTimeUnitConverter(TimeUnitConverter timeUnitConverter) {
-    if (this.timeUnitConverter != null)
+    if (this.timeUnitConverter != null) {
       throw new RuntimeException("Cant modify timeUnitConverter once its been set");
+    }
     this.timeUnitConverter = timeUnitConverter;
   }
 
+  /**
+   * @deprecated Remove in version 6, functionality moved to Grib2CollectionBuilder
+   */
+  @Deprecated
   @Override
   public int convertTimeUnit(int timeUnit) {
-    if (timeUnitConverter == null)
+    if (timeUnitConverter == null) {
       return timeUnit;
+    }
     return timeUnitConverter.convertTimeUnit(timeUnit);
   }
 
@@ -479,92 +495,43 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
 
     } else {
       int val = pds.getForecastTime();
-      CalendarPeriod period = Grib2Utils.getCalendarPeriod(convertTimeUnit(pds.getTimeUnit()));
+      CalendarPeriod period = Grib2Utils.getCalendarPeriod(pds.getTimeUnit());
       if (period == null)
         return null;
       return gr.getReferenceDate().add(period.multiply(val));
     }
   }
 
-  /*
-   * Code Table Code table 4.11 - Type of time intervals (4.11)
-   * 0: Reserved
-   * 1: Successive times processed have same forecast time, start time of forecast is incremented
-   * 2: Successive times processed have same start time of forecast, forecast time is incremented
-   * 3: Successive times processed have start time of forecast incremented and forecast time decremented so that valid
-   * time remains constant
-   * 4: Successive times processed have start time of forecast decremented and forecast time incremented so that valid
-   * time remains constant
-   * 5: Floating subinterval of time between forecast time and end of overall time interval
-   * 
-   * public static class TimeInterval {
-   * public int statProcessType; // (code table 4.10) Statistical process used to calculate the processed field from the
-   * field at each time increment during the time range
-   * public int timeIncrementType; // (code table 4.11) Type of time increment between successive fields used in the
-   * statistical processing
-   * public int timeRangeUnit; // (code table 4.4) Indicator of unit of time for time range over which statistical
-   * processing is done
-   * public int timeRangeLength; // Length of the time range over which statistical processing is done, in units defined
-   * by the previous octet
-   * public int timeIncrementUnit; // (code table 4.4) Indicator of unit of time for the increment between the
-   * successive fields used
-   * public int timeIncrement; // Time increment between successive fields, in units defined by the previous octet
-   * 
-   * from NDFD site:
-   * timeRangeUnit: 8-14 Day Outlooks = 2 (days); Monthly and Seasonal Outlooks = 3 (months)
-   * timeRangeLength: 8-14 Day Outlooks = 6 (days); Monthly Outlooks = 1 (month); Seasonal Outlooks = 3 (months)
-   */
-
-  /**
-   * Get the time interval in units of gr.getPDS().getTimeUnit()
-   *
-   * @param gr Grib record, must have pds that is a time interval.
-   * @return time interval in units of gr.getPDS().getTimeUnit()
-   */
-  @Nullable
   public TimeCoordIntvDateValue getForecastTimeInterval(Grib2Record gr) {
+    if (!gr.getPDS().isTimeInterval()) {
+      return null;
+    }
+    Grib2Pds.PdsInterval pdsIntv = (Grib2Pds.PdsInterval) gr.getPDS();
+
+    // the time "range" in units of pdsIntv timeUnits
+    TimeIntervalAndUnits intvu = getForecastTimeInterval(pdsIntv);
+
+    // convert time "range" to units of pds timeUnits
+    int timeUnitOrg = gr.getPDS().getTimeUnit();
+    CalendarPeriod wantPeriod = Grib2Utils.getCalendarPeriod(timeUnitOrg);
+    if (wantPeriod == null) {
+      return null;
+    }
+    CalendarPeriod havePeriod = Grib2Utils.getCalendarPeriod(intvu.timeUnitIntv);
+    double fac2 = intvu.timeRange * wantPeriod.getConvertFactor(havePeriod);
+    CalendarPeriod period = wantPeriod.multiply((int) fac2); // LOOK needs to be an int
+
     // note from Arthur Taylor (degrib):
     /*
      * If there was a range I used:
-     * 
+     *
      * End of interval (EI) = (bytes 36-42 show an "end of overall time interval")
      * C1) End of Interval = EI;
      * Begin of Interval = EI - range
-     * 
+     *
      * and if there was no interval then I used:
      * C2) End of Interval = Begin of Interval = Ref + ForeT.
      */
-    if (!gr.getPDS().isTimeInterval())
-      return null;
-    Grib2Pds.PdsInterval pdsIntv = (Grib2Pds.PdsInterval) gr.getPDS();
-    int timeUnitOrg = gr.getPDS().getTimeUnit();
-
-    // calculate total "range"
-    int range = 0;
-    for (Grib2Pds.TimeInterval ti : pdsIntv.getTimeIntervals()) {
-      if (ti.timeRangeUnit == 255)
-        continue;
-      if ((ti.timeRangeUnit != timeUnitOrg)
-          || (ti.timeIncrementUnit != timeUnitOrg && ti.timeIncrementUnit != 255 && ti.timeIncrement != 0)) {
-        if (!timeUnitWarnWasSent) {
-          logger.warn(
-              "TimeInterval has different units timeUnit org=" + timeUnitOrg + " TimeInterval=" + ti.timeIncrementUnit);
-          timeUnitWarnWasSent = true;
-          // throw new RuntimeException("TimeInterval(2) has different units");
-        }
-      }
-
-      range += ti.timeRangeLength;
-      if (ti.timeIncrementUnit != 255)
-        range += ti.timeIncrement;
-    }
-
-    CalendarPeriod unitPeriod = Grib2Utils.getCalendarPeriod(convertTimeUnit(timeUnitOrg));
-    if (unitPeriod == null)
-      return null;
-    CalendarPeriod period = unitPeriod.multiply(range);
-
-    // End of Interval as date
     CalendarDate EI = pdsIntv.getIntervalTimeEnd();
     if (EI == CalendarDate.UNKNOWN) { // all values were set to zero LOOK guessing!
       return new TimeCoordIntvDateValue(gr.getReferenceDate(), period);
@@ -576,38 +543,27 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
   /**
    * Get interval size in units of hours.
    * Only use in GribVariable to decide on variable identity when intvMerge = false.
-   * 
+   *
    * @param pds must be a Grib2Pds.PdsInterval
    * @return interval size in units of hours
+   *         LOOK generalize this to return a size and unit?
    */
   public double getForecastTimeIntervalSizeInHours(Grib2Pds pds) {
     Grib2Pds.PdsInterval pdsIntv = (Grib2Pds.PdsInterval) pds;
-    int timeUnitOrg = pds.getTimeUnit();
 
-    // calculate total "range" in units of timeUnit
-    int range = 0;
-    for (Grib2Pds.TimeInterval ti : pdsIntv.getTimeIntervals()) {
-      if (ti.timeRangeUnit == 255)
-        continue;
-      if ((ti.timeRangeUnit != timeUnitOrg)
-          || (ti.timeIncrementUnit != timeUnitOrg && ti.timeIncrementUnit != 255 && ti.timeIncrement != 0)) {
-        logger.warn("TimeInterval(2) has different units timeUnit org=" + timeUnitOrg + " TimeInterval="
-            + ti.timeIncrementUnit);
-        throw new RuntimeException("TimeInterval(2) has different units");
-      }
+    // calculate total "range"
+    TimeIntervalAndUnits intvu = getForecastTimeInterval(pdsIntv);
 
-      range += ti.timeRangeLength;
-      if (ti.timeIncrementUnit != 255)
-        range += ti.timeIncrement;
+    // convert that range to units of hours.
+    CalendarPeriod timeUnitPeriod = Grib2Utils.getCalendarPeriod(intvu.timeUnitIntv);
+    if (timeUnitPeriod == null) {
+      return GribNumbers.UNDEFINEDD;
+    }
+    if (timeUnitPeriod.equals(CalendarPeriod.Hour)) {
+      return intvu.timeRange;
     }
 
-    // now convert that range to units of the requested period.
-    CalendarPeriod timeUnitPeriod = Grib2Utils.getCalendarPeriod(convertTimeUnit(timeUnitOrg));
-    if (timeUnitPeriod == null)
-      return GribNumbers.UNDEFINEDD;
-    if (timeUnitPeriod.equals(CalendarPeriod.Hour))
-      return range;
-
+    // LOOK leave this until we fix getConvertFactor()
     double fac;
     if (timeUnitPeriod.getField() == CalendarPeriod.Field.Month) {
       fac = 30.0 * 24.0; // nominal hours in a month
@@ -616,7 +572,42 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
     } else {
       fac = CalendarPeriod.Hour.getConvertFactor(timeUnitPeriod);
     }
-    return fac * range;
+    return fac * intvu.timeRange;
+  }
+
+  private static class TimeIntervalAndUnits {
+    final int timeUnitIntv;
+    final int timeRange;
+
+    TimeIntervalAndUnits(int timeUnitIntv, int timeRange) {
+      this.timeUnitIntv = timeUnitIntv;
+      this.timeRange = timeRange;
+    }
+  }
+
+  private TimeIntervalAndUnits getForecastTimeInterval(Grib2Pds.PdsInterval pdsIntv) {
+    int range = 0;
+    int timeUnitIntv = -999;
+    for (Grib2Pds.TimeInterval ti : pdsIntv.getTimeIntervals()) {
+      if (ti.timeRangeUnit == 255) {
+        continue;
+      }
+      if (timeUnitIntv < 0) {
+        timeUnitIntv = ti.timeRangeUnit;
+      } else if ((ti.timeRangeUnit != timeUnitIntv) // make sure it doesn't change
+          || (ti.timeIncrementUnit != timeUnitIntv && ti.timeIncrementUnit != 255 && ti.timeIncrement != 0)) { // LOOK
+        // WTF?
+        logger.warn("TimeInterval(2) has different units timeUnit first=" + timeUnitIntv + " TimeInterval="
+            + ti.timeIncrementUnit);
+        throw new RuntimeException("TimeInterval(2) has different units");
+      }
+
+      range += ti.timeRangeLength;
+      if (ti.timeIncrementUnit != 255) {
+        range += ti.timeIncrement;
+      }
+    }
+    return new TimeIntervalAndUnits(timeUnitIntv, range);
   }
 
   /**
@@ -632,10 +623,11 @@ public class Grib2Tables implements ucar.nc2.grib.GribTables, TimeUnitConverter 
       return null;
 
     Grib2Pds pds = gr.getPDS();
-    int unit = convertTimeUnit(pds.getTimeUnit());
+    int unit = pds.getTimeUnit();
     TimeCoordIntvValue tinv = tinvd.convertReferenceDate(gr.getReferenceDate(), Grib2Utils.getCalendarPeriod(unit));
-    if (tinv == null)
+    if (tinv == null) {
       return null;
+    }
     int[] result = new int[2];
     result[0] = tinv.getBounds1();
     result[1] = tinv.getBounds2();

@@ -4,6 +4,7 @@
  */
 package ucar.nc2.dataset;
 
+import com.google.common.collect.ImmutableList;
 import ucar.nc2.*;
 import ucar.nc2.constants.CDM;
 import ucar.nc2.constants.CF;
@@ -14,10 +15,12 @@ import java.util.*;
  * Factored out so that it can be used as a 'mixin' in VariablesDS and StructureDS.
  * 
  * @author caron
+ * @deprecated do not use
  */
+@Deprecated
 class EnhancementsImpl implements Enhancements {
   private Variable forVar;
-  private String desc, units;
+  String desc, units;
   private List<CoordinateSystem> coordSys; // dont allocate unless its used
 
   /**
@@ -50,8 +53,8 @@ class EnhancementsImpl implements Enhancements {
    * 
    * @return list of type ucar.nc2.dataset.CoordinateSystem; may be empty not null.
    */
-  public List<CoordinateSystem> getCoordinateSystems() {
-    return (coordSys == null) ? new ArrayList<>(0) : coordSys;
+  public ImmutableList<CoordinateSystem> getCoordinateSystems() {
+    return (coordSys == null) ? ImmutableList.of() : ImmutableList.copyOf(coordSys);
   }
 
   /** Add a CoordinateSystem to the dataset. */
@@ -115,6 +118,9 @@ class EnhancementsImpl implements Enhancements {
    * @param units unit string
    */
   public void setUnitsString(String units) {
+    if (units != null) {
+      units = units.trim();
+    }
     this.units = units;
     forVar.addAttribute(new Attribute(CDM.UNITS, units));
   }
@@ -125,14 +131,12 @@ class EnhancementsImpl implements Enhancements {
    * @return the Unit String for the Variable, or null if none.
    */
   public String getUnitsString() {
-    String result = units;
-    if ((result == null) && (forVar != null)) {
-      Attribute att = forVar.findAttribute(CDM.UNITS);
-      if (att == null)
-        att = forVar.findAttributeIgnoreCase(CDM.UNITS);
+    String result = null;
+    if (forVar != null) {
+      Attribute att = forVar.findAttributeIgnoreCase(CDM.UNITS);
       if ((att != null) && att.isString())
         result = att.getStringValue();
     }
-    return (result == null) ? null : result.trim();
+    return (result == null) ? units : result.trim();
   }
 }

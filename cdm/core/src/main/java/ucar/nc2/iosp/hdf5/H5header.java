@@ -30,7 +30,7 @@ import java.nio.*;
 
 /*
  * Implementation notes
- * any field called address is actually reletive to the base address.
+ * any field called address is actually relative to the base address.
  * any field called filePos or dataPos is a byte offset within the file.
  */
 /*
@@ -41,7 +41,7 @@ import java.nio.*;
  * 2) they all have the same length as the dimension
  * 3) all variables' dimensions have a dimension scale
  */
-public class H5header extends NCheader {
+public class H5header extends NCheader implements H5headerIF {
   private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(H5header.class);
 
   // special attribute names in HDF5
@@ -59,6 +59,9 @@ public class H5header extends NCheader {
   private static boolean debugContinueMessage, debugTracker, debugSoftLink, debugHardLink, debugSymbolTable;
   private static boolean warnings = true, debugReference, debugRegionReference, debugCreationOrder, debugStructure;
   private static boolean debugDimensionScales;
+
+  // NULL string value, following netCDF-C, set to NIL
+  private static final String NULL_STRING_VALUE = "NIL";
 
   public static void setWarnings(boolean warn) {
     warnings = warn;
@@ -124,12 +127,22 @@ public class H5header extends NCheader {
     this.h5iosp = h5iosp;
   }
 
+  @Override
   public byte getSizeOffsets() {
     return sizeOffsets;
   }
 
+  @Override
+  public byte getSizeLengths() {
+    return sizeLengths;
+  }
+
   boolean isNetcdf4() {
     return isNetcdf4;
+  }
+
+  boolean isClassic() {
+    return false; // TODO
   }
 
   public void read(java.io.PrintWriter debugPS) throws IOException {
@@ -470,6 +483,39 @@ public class H5header extends NCheader {
 
     createDimensions(ncGroup, h5group);
 
+    // process types first
+    for (DataObjectFacade facadeNested : h5group.nestedObjects) {
+      if (facadeNested.isTypedef) {
+        if (debugReference && facadeNested.dobj.mdt.type == 7) {
+          log.debug("{}", facadeNested);
+        }
+
+        if (facadeNested.dobj.mdt.map != null) {
+          EnumTypedef enumTypedef = ncGroup.findEnumeration(facadeNested.name);
+          if (enumTypedef == null) {
+            DataType basetype;
+            switch (facadeNested.dobj.mdt.byteSize) {
+              case 1:
+                basetype = DataType.ENUM1;
+                break;
+              case 2:
+                basetype = DataType.ENUM2;
+                break;
+              default:
+                basetype = DataType.ENUM4;
+                break;
+            }
+            enumTypedef = new EnumTypedef(facadeNested.name, facadeNested.dobj.mdt.map, basetype);
+            ncGroup.addEnumeration(enumTypedef);
+          }
+        }
+        if (debugV) {
+          log.debug("  made enumeration {}", facadeNested.name);
+        }
+      }
+
+    } // loop over typedefs
+
     // nested objects - groups and variables
     for (DataObjectFacade facadeNested : h5group.nestedObjects) {
 
@@ -517,36 +563,7 @@ public class H5header extends NCheader {
             log.debug("  made Variable " + v.getFullName() + "  vinfo= " + vinfo + "\n" + v);
           }
         }
-
-      } else if (facadeNested.isTypedef) {
-        if (debugReference && facadeNested.dobj.mdt.type == 7) {
-          log.debug("{}", facadeNested);
-        }
-
-        if (facadeNested.dobj.mdt.map != null) {
-          EnumTypedef enumTypedef = ncGroup.findEnumeration(facadeNested.name);
-          if (enumTypedef == null) {
-            DataType basetype;
-            switch (facadeNested.dobj.mdt.byteSize) {
-              case 1:
-                basetype = DataType.ENUM1;
-                break;
-              case 2:
-                basetype = DataType.ENUM2;
-                break;
-              default:
-                basetype = DataType.ENUM4;
-                break;
-            }
-            enumTypedef = new EnumTypedef(facadeNested.name, facadeNested.dobj.mdt.map, basetype);
-            ncGroup.addEnumeration(enumTypedef);
-          }
-        }
-        if (debugV) {
-          log.debug("  made enumeration {}", facadeNested.name);
-        }
       }
-
     } // loop over nested objects
 
     // create group attributes last. need enums to be found first
@@ -566,7 +583,7 @@ public class H5header extends NCheader {
 
   /////////////////////////
   /*
-   * from http://www.unidata.ucar.edu/software/netcdf/docs/netcdf.html#NetCDF_002d4-Format
+   * from https://www.unidata.ucar.edu/software/netcdf/docs/netcdf.html#NetCDF_002d4-Format
    * C.3.7 Attributes
    * 
    * Attributes in HDF5 and netCDF-4 correspond very closely. Each attribute in an HDF5 file is represented as an
@@ -591,7 +608,7 @@ public class H5header extends NCheader {
    * Attribute references to any associated Dataset
    * 
    * -------------
-   * from http://www.unidata.ucar.edu/mailing_lists/archives/netcdfgroup/2008/msg00093.html
+   * from https://www.unidata.ucar.edu/mailing_lists/archives/netcdfgroup/2008/msg00093.html
    * 
    * Then comes the part you will have to do for your datasets. You open the data
    * dataset, get an ID, DID variable here, open the latitude dataset, get its ID,
@@ -1052,7 +1069,7 @@ public class H5header extends NCheader {
         }
         StructureMembers.Member m = sm.addMember(h5sm.name, null, null, dt, dim);
 
-        if (h5sm.mdt.endian >= 0) // apparently each member may have seperate byte order (!!!??)
+        if (h5sm.mdt.endian >= 0) // apparently each member may have separate byte order (!!!??)
           m.setDataObject(
               h5sm.mdt.endian == RandomAccessFile.LITTLE_ENDIAN ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
         m.setDataParam((h5sm.offset)); // offset since start of Structure
@@ -1493,8 +1510,9 @@ public class H5header extends NCheader {
     }
 
     if (transformReference && (facade.dobj.mdt.type == 7) && (facade.dobj.mdt.referenceType == 0)) { // object reference
-      // log.debug("transform object Reference: facade=" + facade.name +" variable name=" + v.getName());
-      Array newData = findReferenceObjectNames(v.read());
+      // System.out.println("transform object Reference: facade=" + facade.name +" variable name=" + v.getName());
+      Array oldData = v.read();
+      Array newData = findReferenceObjectNames(oldData);
       v.setDataType(DataType.STRING);
       v.setCachedData(newData, true); // so H5iosp.read() is never called
       v.addAttribute(new Attribute("_HDF5ReferenceType", "values are names of referenced Variables"));
@@ -1542,7 +1560,6 @@ public class H5header extends NCheader {
   // convert an array of lons which are data object references to an array of strings,
   // the names of the data objects (dobj.who)
   private Array findReferenceObjectNames(Array data) throws IOException {
-    // Array data = v.read();
     IndexIterator ii = data.getIndexIterator();
 
     Array newData = Array.factory(DataType.STRING, data.getShape());
@@ -1724,11 +1741,16 @@ public class H5header extends NCheader {
 
     // set the enumTypedef
     if (dt.isEnum()) {
-      Group ncGroup = v.getParentGroup();
-      EnumTypedef enumTypedef = ncGroup.findEnumeration(mdt.enumTypeName);
-      if (enumTypedef == null) { // if shared object, wont have a name, shared version gets added later
+      Group ncGroup = v.getParentGroupOrRoot();
+      EnumTypedef local = new EnumTypedef(mdt.enumTypeName, mdt.map);
+      EnumTypedef enumTypedef =
+          ncGroup.getEnumTypedefs().stream().filter((e) -> e.equalsMapOnly(local)).findFirst().orElse(local);
+      if (enumTypedef != null) {
+        // if found, make sure it is added to the group
+        ncGroup.addEnumeration(enumTypedef);
+      } else { // if shared object, wont have a name, shared version gets added later
         enumTypedef = new EnumTypedef(mdt.enumTypeName, mdt.map);
-        // LOOK ncGroup.addEnumeration(enumTypedef);
+        ncGroup.addEnumeration(enumTypedef);
       }
       v.setEnumTypedef(enumTypedef);
     }
@@ -4111,9 +4133,7 @@ public class H5header extends NCheader {
               attMessage.read(dh.getPos());
               f.format(" %-30s", trunc(attMessage.getName(), 30));
             }
-            f.format(" heapId=:");
-            Misc.showBytes(heapId, f);
-            f.format("%n");
+            f.format(" heapId=:%s%n", Arrays.toString(heapId));
           }
 
         } catch (IOException e) {
@@ -4694,6 +4714,9 @@ public class H5header extends NCheader {
    */
   String readHeapString(long heapIdAddress) throws IOException {
     H5header.HeapIdentifier heapId = new HeapIdentifier(heapIdAddress);
+    if (heapId.isEmpty()) {
+      return NULL_STRING_VALUE;
+    }
     H5header.GlobalHeap.HeapObject ho = heapId.getHeapObject();
     if (ho == null)
       throw new IllegalStateException("Cant find Heap Object,heapId=" + heapId);
@@ -4713,6 +4736,9 @@ public class H5header extends NCheader {
    */
   String readHeapString(ByteBuffer bb, int pos) throws IOException {
     H5header.HeapIdentifier heapId = new HeapIdentifier(bb, pos);
+    if (heapId.isEmpty()) {
+      return NULL_STRING_VALUE;
+    }
     H5header.GlobalHeap.HeapObject ho = heapId.getHeapObject();
     if (ho == null)
       throw new IllegalStateException("Cant find Heap Object,heapId=" + heapId);
@@ -4776,7 +4802,7 @@ public class H5header extends NCheader {
     // the heap id is has already been read into a byte array at given pos
     HeapIdentifier(ByteBuffer bb, int pos) {
       bb.order(ByteOrder.LITTLE_ENDIAN); // header information is in le byte order
-      bb.position(pos); // reletive reading
+      bb.position(pos); // relative reading
       nelems = bb.getInt();
       heapAddress = isOffsetLong ? bb.getLong() : (long) bb.getInt();
       index = bb.getInt();
@@ -4883,6 +4909,8 @@ public class H5header extends NCheader {
         long startPos = raf.getFilePointer();
         HeapObject o = new HeapObject();
         o.id = raf.readShort();
+        if (o.id == 0)
+          break; // ?? look
         o.refCount = raf.readShort();
         raf.skipBytes(4);
         o.dataSize = readLength();
@@ -4891,8 +4919,6 @@ public class H5header extends NCheader {
         int dsize = ((int) o.dataSize) + padding((int) o.dataSize, 8);
         countBytes += dsize + 16;
 
-        if (o.id == 0)
-          break; // ?? look
         if (o.dataSize < 0)
           break; // ran off the end, must be done
         if (countBytes < 0)
@@ -5003,7 +5029,8 @@ public class H5header extends NCheader {
   //////////////////////////////////////////////////////////////
   // utilities
 
-  int makeIntFromBytes(byte[] bb, int start, int n) {
+  @Override
+  public int makeIntFromBytes(byte[] bb, int start, int n) {
     int result = 0;
     for (int i = start + n - 1; i >= start; i--) {
       result <<= 8;
@@ -5011,6 +5038,11 @@ public class H5header extends NCheader {
       result += (b < 0) ? b + 256 : b;
     }
     return result;
+  }
+
+  @Override
+  public boolean isOffsetLong() {
+    return isOffsetLong;
   }
 
   /**
@@ -5070,20 +5102,24 @@ public class H5header extends NCheader {
     return raf.readString(size);
   }
 
-  long readLength() throws IOException {
+  @Override
+  public long readLength() throws IOException {
     return isLengthLong ? raf.readLong() : (long) raf.readInt();
   }
 
-  long readOffset() throws IOException {
+  @Override
+  public long readOffset() throws IOException {
     return isOffsetLong ? raf.readLong() : (long) raf.readInt();
   }
 
-  long readAddress() throws IOException {
+  @Override
+  public long readAddress() throws IOException {
     return getFileOffset(readOffset());
   }
 
   // size of data depends on "maximum possible number"
-  int getNumBytesFromMax(long maxNumber) {
+  @Override
+  public int getNumBytesFromMax(long maxNumber) {
     int size = 0;
     while (maxNumber != 0) {
       size++;
@@ -5103,7 +5139,8 @@ public class H5header extends NCheader {
     return readVariableSizeUnsigned(size);
   }
 
-  long readVariableSizeUnsigned(int size) throws IOException {
+  @Override
+  public long readVariableSizeUnsigned(int size) throws IOException {
     long vv;
     if (size == 1) {
       vv = DataType.unsignedByteToShort(raf.readByte());
@@ -5150,7 +5187,13 @@ public class H5header extends NCheader {
     return result;
   }
 
-  long getFileOffset(long address) {
+  @Override
+  public RandomAccessFile getRandomAccessFile() {
+    return raf;
+  }
+
+  @Override
+  public long getFileOffset(long address) {
     return baseAddress + address;
   }
 

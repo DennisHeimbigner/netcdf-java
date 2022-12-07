@@ -24,6 +24,7 @@ import ucar.nc2.dataset.*;
 import ucar.nc2.util.CancelTask;
 import java.io.IOException;
 import java.util.*;
+import ucar.nc2.write.CDLWriter;
 
 /**
  * Wrap CDM source (NetcdfDataset) to be a DSP
@@ -108,8 +109,8 @@ public class CDMDSP extends AbstractDSP {
   /**
    * Provide an extra API for use in testing
    *
-   * @param ncd
-   * @return
+   * @param ncd netcdf dataset
+   * @return the cdmdsp
    * @throws DapException
    */
   public CDMDSP open(NetcdfDataset ncd) throws DapException {
@@ -235,7 +236,7 @@ public class CDMDSP extends AbstractDSP {
     try {
       if (DUMPCDL) {
         System.out.println("writecdl:");
-        this.ncdfile.writeCDL(System.out, false);
+        CDLWriter.writeCDL(this.ncdfile, System.out, false);
         System.out.flush();
       }
       // Use the file path to define the dataset name
@@ -314,7 +315,7 @@ public class CDMDSP extends AbstractDSP {
       dapgroup.addDecl(newgroup);
     }
     // Create decls in dap group for group-level attributes
-    buildattributes(dapgroup, cdmgroup.getAttributes());
+    buildattributes(dapgroup, cdmgroup.attributes());
   }
 
   //////////////////////////////////////////////////
@@ -486,7 +487,7 @@ public class CDMDSP extends AbstractDSP {
       throw new DapException("DapFile: illegal CDM variable base type: " + cdmvar.getDataType());
     DapVariable dapvar = (DapVariable) dmrfactory.newVariable(cdmvar.getShortName(), basetype);
     recordVar(cdmvar, dapvar);
-    buildattributes(dapvar, cdmvar.getAttributes());
+    buildattributes(dapvar, cdmvar.attributes());
     if (CDMUtil.hasVLEN(cdmvar)) {
       // Get the fake sequence associated with this vlen
       DapSequence seq = vlenmap.get(cdmvar);
@@ -504,7 +505,7 @@ public class CDMDSP extends AbstractDSP {
     assert (cdmvar.getDataType() == DataType.OPAQUE) : "Internal error";
     DapVariable dapvar = (DapVariable) dmrfactory.newVariable(cdmvar.getShortName(), DapType.OPAQUE);
     recordVar(cdmvar, dapvar);
-    buildattributes(dapvar, cdmvar.getAttributes());
+    buildattributes(dapvar, cdmvar.attributes());
     Object osize = cdmvar.annotation(UCARTAGOPAQUE);
     if (osize != null) {
       dapvar.addXMLAttribute(UCARTAGOPAQUE, osize.toString());
@@ -516,7 +517,7 @@ public class CDMDSP extends AbstractDSP {
     assert (cdmvar.getDataType() == DataType.STRING) : "Internal error";
     DapVariable dapvar = (DapVariable) dmrfactory.newVariable(cdmvar.getShortName(), DapType.STRING);
     recordVar(cdmvar, dapvar);
-    buildattributes(dapvar, cdmvar.getAttributes());
+    buildattributes(dapvar, cdmvar.attributes());
     return dapvar;
   }
 
@@ -534,7 +535,7 @@ public class CDMDSP extends AbstractDSP {
     assert (dapenum != null);
     DapVariable dapvar = (DapVariable) dmrfactory.newVariable(cdmvar.getShortName(), dapenum);
     recordVar(cdmvar, dapvar);
-    buildattributes(dapvar, cdmvar.getAttributes());
+    buildattributes(dapvar, cdmvar.attributes());
     return dapvar;
   }
 
@@ -545,7 +546,7 @@ public class CDMDSP extends AbstractDSP {
     assert struct != null : "Internal Error";
     DapVariable dapvar = (DapVariable) dmrfactory.newVariable(cdmvar.getShortName(), struct);
     recordVar(cdmvar, dapvar);
-    buildattributes(dapvar, cdmvar.getAttributes());
+    buildattributes(dapvar, cdmvar.attributes());
     return dapvar;
   }
 
@@ -600,7 +601,7 @@ public class CDMDSP extends AbstractDSP {
     }
   }
 
-  protected void buildattributes(DapNode node, List<Attribute> attributes) throws DapException {
+  protected void buildattributes(DapNode node, AttributeContainer attributes) throws DapException {
     for (Attribute attr : attributes) {
       if (!suppress(attr.getShortName())) {
         DapAttribute dapattr = buildattribute(attr);

@@ -5,6 +5,7 @@
 
 package ucar.nc2.ui.op;
 
+import com.google.common.collect.ImmutableList;
 import thredds.inventory.*;
 import ucar.nc2.time.CalendarDate;
 import ucar.ui.widget.BAMutil;
@@ -155,7 +156,7 @@ public class CollectionSpecTable extends JPanel {
     if (spec.startsWith("<collection ")) {
       dcm = setCollectionElement(spec, f);
     } else {
-      CollectionSpecParser sp = new CollectionSpecParser(spec, f);
+      CollectionSpecParserAbstract sp = CollectionSpecParsers.create(spec, f);
       f.format("spec='%s'%n", sp);
       dcm = scanCollection(spec, f);
     }
@@ -214,7 +215,7 @@ public class CollectionSpecTable extends JPanel {
     try {
       dc = MFileCollectionManager.open(spec, spec, null, f);
       dc.scan(false);
-      fileList = (List<MFile>) Misc.getList(dc.getFilesSorted());
+      fileList = ImmutableList.copyOf(dc.getFilesSorted());
 
       List<Bean> beans = new ArrayList<>();
       for (MFile mfile : fileList)

@@ -4,13 +4,19 @@
  */
 package ucar.nc2.ncml;
 
-import junit.framework.*;
+import java.util.Formatter;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.ma2.*;
 import ucar.nc2.*;
 import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dataset.NetcdfDatasets;
 import ucar.nc2.dataset.VariableDS;
+import ucar.nc2.util.CompareNetcdf2;
 import ucar.unidata.util.test.Assert2;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -111,28 +117,27 @@ import java.lang.invoke.MethodHandles;
  * }
  */
 
-public class TestAggUnionSimple extends TestCase {
+public class TestAggUnionSimple {
   private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-  public TestAggUnionSimple(String name) {
-    super(name);
-  }
 
   static NetcdfFile ncfile = null;
 
-  public void setUp() throws IOException {
+  @BeforeClass
+  public static void setUp() throws IOException {
     if (ncfile != null)
       return;
-    String filename = "file:./" + TestNcML.topDir + "aggUnionSimple.xml";
+    String filename = "file:./" + TestNcmlRead.topDir + "aggUnionSimple.xml";
     ncfile = NetcdfDataset.openDataset(filename, false, null);
   }
 
-  public void tearDown() throws IOException {
+  @AfterClass
+  public static void tearDown() throws IOException {
     if (ncfile != null)
       ncfile.close();
     ncfile = null;
   }
 
+  @Test
   public void testDataset() {
     Variable v = ncfile.findVariable("lflx");
     assert v instanceof VariableDS;
@@ -148,11 +153,13 @@ public class TestAggUnionSimple extends TestCase {
     assert v.getParentGroup() != org.getParentGroup();
   }
 
+  @Test
   public void testRead() {
     logger.debug("ncfile = \n{}", ncfile);
     ucar.nc2.TestUtils.testReadData(ncfile, true);
   }
 
+  @Test
   public void testStructure() {
     logger.debug("TestNested = \n{}", ncfile);
 
@@ -213,6 +220,7 @@ public class TestAggUnionSimple extends TestCase {
     Assert2.assertNearlyEquals(dataI.getDoubleNext(), 8.0);
   }
 
+  @Test
   public void testReadData() throws IOException {
     Variable v = ncfile.findVariable("lflx");
     assert null != v;
@@ -255,6 +263,7 @@ public class TestAggUnionSimple extends TestCase {
     assert 32766 == dataI.getShortNext();
   }
 
+  @Test
   public void testReadSlice() throws IOException, InvalidRangeException {
     Variable v = ncfile.findVariable("lflx");
     int[] origin = {0, 6, 5};
@@ -282,18 +291,20 @@ public class TestAggUnionSimple extends TestCase {
    * <scan location="file:src/test/data/ncml/nc/" suffix="mean.nc"/>
    * </aggregation>
    */
+  @Test
   public void testScan() throws IOException {
-    String filename = "file:./" + TestNcML.topDir + "aggUnionScan.xml";
-    NetcdfDataset scanFile = NetcdfDataset.openDataset(filename, false, null);
-    ucar.unidata.util.test.CompareNetcdf.compareFiles(ncfile, scanFile, true, false, false);
-    scanFile.close();
+    String filename = "file:./" + TestNcmlRead.topDir + "aggUnionScan.xml";
+    try (NetcdfDataset scanFile = NetcdfDatasets.openDataset(filename, false, null)) {
+      Assert.assertTrue(CompareNetcdf2.compareFiles(ncfile, scanFile, new Formatter(), true, false, false));
+    }
   }
 
+  @Test
   public void testRename() throws IOException {
-    String filename = "file:./" + TestNcML.topDir + "aggUnionRename.xml";
-    NetcdfDataset scanFile = NetcdfDataset.openDataset(filename, false, null);
-    Variable v = scanFile.findVariable("LavaFlow");
-    assert v != null;
-    scanFile.close();
+    String filename = "file:./" + TestNcmlRead.topDir + "aggUnionRename.xml";
+    try (NetcdfDataset scanFile = NetcdfDatasets.openDataset(filename, false, null)) {
+      Variable v = scanFile.findVariable("LavaFlow");
+      assert v != null;
+    }
   }
 }

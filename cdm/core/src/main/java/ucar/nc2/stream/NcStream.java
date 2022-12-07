@@ -31,23 +31,17 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.EnumTypedef;
 import ucar.nc2.Group;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.Sequence;
 import ucar.nc2.Structure;
 import ucar.nc2.Variable;
+import ucar.nc2.stream.NcStreamProto.Variable.Builder;
 import ucar.unidata.io.RandomAccessFile;
 
 /**
  * Defines the ncstream format, along with ncStream.proto.
- * 
- * <pre>
- * To regenerate ncStreamProto.java from ncStream.proto:
- * cd c:/dev/tds4.2/thredds/cdm/src/main/java
- * protoc --proto_path=. --java_out=. ucar/nc2/stream/ncStream.proto
- * </pre>
  *
- * @see "http://www.unidata.ucar.edu/software/netcdf-java/stream/NcStream.html"
- * @see "http://www.unidata.ucar.edu/software/netcdf-java/stream/NcstreamGrammer.html"
+ * @see "https://www.unidata.ucar.edu/software/netcdf-java/stream/NcStream.html"
+ * @see "https://www.unidata.ucar.edu/software/netcdf-java/stream/NcstreamGrammer.html"
  */
 public class NcStream {
   // must start with this "CDFS"
@@ -74,7 +68,7 @@ public class NcStream {
     for (Dimension dim : g.getDimensions())
       groupBuilder.addDims(NcStream.encodeDim(dim));
 
-    for (Attribute att : g.getAttributes())
+    for (Attribute att : g.attributes())
       groupBuilder.addAtts(NcStream.encodeAtt(att));
 
     for (EnumTypedef enumType : g.getEnumTypedefs())
@@ -116,7 +110,7 @@ public class NcStream {
     return attBuilder;
   }
 
-  static NcStreamProto.Dimension.Builder encodeDim(Dimension dim) {
+  private static NcStreamProto.Dimension.Builder encodeDim(Dimension dim) {
     NcStreamProto.Dimension.Builder dimBuilder = NcStreamProto.Dimension.newBuilder();
     if (dim.getShortName() != null)
       dimBuilder.setName(dim.getShortName());
@@ -128,7 +122,7 @@ public class NcStream {
     return dimBuilder;
   }
 
-  static NcStreamProto.EnumTypedef.Builder encodeEnumTypedef(EnumTypedef enumType) {
+  private static NcStreamProto.EnumTypedef.Builder encodeEnumTypedef(EnumTypedef enumType) {
     NcStreamProto.EnumTypedef.Builder builder = NcStreamProto.EnumTypedef.newBuilder();
 
     builder.setName(enumType.getShortName());
@@ -143,8 +137,8 @@ public class NcStream {
     return builder;
   }
 
-  static NcStreamProto.Variable.Builder encodeVar(Variable var, int sizeToCache) throws IOException {
-    NcStreamProto.Variable.Builder builder = NcStreamProto.Variable.newBuilder();
+  private static Builder encodeVar(Variable var, int sizeToCache) throws IOException {
+    Builder builder = NcStreamProto.Variable.newBuilder();
     builder.setName(var.getShortName());
     builder.setDataType(convertDataType(var.getDataType()));
     if (var.getDataType().isEnum()) {
@@ -157,7 +151,7 @@ public class NcStream {
       builder.addShape(encodeDim(dim));
     }
 
-    for (Attribute att : var.getAttributes()) {
+    for (Attribute att : var.attributes()) {
       builder.addAtts(encodeAtt(att));
     }
 
@@ -173,7 +167,7 @@ public class NcStream {
     return builder;
   }
 
-  static NcStreamProto.Structure.Builder encodeStructure(Structure s) throws IOException {
+  private static NcStreamProto.Structure.Builder encodeStructure(Structure s) throws IOException {
     NcStreamProto.Structure.Builder builder = NcStreamProto.Structure.newBuilder();
     builder.setName(s.getShortName());
     builder.setDataType(convertDataType(s.getDataType()));
@@ -181,7 +175,7 @@ public class NcStream {
     for (Dimension dim : s.getDimensions())
       builder.addShape(encodeDim(dim));
 
-    for (Attribute att : s.getAttributes())
+    for (Attribute att : s.attributes())
       builder.addAtts(encodeAtt(att));
 
     for (Variable v : s.getVariables()) {
@@ -390,9 +384,6 @@ public class NcStream {
   public static boolean readAndTest(InputStream is, byte[] test) throws IOException {
     byte[] b = new byte[test.length];
     readFully(is, b);
-
-    if (b.length != test.length)
-      return false;
     for (int i = 0; i < b.length; i++)
       if (b[i] != test[i])
         return false;
@@ -402,9 +393,6 @@ public class NcStream {
   public static boolean readAndTest(RandomAccessFile raf, byte[] test) throws IOException {
     byte[] b = new byte[test.length];
     raf.readFully(b);
-
-    if (b.length != test.length)
-      return false;
     for (int i = 0; i < b.length; i++)
       if (b[i] != test[i])
         return false;
@@ -424,39 +412,40 @@ public class NcStream {
     return err.getMessage();
   }
 
-  static Dimension decodeDim(NcStreamProto.Dimension dim) {
+  private static Dimension decodeDim(NcStreamProto.Dimension dim) {
     String name = (dim.getName().isEmpty() ? null : dim.getName());
     int dimLen = dim.getIsVlen() ? -1 : (int) dim.getLength();
-    return new Dimension(name, dimLen, !dim.getIsPrivate(), dim.getIsUnlimited(), dim.getIsVlen());
+    return Dimension.builder().setName(name).setIsShared(!dim.getIsPrivate()).setIsUnlimited(dim.getIsUnlimited())
+        .setIsVariableLength(dim.getIsVlen()).setLength(dimLen).build();
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  static void readGroup(NcStreamProto.Group proto, NetcdfFile ncfile, Group g) {
+  static void readGroup(NcStreamProto.Group proto, Group.Builder g) {
 
     for (NcStreamProto.Dimension dim : proto.getDimsList())
-      g.addDimension(NcStream.decodeDim(dim));
+      g.addDimension(NcStream.decodeDim(dim)); // always added to group? what if private ??
 
     for (NcStreamProto.Attribute att : proto.getAttsList())
       g.addAttribute(NcStream.decodeAtt(att));
 
     for (NcStreamProto.EnumTypedef enumType : proto.getEnumTypesList())
-      g.addEnumeration(NcStream.decodeEnumTypedef(enumType));
+      g.addEnumTypedef(NcStream.decodeEnumTypedef(enumType));
 
     for (NcStreamProto.Variable var : proto.getVarsList())
-      g.addVariable(NcStream.decodeVar(ncfile, g, null, var));
+      g.addVariable(NcStream.decodeVar(var));
 
     for (NcStreamProto.Structure s : proto.getStructsList())
-      g.addVariable(NcStream.decodeStructure(ncfile, g, null, s));
+      g.addVariable(NcStream.decodeStructure(s));
 
     for (NcStreamProto.Group gp : proto.getGroupsList()) {
-      Group ng = new Group(ncfile, g, gp.getName());
+      Group.Builder ng = Group.builder().setName(gp.getName());
       g.addGroup(ng);
-      readGroup(gp, ncfile, ng);
+      readGroup(gp, ng);
     }
   }
 
-  static EnumTypedef decodeEnumTypedef(NcStreamProto.EnumTypedef enumType) {
+  private static EnumTypedef decodeEnumTypedef(NcStreamProto.EnumTypedef enumType) {
     List<NcStreamProto.EnumTypedef.EnumType> list = enumType.getMapList();
     Map<Integer, String> map = new HashMap<>(2 * list.size());
     for (NcStreamProto.EnumTypedef.EnumType et : list) {
@@ -481,12 +470,10 @@ public class NcStream {
 
     int len = attp.getLen();
     if (len == 0) // deal with empty attribute
-      return new Attribute(attp.getName(), dtUse);
+      return Attribute.builder(attp.getName()).setDataType(dtUse).build();
 
     if (dtUse == DataType.STRING) {
       int lenp = attp.getSdataCount();
-      if (lenp != len)
-        System.out.println("HEY lenp != len");
       if (lenp == 1)
         return new Attribute(attp.getName(), attp.getSdata(0));
       else {
@@ -498,36 +485,29 @@ public class NcStream {
     } else {
       ByteString bs = attp.getData();
       ByteBuffer bb = ByteBuffer.wrap(bs.toByteArray());
-      return new Attribute(attp.getName(), Array.factory(dtUse, (int[]) null, bb)); // if null, then use int[]{bb
-      // .limit()}
+      // if null, then use int[]{bb.limit()}
+      return new Attribute(attp.getName(), Array.factory(dtUse, (int[]) null, bb));
     }
   }
 
-  static Variable decodeVar(NetcdfFile ncfile, Group g, Structure parent, NcStreamProto.Variable var) {
-    Variable ncvar = new Variable(ncfile, g, parent, var.getName());
+  private static Variable.Builder decodeVar(NcStreamProto.Variable var) {
     DataType varType = convertDataType(var.getDataType());
-    ncvar.setDataType(convertDataType(var.getDataType()));
+    Variable.Builder ncvar = Variable.builder().setName(var.getName()).setDataType(varType);
 
     if (varType.isEnum()) {
-      String enumName = var.getEnumType();
-      EnumTypedef enumType = g.findEnumeration(enumName);
-      if (enumType != null)
-        ncvar.setEnumTypedef(enumType);
+      ncvar.setEnumTypeName(var.getEnumType());
     }
 
+    // The Dimensions are stored redunantly in the Variable.
+    // If shared, they must also exist in a parent Group. However, we dont yet have the Groups wired together,
+    // so that has to wait until build().
     List<Dimension> dims = new ArrayList<>(6);
+    Section.Builder section = Section.builder();
     for (ucar.nc2.stream.NcStreamProto.Dimension dim : var.getShapeList()) {
-      Dimension ncdim = decodeDim(dim);
-      if (!ncdim.isShared())
-        dims.add(ncdim);
-      else {
-        Dimension d = g.findDimension(ncdim.getShortName());
-        if (d == null)
-          throw new IllegalStateException("Can find shared dimension " + dim.getName());
-        dims.add(d);
-      }
+      dims.add(decodeDim(dim));
+      section.appendRange((int) dim.getLength());
     }
-    ncvar.setDimensions(dims);
+    ncvar.addDimensions(dims);
 
     for (ucar.nc2.stream.NcStreamProto.Attribute att : var.getAttsList())
       ncvar.addAttribute(decodeAtt(att));
@@ -535,49 +515,40 @@ public class NcStream {
     if (!var.getData().isEmpty()) {
       // LOOK may mess with ability to change var size later.
       ByteBuffer bb = ByteBuffer.wrap(var.getData().toByteArray());
-      Array data = Array.factory(varType, ncvar.getShape(), bb);
-      ncvar.setCachedData(data, false);
+      Array data = Array.factory(varType, section.build().getShape(), bb);
+      ncvar.setCachedData(data, true);
     }
 
     return ncvar;
   }
 
-  static Structure decodeStructure(NetcdfFile ncfile, Group g, Structure parent, NcStreamProto.Structure s) {
-    Structure ncvar = (s.getDataType() == ucar.nc2.stream.NcStreamProto.DataType.SEQUENCE)
-        ? new Sequence(ncfile, g, parent, s.getName())
-        : new Structure(ncfile, g, parent, s.getName());
+  private static Structure.Builder decodeStructure(NcStreamProto.Structure s) {
+    Structure.Builder ncvar =
+        (s.getDataType() == ucar.nc2.stream.NcStreamProto.DataType.SEQUENCE) ? Sequence.builder() : Structure.builder();
 
-    ncvar.setDataType(convertDataType(s.getDataType()));
+    ncvar.setName(s.getName()).setDataType(convertDataType(s.getDataType()));
 
     List<Dimension> dims = new ArrayList<>(6);
     for (ucar.nc2.stream.NcStreamProto.Dimension dim : s.getShapeList()) {
-      Dimension ncdim = decodeDim(dim);
-      if (!ncdim.isShared())
-        dims.add(ncdim);
-      else {
-        Dimension d = g.findDimension(ncdim.getShortName());
-        if (d == null)
-          throw new IllegalStateException("Can find shared dimension " + dim.getName());
-        dims.add(d);
-      }
+      dims.add(decodeDim(dim));
     }
-    ncvar.setDimensions(dims);
+    ncvar.addDimensions(dims);
 
     for (ucar.nc2.stream.NcStreamProto.Attribute att : s.getAttsList())
       ncvar.addAttribute(decodeAtt(att));
 
     for (ucar.nc2.stream.NcStreamProto.Variable vp : s.getVarsList())
-      ncvar.addMemberVariable(decodeVar(ncfile, g, ncvar, vp));
+      ncvar.addMemberVariable(decodeVar(vp));
 
     for (NcStreamProto.Structure sp : s.getStructsList())
-      ncvar.addMemberVariable(decodeStructure(ncfile, g, ncvar, sp));
+      ncvar.addMemberVariable(decodeStructure(sp));
 
     return ncvar;
   }
 
   @Nonnull
   public static Section decodeSection(NcStreamProto.Section proto) {
-    Section section = new Section();
+    Section.Builder section = Section.builder();
 
     for (ucar.nc2.stream.NcStreamProto.Range pr : proto.getRangeList()) {
       try {
@@ -595,7 +566,7 @@ public class NcStream {
         throw new RuntimeException("Bad Section in ncstream", e);
       }
     }
-    return section;
+    return section.build();
   }
 
   /*
@@ -731,7 +702,7 @@ public class NcStream {
   /////////////////////
   // < 5.0
 
-  static DataType decodeAttributeType(ucar.nc2.stream.NcStreamProto.Attribute.Type dtype) {
+  private static DataType decodeAttributeType(ucar.nc2.stream.NcStreamProto.Attribute.Type dtype) {
     switch (dtype) {
       case STRING:
         return DataType.STRING;
@@ -753,7 +724,7 @@ public class NcStream {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public static long encodeArrayStructure(ArrayStructure as, ByteOrder bo, OutputStream os) throws java.io.IOException {
+  static long encodeArrayStructure(ArrayStructure as, ByteOrder bo, OutputStream os) throws java.io.IOException {
     long size = 0;
 
     ArrayStructureBB dataBB = StructureDataDeep.copyToArrayBB(as, bo, true); // force canonical packing
@@ -786,8 +757,8 @@ public class NcStream {
     return size;
   }
 
-  static NcStreamProto.StructureData encodeStructureDataProto(byte[] fixed, List<Integer> count, List<String> ss,
-      int nrows, int rowLength) {
+  private static NcStreamProto.StructureData encodeStructureDataProto(byte[] fixed, List<Integer> count,
+      List<String> ss, int nrows, int rowLength) {
     NcStreamProto.StructureData.Builder builder = NcStreamProto.StructureData.newBuilder();
     builder.setData(ByteString.copyFrom(fixed));
     builder.setNrows(nrows);
@@ -799,11 +770,10 @@ public class NcStream {
     return builder.build();
   }
 
-  public static ArrayStructureBB decodeArrayStructure(StructureMembers sm, int[] shape, byte[] proto)
+  static ArrayStructureBB decodeArrayStructure(StructureMembers sm, int[] shape, byte[] proto)
       throws java.io.IOException {
     NcStreamProto.StructureData.Builder builder = NcStreamProto.StructureData.newBuilder();
     builder.mergeFrom(proto);
-    long size = 0;
 
     ByteBuffer bb = ByteBuffer.wrap(builder.getData().toByteArray());
     ArrayStructureBB dataBB = new ArrayStructureBB(sm, shape, bb, 0);

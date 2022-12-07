@@ -4,6 +4,7 @@
  */
 package ucar.nc2;
 
+import javax.annotation.concurrent.Immutable;
 import ucar.ma2.*;
 import ucar.nc2.util.CancelTask;
 import java.io.IOException;
@@ -14,13 +15,13 @@ import java.io.IOException;
  * @author caron
  * @see Variable#slice(int, int)
  */
-
+@Immutable
 class SliceReader implements ProxyReader {
   private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SliceReader.class);
 
-  private Variable orgClient;
-  private int sliceDim; // dimension index into original
-  private Section slice; // section of the original
+  private final Variable orgClient;
+  private final int sliceDim; // dimension index into original
+  private final Section slice; // section of the original
 
   SliceReader(Variable orgClient, int dim, Section slice) {
     // LOOK could do check that slice is compatible with client
@@ -46,9 +47,9 @@ class SliceReader implements ProxyReader {
   @Override
   public Array reallyRead(Variable client, Section section, CancelTask cancelTask)
       throws IOException, InvalidRangeException {
-    Section orgSection = new Section(section.getRanges());
+    Section.Builder orgSection = Section.builder().appendRanges(section.getRanges());
     orgSection.insertRange(sliceDim, slice.getRange(sliceDim));
-    Array data = orgClient._read(orgSection);
+    Array data = orgClient._read(orgSection.build());
     data = data.reduce(sliceDim);
     return data;
   }

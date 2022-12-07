@@ -6,41 +6,79 @@
 package ucar.nc2.dataset;
 
 import ucar.unidata.geoloc.ProjectionImpl;
-import ucar.unidata.util.Parameter;
 import javax.annotation.concurrent.Immutable;
 
-/**
- * A Projection CoordinateTransform is a function from (GeoX, GeoY) -> (Lat, Lon).
- *
- * @author caron
- */
-
+/** A Projection CoordinateTransform has a Projection bijection (GeoX, GeoY) <-> (Lat, Lon). */
 @Immutable
 public class ProjectionCT extends CoordinateTransform {
-  private final ProjectionImpl proj;
 
   /**
    * Create a Projection Coordinate Transform.
    * 
    * @param name name of transform, must be unique within the NcML.
    * @param authority naming authority.
-   * @param proj projection function.
+   * @param proj projection function. TODO will be Projection in ver6.
    */
   public ProjectionCT(String name, String authority, ProjectionImpl proj) {
-    super(name, authority, TransformType.Projection);
-    this.proj = proj;
-
-    for (Parameter p : proj.getProjectionParameters()) {
-      addParameter(p);
-    }
+    super(name, authority, TransformType.Projection, proj.getProjectionParameters());
+    this.projection = proj;
   }
 
   /**
-   * get the Projection function
+   * Get the Projection function.
    * 
    * @return the Projection
+   * @deprecated this will return Projection, not ProjectionImpl in 6.
    */
   public ProjectionImpl getProjection() {
-    return proj;
+    return projection;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  private final ProjectionImpl projection;
+
+  protected ProjectionCT(Builder<?> builder, NetcdfDataset ncd) {
+    super(builder, ncd);
+    this.projection = builder.projection;
+  }
+
+  public Builder<?> toBuilder() {
+    return addLocalFieldsToBuilder(builder());
+  }
+
+  // Add local fields to the builder.
+  protected Builder<?> addLocalFieldsToBuilder(Builder<? extends Builder<?>> b) {
+    b.setProjection(this.projection);
+    return (Builder<?>) super.addLocalFieldsToBuilder(b);
+  }
+
+  public static Builder<?> builder() {
+    return new Builder2();
+  }
+
+  private static class Builder2 extends Builder<Builder2> {
+    @Override
+    protected Builder2 self() {
+      return this;
+    }
+  }
+
+  public static abstract class Builder<T extends Builder<T>> extends CoordinateTransform.Builder<T> {
+    public ProjectionImpl projection;
+    private boolean built;
+
+    protected abstract T self();
+
+    public Builder<?> setProjection(ProjectionImpl projection) {
+      this.projection = projection;
+      return self();
+    }
+
+    public ProjectionCT build(NetcdfDataset ncd) {
+      if (built)
+        throw new IllegalStateException("already built");
+      built = true;
+      return new ProjectionCT(this, ncd);
+    }
   }
 }

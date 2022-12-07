@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.unidata.util.test.UnitTestCommon;
 import ucar.unidata.util.test.category.NotJenkins;
-import ucar.unidata.util.test.category.NotTravis;
+import ucar.unidata.util.test.category.NotPullRequest;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
@@ -21,7 +21,8 @@ import java.util.List;
 /**
  * Test OpenDap Server at the NetcdfDataset level
  */
-public class TestHyrax extends UnitTestCommon {
+@Ignore
+public class TestHyrax extends DapTestCommon {
   private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   static final boolean DEBUG = false;
@@ -251,7 +252,7 @@ public class TestHyrax extends UnitTestCommon {
   // Junit test method
 
   @Test
-  @Category({NotJenkins.class, NotTravis.class})
+  @Category({NotJenkins.class, NotPullRequest.class})
   public void testHyrax() throws Exception {
     boolean pass = true;
     for (ClientTest testcase : chosentests) {

@@ -41,7 +41,7 @@ public class CoverageCoordAxis1D extends CoverageCoordAxis { // implements Itera
     // make sure range has axisType as the name
     String rangeName = (axisType != null) ? axisType.toString() : null;
     if (builder.range != null) {
-      this.range = (rangeName != null) ? builder.range.setName(rangeName) : builder.range;
+      this.range = (rangeName != null) ? builder.range.copyWithName(rangeName) : builder.range;
     } else {
       this.range = Range.make(rangeName, getNcoords());
     }
@@ -112,6 +112,25 @@ public class CoverageCoordAxis1D extends CoverageCoordAxis { // implements Itera
         return values[0] <= values[2 * ncoords - 1];
     }
     throw new IllegalStateException("unknown spacing" + spacing);
+  }
+
+  public double getCoord(int index) {
+    if (index < 0 || index >= getNcoords()) {
+      throw new IllegalArgumentException("Index out of range=" + index);
+    }
+    loadValuesIfNeeded();
+
+    switch (spacing) {
+      case regularPoint:
+      case regularInterval:
+        return startValue + index * getResolution();
+
+      case irregularPoint:
+      case contiguousInterval:
+      case discontiguousInterval:
+        return values[index];
+    }
+    throw new IllegalStateException("Unknown spacing=" + spacing);
   }
 
   public double getCoordMidpoint(int index) {
@@ -243,6 +262,8 @@ public class CoverageCoordAxis1D extends CoverageCoordAxis { // implements Itera
     return getCoordMidpoint(index);
   }
 
+  /** @deprecated will be moved in ver6 */
+  @Deprecated
   public List<NamedObject> getCoordValueNames() {
     loadValuesIfNeeded();
     if (timeHelper != null)
@@ -288,6 +309,9 @@ public class CoverageCoordAxis1D extends CoverageCoordAxis { // implements Itera
     if (!isRegular())
       return Optional.empty("subsetByIntervals only for regular longitude");
 
+    // adjust the resolution of the subset based on stride
+    double subsetResolution = stride > 1 ? stride * resolution : resolution;
+
     CoordAxisHelper helper = new CoordAxisHelper(this);
 
     double start = Double.NaN;
@@ -305,11 +329,13 @@ public class CoverageCoordAxis1D extends CoverageCoordAxis { // implements Itera
     }
 
     RangeComposite compositeRange = new RangeComposite(AxisType.Lon.toString(), ranges);
+    // number of points in the subset
     int npts = compositeRange.length();
-    double end = start + npts * resolution;
+    // need to use the subset resolution to figure out the end
+    double end = start + npts * subsetResolution;
 
     CoverageCoordAxisBuilder builder = new CoverageCoordAxisBuilder(this); // copy
-    builder.subset(npts, start, end, resolution, null);
+    builder.subset(npts, start, end, subsetResolution, null);
     builder.setRange(null);
     builder.setCompositeRange(compositeRange);
 
@@ -360,13 +386,13 @@ public class CoverageCoordAxis1D extends CoverageCoordAxis { // implements Itera
         // default is all
         break;
 
-      // x,y get seperately subsetted
+      // x,y get separately subsetted
       case GeoX:
       case GeoY:
       case Lat:
       case Lon:
         throw new IllegalArgumentException();
-        // return null; // LOOK heres a case where null is "correct"
+      // return null; // LOOK heres a case where null is "correct"
 
       case Time:
         if (params.isTrue(SubsetParams.timePresent))
@@ -416,7 +442,7 @@ public class CoverageCoordAxis1D extends CoverageCoordAxis { // implements Itera
 
         if (stride != 1)
           try {
-            return Optional.of(helper.subsetByIndex(getRange().setStride(stride)));
+            return Optional.of(helper.subsetByIndex(getRange().copyWithStride(stride)));
           } catch (InvalidRangeException e) {
             return Optional.empty(e.getMessage());
           }

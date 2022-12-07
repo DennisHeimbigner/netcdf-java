@@ -6,6 +6,7 @@ package ucar.nc2.ft2.coverage.adapter;
 
 import ucar.ma2.*;
 import ucar.nc2.Attribute;
+import ucar.nc2.AttributeContainer;
 import ucar.nc2.Dimension;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -233,7 +234,7 @@ public class DtCoverage implements IsMissingEvaluator {
    * @return the attribute, or null if not found
    */
   public Attribute findAttributeIgnoreCase(String name) {
-    return vs.findAttributeIgnoreCase(name);
+    return vs.attributes().findAttributeIgnoreCase(name);
   }
 
   /**
@@ -244,7 +245,7 @@ public class DtCoverage implements IsMissingEvaluator {
    * @return Attribute string value, or default if not found.
    */
   public String findAttValueIgnoreCase(String attName, String defaultValue) {
-    return dataset.getNetcdfDataset().findAttValueIgnoreCase(vs, attName, defaultValue);
+    return vs.findAttributeString(attName, defaultValue);
   }
 
   // implementation of GeoGrid interface
@@ -268,13 +269,16 @@ public class DtCoverage implements IsMissingEvaluator {
     return shape;
   }
 
-  /**
-   * get the data type
-   */
   public DataType getDataType() {
     return vs.getDataType();
   }
 
+  public AttributeContainer attributes() {
+    return vs.attributes();
+  }
+
+  /** @deprecated use attributes() */
+  @Deprecated
   public List<Attribute> getAttributes() {
     return vs.getAttributes();
   }
@@ -542,6 +546,13 @@ public class DtCoverage implements IsMissingEvaluator {
    */
   public Array readDataSection(Section subset, boolean canonicalOrder) throws InvalidRangeException, IOException {
 
+    if (vs.getDimensions().size() != mydims.size()) {
+      throw new InvalidRangeException("Variable '" + vs.getOriginalName()
+          + "' has a different number of dimensions than the coordinate system. This is likely due to a problem with a"
+          + " parsing a dimension in the data.\n Variable dimensions: " + vs.getDimensionsString()
+          + ".\n Coordinate system: " + gcs);
+    }
+
     // get the ranges list in the order of the variable; a null range means "all" to vs.read()
     Range[] varRange = new Range[getRank()];
     for (Range r : subset.getRanges()) {
@@ -611,20 +622,13 @@ public class DtCoverage implements IsMissingEvaluator {
     if (oldDims.contains(xdim))
       permuteIndex[count] = oldDims.indexOf(xdim);
 
-    if (debugArrayShape) {
-      System.out.println("oldDims = ");
-      for (Dimension oldDim : oldDims)
-        System.out.println("   oldDim = " + oldDim.getShortName());
-      System.out.println("permute dims = ");
-      for (int aPermuteIndex : permuteIndex)
-        System.out.println("   oldDim index = " + aPermuteIndex);
-    }
-
     // check to see if we need to permute
     boolean needPermute = false;
     for (int i = 0; i < permuteIndex.length; i++) {
-      if (i != permuteIndex[i])
+      if (i != permuteIndex[i]) {
         needPermute = true;
+        break;
+      }
     }
 
     return needPermute ? permuteIndex : null;

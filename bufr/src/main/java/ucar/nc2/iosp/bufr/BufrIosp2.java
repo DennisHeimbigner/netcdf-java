@@ -1,21 +1,33 @@
 /*
- * Copyright (c) 1998-2018 University Corporation for Atmospheric Research/Unidata
+ * Copyright (c) 1998-2020 University Corporation for Atmospheric Research/Unidata
  * See LICENSE for license information.
  */
 package ucar.nc2.iosp.bufr;
 
+import java.io.IOException;
+import java.util.Formatter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import org.jdom2.Element;
+import ucar.ma2.Array;
+import ucar.ma2.ArraySequence;
+import ucar.ma2.ArrayStructure;
+import ucar.ma2.Section;
+import ucar.ma2.StructureData;
+import ucar.ma2.StructureDataIterator;
+import ucar.nc2.Group;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Sequence;
+import ucar.nc2.Structure;
+import ucar.nc2.Variable;
 import ucar.nc2.constants.DataFormatType;
-import ucar.ma2.*;
-import ucar.nc2.*;
 import ucar.nc2.iosp.AbstractIOServiceProvider;
 import ucar.nc2.util.CancelTask;
 import ucar.unidata.io.RandomAccessFile;
-import java.io.*;
-import java.util.*;
 
 /**
- * IOSP for BUFR data - version 2, use the preprocessor
+ * IOSP for BUFR data - version 2, using the preprocessor.
  *
  * @author caron
  * @since 8/8/13
@@ -23,7 +35,7 @@ import java.util.*;
 public class BufrIosp2 extends AbstractIOServiceProvider {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BufrIosp2.class);
 
-  public static final String obsRecord = "obs";
+  public static final String obsRecordName = "obs";
   public static final String fxyAttName = "BUFR:TableB_descriptor";
   public static final String centerId = "BUFR:centerId";
 
@@ -31,18 +43,11 @@ public class BufrIosp2 extends AbstractIOServiceProvider {
   private static boolean debugIter;
 
   public static void setDebugFlags(ucar.nc2.util.DebugFlags debugFlag) {
-    // debugOpen = debugFlag.isSet("Bufr/open");
     debugIter = debugFlag.isSet("Bufr/iter");
   }
 
-  // static public final Set<NetcdfDataset.Enhance> enhance =
-  // Collections.unmodifiableSet(EnumSet.of(NetcdfDataset.Enhance.ScaleMissing));
-
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
   private Structure obsStructure;
-  private Message protoMessage;
+  private Message protoMessage; // prototypical message: all messages in the file must be the same.
   private MessageScanner scanner;
   private HashSet<Integer> messHash;
   private boolean isSingle;
@@ -55,6 +60,58 @@ public class BufrIosp2 extends AbstractIOServiceProvider {
   }
 
   @Override
+  public boolean isBuilder() {
+    return true;
+  }
+
+  @Override
+  public void build(RandomAccessFile raf, Group.Builder rootGroup, CancelTask cancelTask) throws IOException {
+    super.open(raf, rootGroup.getNcfile(), cancelTask);
+
+    scanner = new MessageScanner(raf);
+    protoMessage = scanner.getFirstDataMessage();
+    if (protoMessage == null)
+      throw new IOException("No data messages in the file= " + raf.getLocation());
+    if (!protoMessage.isTablesComplete())
+      throw new IllegalStateException("BUFR file has incomplete tables");
+
+    // just get the fields
+    config = BufrConfig.openFromMessage(raf, protoMessage, iospParam);
+
+    // this fills the netcdf object
+    new BufrIospBuilder(protoMessage, config, rootGroup, raf.getLocation());
+    isSingle = false;
+  }
+
+  @Override
+  public void buildFinish(NetcdfFile ncfile) {
+    obsStructure = (Structure) ncfile.findVariable(obsRecordName);
+    // The proto DataDescriptor must have a link to the Sequence object to read nested Sequences.
+    connectSequences(obsStructure.getVariables(), protoMessage.getRootDataDescriptor().getSubKeys());
+  }
+
+  private void connectSequences(List<Variable> variables, List<DataDescriptor> dataDescriptors) {
+    for (Variable v : variables) {
+      if (v instanceof Sequence) {
+        findDataDescriptor(dataDescriptors, v.getShortName()).ifPresent(dds -> dds.refersTo = (Sequence) v);
+      }
+      if (v instanceof Structure) { // recurse
+        findDataDescriptor(dataDescriptors, v.getShortName())
+            .ifPresent(dds -> connectSequences(((Structure) v).getVariables(), dds.getSubKeys()));
+      }
+    }
+  }
+
+  private Optional<DataDescriptor> findDataDescriptor(List<DataDescriptor> dataDescriptors, String name) {
+    Optional<DataDescriptor> ddsOpt = dataDescriptors.stream().filter(d -> name.equals(d.name)).findFirst();
+    if (ddsOpt.isPresent()) {
+      return ddsOpt;
+    } else {
+      throw new IllegalStateException("DataDescriptor does not contain " + name);
+    }
+  }
+
+  @Override
   public void open(RandomAccessFile raf, NetcdfFile ncfile, CancelTask cancelTask) throws IOException {
     super.open(raf, ncfile, cancelTask);
 
@@ -62,8 +119,6 @@ public class BufrIosp2 extends AbstractIOServiceProvider {
     protoMessage = scanner.getFirstDataMessage();
     if (protoMessage == null)
       throw new IOException("No data messages in the file= " + ncfile.getLocation());
-    // DataDescriptor dds = protoMessage.getRootDataDescriptor(); // construct the data descriptors, check for complete
-    // tables
     if (!protoMessage.isTablesComplete())
       throw new IllegalStateException("BUFR file has incomplete tables");
 
@@ -94,6 +149,7 @@ public class BufrIosp2 extends AbstractIOServiceProvider {
     isSingle = true;
 
     ncfile.finish();
+    this.ncfile = ncfile;
   }
 
   @Override
@@ -119,13 +175,18 @@ public class BufrIosp2 extends AbstractIOServiceProvider {
 
   @Override
   public Array readData(Variable v2, Section section) {
-    // return new ArraySequence(obsStructure.makeStructureMembers(), getStructureIterator(null, -1), nelems);
+    findRootSequence();
     return new ArraySequence(obsStructure.makeStructureMembers(), new SeqIter(), nelems);
   }
 
   @Override
   public StructureDataIterator getStructureIterator(Structure s, int bufferSize) {
+    findRootSequence();
     return isSingle ? new SeqIterSingle() : new SeqIter();
+  }
+
+  private void findRootSequence() {
+    this.obsStructure = (Structure) this.ncfile.findVariable(BufrIosp2.obsRecordName);
   }
 
   private class SeqIter implements StructureDataIterator {

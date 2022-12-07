@@ -7,11 +7,11 @@ package ucar.nc2.ui.op;
 
 import javax.annotation.Nullable;
 import ucar.ma2.Array;
-import ucar.nc2.NCdumpW;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.ncml.Aggregation;
+import ucar.nc2.write.Ncdump;
 import ucar.ui.widget.BAMutil;
 import ucar.ui.widget.IndependentWindow;
 import ucar.ui.widget.PopupMenu;
@@ -42,7 +42,7 @@ import javax.swing.JSplitPane;
 public class AggTable extends JPanel {
   private PreferencesExt prefs;
 
-  private BeanTable datasetTable;
+  private BeanTable<DatasetBean> datasetTable;
   private JSplitPane split;
 
   private TextHistoryPane infoTA, aggTA;
@@ -50,24 +50,16 @@ public class AggTable extends JPanel {
 
   private NetcdfDataset current;
 
-  /**
-   *
-   */
-  public AggTable(PreferencesExt prefs, JPanel buttPanel) {
+  AggTable(PreferencesExt prefs, JPanel buttPanel) {
     this.prefs = prefs;
 
-    datasetTable = new BeanTable(DatasetBean.class, (PreferencesExt) prefs.node("DatasetBean"), false);
-    /*
-     * datasetTable.addListSelectionListener(e -> {
-     * datasetTable.getSelectedBean();
-     * });
-     */
+    datasetTable = new BeanTable<>(DatasetBean.class, (PreferencesExt) prefs.node("DatasetBean"), false);
 
     PopupMenu varPopup = new PopupMenu(datasetTable.getJTable(), "Options");
     varPopup.addAction("Open as NetcdfFile", new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        DatasetBean dsb = (DatasetBean) datasetTable.getSelectedBean();
+        DatasetBean dsb = datasetTable.getSelectedBean();
         if (dsb == null) {
           return;
         }
@@ -78,7 +70,7 @@ public class AggTable extends JPanel {
     varPopup.addAction("Check CoordSystems", new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        DatasetBean dsb = (DatasetBean) datasetTable.getSelectedBean();
+        DatasetBean dsb = datasetTable.getSelectedBean();
         if (dsb == null) {
           return;
         }
@@ -89,7 +81,7 @@ public class AggTable extends JPanel {
     varPopup.addAction("Open as GridDataset", new AbstractAction() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        DatasetBean dsb = (DatasetBean) datasetTable.getSelectedBean();
+        DatasetBean dsb = datasetTable.getSelectedBean();
         if (dsb == null) {
           return;
         }
@@ -132,21 +124,15 @@ public class AggTable extends JPanel {
     prefs.putInt("splitPos", split.getDividerLocation());
   }
 
-  /**
-   *
-   */
   public void clear() {
     datasetTable.clearBeans();
     aggTA.clear();
   }
 
-  /**
-   *
-   */
-  public void setAggDataset(NetcdfDataset ncd) throws IOException {
+  void setAggDataset(NetcdfDataset ncd) {
     current = ncd;
 
-    Aggregation agg = ncd.getAggregation();
+    Aggregation agg = (Aggregation) ncd.getAggregation();
     List<DatasetBean> beanList = new ArrayList<>();
     for (Aggregation.Dataset dataset : agg.getDatasets()) {
       beanList.add(new DatasetBean(dataset));
@@ -159,23 +145,20 @@ public class AggTable extends JPanel {
     aggTA.setText(f.toString());
   }
 
-  /**
-   *
-   */
   private void checkAggCoordinate(Formatter f) {
     if (null == current) {
       return;
     }
 
     try {
-      Aggregation agg = current.getAggregation();
+      Aggregation agg = (Aggregation) current.getAggregation();
       String aggDimName = agg.getDimensionName();
       Variable aggCoord = current.findVariable(aggDimName);
 
       Array data = aggCoord.read();
 
       f.format("   Aggregated coordinate variable %s%n", aggCoord);
-      f.format(NCdumpW.toString(data, aggDimName, null));
+      f.format(Ncdump.printArray(data, aggDimName, null));
 
       for (Object bean : datasetTable.getBeans()) {
         DatasetBean dbean = (DatasetBean) bean;
@@ -188,7 +171,7 @@ public class AggTable extends JPanel {
             f.format("   doesnt have coordinate variable%n");
           } else {
             data = aggCoordp.read();
-            f.format(NCdumpW.toString(data, aggCoordp.getNameAndDimensions() + " (" + aggCoordp.getUnitsString() + ")",
+            f.format(Ncdump.printArray(data, aggCoordp.getNameAndDimensions() + " (" + aggCoordp.getUnitsString() + ")",
                 null));
           }
         }
@@ -200,9 +183,6 @@ public class AggTable extends JPanel {
     }
   }
 
-  /**
-   *
-   */
   private void compare(Formatter f) {
     try {
       NetcdfFile org = null;
@@ -230,17 +210,11 @@ public class AggTable extends JPanel {
     }
   }
 
-  /**
-   *
-   */
   public static class DatasetBean {
     Aggregation.Dataset ds;
 
-    /**
-     *
-     */
     @Nullable
-    protected NetcdfFile acquireFile() {
+    NetcdfFile acquireFile() {
       try {
         return ds.acquireFile(null);
       } catch (IOException e) {
@@ -249,14 +223,11 @@ public class AggTable extends JPanel {
       }
     }
 
-    /**
-     * create from a dataset
-     */
-    public DatasetBean(Aggregation.Dataset ds) {
+    DatasetBean(Aggregation.Dataset ds) {
       this.ds = ds;
     }
 
-    public String getLocation() throws IOException {
+    public String getLocation() {
       return ds.getLocation();
     }
 

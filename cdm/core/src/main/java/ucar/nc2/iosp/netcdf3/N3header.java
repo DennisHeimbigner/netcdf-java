@@ -4,6 +4,7 @@
  */
 package ucar.nc2.iosp.netcdf3;
 
+import com.google.common.collect.Iterables;
 import java.nio.charset.StandardCharsets;
 import ucar.ma2.*;
 import ucar.nc2.*;
@@ -17,14 +18,15 @@ import java.io.IOException;
  * This is used by N3iosp.
  *
  * @author caron
+ * @deprecated do not use
  */
-
+@Deprecated
 public class N3header extends NCheader {
   private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(N3header.class);
 
-  static final byte[] MAGIC = {0x43, 0x44, 0x46, 0x01};
-  private static final long MAX_UNSIGNED_INT = 0x00000000ffffffffL;
+  static final long MAX_UNSIGNED_INT = 0x00000000ffffffffL;
 
+  static final byte[] MAGIC = {0x43, 0x44, 0x46, 0x01};
   static final byte[] MAGIC_LONG = {0x43, 0x44, 0x46, 0x02}; // 64-bit offset format : only affects the
                                                              // variable offset value
   static final int MAGIC_DIM = 10;
@@ -48,6 +50,21 @@ public class N3header extends NCheader {
   private static boolean debugVariablePos;
   private static boolean debugStreaming;
 
+  // variable info for reading/writing
+  static class Vinfo {
+    long vsize; // size of array in bytes. if isRecord, size per record.
+    long begin; // offset of start of data from start of file
+    boolean isRecord; // is it a record variable?
+    long attsPos; // attributes start here - used for update
+
+    Vinfo(long vsize, long begin, boolean isRecord, long attsPos) {
+      this.vsize = vsize;
+      this.begin = begin;
+      this.isRecord = isRecord;
+      this.attsPos = attsPos;
+    }
+  }
+
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   ucar.unidata.io.RandomAccessFile raf;
@@ -60,12 +77,14 @@ public class N3header extends NCheader {
   int numrecs; // number of records written
   long recsize; // size of each record (padded)
   long recStart = Integer.MAX_VALUE; // where the record data starts
+  boolean useLongOffset;
 
-  private boolean useLongOffset;
   private long nonRecordDataSize; // size of non-record variables
   private long dataStart = Long.MAX_VALUE; // where the data starts
 
   private long globalAttsPos; // global attributes start here - used for update
+
+  private Optional<Boolean> headerCreated = Optional.empty();
 
   /*
    * Notes
@@ -323,10 +342,15 @@ public class N3header extends NCheader {
   }
 
   long calcFileSize() {
-    if (udim != null)
-      return recStart + recsize * numrecs;
-    else
-      return dataStart + nonRecordDataSize;
+    long size = 0;
+    // only calculate a file size if an attempt to write the header was made and was successful.
+    if (headerCreated.isPresent() && headerCreated.get().booleanValue()) {
+      if (udim != null)
+        size = recStart + recsize * numrecs;
+      else
+        size = dataStart + nonRecordDataSize;
+    }
+    return size;
   }
 
   void showDetail(Formatter out) throws IOException {
@@ -614,15 +638,30 @@ public class N3header extends NCheader {
    *
    * @param largeFile is large file format
    * @param fout put debug messages here, mnay be null
-   * @return true if it worked
+   * @return true if rewrite occurred
    */
   boolean rewriteHeader(boolean largeFile, Formatter fout) throws IOException {
-    int want = sizeHeader(largeFile);
-    if (want > dataStart)
-      return false;
+    boolean rewriteInPlace = true;
 
-    writeHeader(0, largeFile, true, fout);
-    return true;
+    int want = sizeHeader(largeFile);
+
+    if (want > dataStart) {
+      // if the size of the new header has been computed and
+      // is in the data portion of the file, bail
+      rewriteInPlace = false;
+    } else if (want != -1 && !headerCreated.isPresent()) {
+      writeHeader(0, largeFile, true, fout);
+      // didn't write the header in place, but rather wrote it for the first time,
+      // so will return true
+      rewriteInPlace = true;
+    } else if ((headerCreated.isPresent() && headerCreated.get())) {
+      writeHeader(0, largeFile, true, fout);
+      rewriteInPlace = true;
+    } else if (headerCreated.isPresent() && !headerCreated.get()) {
+      rewriteInPlace = true;
+    }
+
+    return rewriteInPlace;
   }
 
   void writeHeader(int extra, boolean largeFile, boolean keepDataStart, Formatter fout) throws IOException {
@@ -630,6 +669,7 @@ public class N3header extends NCheader {
     nonRecordDataSize = 0; // length of non-record data
     recsize = 0; // length of single record
     recStart = Long.MAX_VALUE; // where the record data starts
+    headerCreated = Optional.of(false);
 
     // magic number
     raf.seek(0);
@@ -733,43 +773,52 @@ public class N3header extends NCheader {
       nonRecordDataSize -= dataStart;
     if (uvars.isEmpty()) // if there are no record variables
       recStart = 0;
+    // if we make it here, we can assume the header was created
+    // and that we didn't throw any runtime exceptions along the way
+    headerCreated = Optional.of(true);
   }
 
   // calculate the size writing a header would take
   int sizeHeader(boolean largeFile) {
-    int size = 4; // magic number
-    size += 4; // numrecs
+    // start off by assuming the header was not fully created,
+    // and therefore cannot be trusted to be used to compute size
+    int size = -1;
+    // if the header was created, use what is inside of it to compute the header size
+    if (!headerCreated.isPresent() || headerCreated.isPresent() && headerCreated.get()) {
+      size = 4; // magic number
+      size += 4; // numrecs
 
-    // dims
-    size += 8; // magic, ndims
-    for (Dimension dim : ncfile.getDimensions())
-      size += sizeString(dim.getShortName()) + 4; // name, len
+      // dims
+      size += 8; // magic, ndims
+      for (Dimension dim : ncfile.getDimensions())
+        size += sizeString(dim.getShortName()) + 4; // name, len
 
-    // global attributes
-    size += sizeAtts(ncfile.getGlobalAttributes());
+      // global attributes
+      size += sizeAtts(ncfile.getGlobalAttributes());
 
-    // variables
-    size += 8; // magic, nvars
-    for (Variable var : ncfile.getVariables()) {
-      size += sizeString(var.getShortName());
+      // variables
+      size += 8; // magic, nvars
+      for (Variable var : ncfile.getVariables()) {
+        size += sizeString(var.getShortName());
 
-      // dimensions
-      size += 4; // ndims
-      size += 4 * var.getDimensions().size(); // dim id
+        // dimensions
+        size += 4; // ndims
+        size += 4 * var.getDimensions().size(); // dim id
 
-      // variable attributes
-      size += sizeAtts(var.getAttributes());
+        // variable attributes
+        size += sizeAtts(var.attributes());
 
-      size += 8; // data type, variable size
-      size += (largeFile) ? 8 : 4;
+        size += 8; // data type, variable size
+        size += (largeFile) ? 8 : 4;
+      }
     }
 
     return size;
   }
 
-  private void writeAtts(List<Attribute> atts, Formatter fout) throws IOException {
+  private void writeAtts(Iterable<Attribute> atts, Formatter fout) throws IOException {
 
-    int n = atts.size();
+    int n = Iterables.size(atts);
     if (n == 0) {
       raf.writeInt(0);
       raf.writeInt(0);
@@ -778,10 +827,10 @@ public class N3header extends NCheader {
       raf.writeInt(n);
     }
 
-    for (int i = 0; i < n; i++) {
+    int count = 0;
+    for (Attribute att : atts) {
       if (fout != null)
-        fout.format("***att %d pos= %d%n", i, raf.getFilePointer());
-      Attribute att = atts.get(i);
+        fout.format("***att %d pos= %d%n", count, raf.getFilePointer());
 
       writeString(att.getShortName());
       int type = getType(att.getDataType());
@@ -802,9 +851,10 @@ public class N3header extends NCheader {
       if (fout != null)
         fout.format("  %s%n", att);
     }
+    count++;
   }
 
-  private int sizeAtts(List<Attribute> atts) {
+  private int sizeAtts(Iterable<Attribute> atts) {
     int size = 8; // magic, natts
 
     for (Attribute att : atts) {
@@ -929,7 +979,7 @@ public class N3header extends NCheader {
 
       // variable attributes
       long varAttsPos = raf.getFilePointer();
-      writeAtts(var.getAttributes(), fout);
+      writeAtts(var.attributes(), fout);
 
       // data type, variable size, beginning file position
       DataType dtype = var.getDataType();
@@ -1020,22 +1070,6 @@ public class N3header extends NCheader {
     }
 
     return true;
-  }
-
-
-  // variable info for reading/writing
-  static class Vinfo {
-    long vsize; // size of array in bytes. if isRecord, size per record.
-    long begin; // offset of start of data from start of file
-    boolean isRecord; // is it a record variable?
-    long attsPos; // attributes start here - used for update
-
-    Vinfo(long vsize, long begin, boolean isRecord, long attsPos) {
-      this.vsize = vsize;
-      this.begin = begin;
-      this.isRecord = isRecord;
-      this.attsPos = attsPos;
-    }
   }
 
   ///////////////////////////////////////////////////////////////////////////////

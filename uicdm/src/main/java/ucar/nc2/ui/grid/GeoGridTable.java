@@ -8,6 +8,7 @@ package ucar.nc2.ui.grid;
 // import thredds.wcs.Request;
 // import thredds.wcs.v1_0_0_1.*;
 import ucar.nc2.*;
+import ucar.nc2.NetcdfFileWriter.Version;
 import ucar.nc2.constants.AxisType;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.GridCoordSystem;
@@ -17,8 +18,11 @@ import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dataset.*;
 import ucar.nc2.ft.fmrc.GridDatasetInv;
 import ucar.nc2.ui.dialog.NetcdfOutputChooser;
+import ucar.nc2.write.NetcdfFileFormat;
+import ucar.nc2.write.NetcdfFormatWriter;
 import ucar.ui.widget.*;
 import ucar.ui.widget.PopupMenu;
+import ucar.unidata.geoloc.Projection;
 import ucar.util.prefs.PreferencesExt;
 import ucar.ui.prefs.*;
 import ucar.unidata.geoloc.ProjectionImpl;
@@ -264,14 +268,13 @@ public class GeoGridTable extends JPanel {
   }
 
   private void writeNetcdf(NetcdfOutputChooser.Data data) {
-    if (data.version == NetcdfFileWriter.Version.ncstream)
+    if (data.format == NetcdfFileFormat.NCSTREAM)
       return;
 
     try {
-      NetcdfFileWriter writer = NetcdfFileWriter.createNew(data.version, data.outputFilename, null); // default chunking
-                                                                                                     // - let user
-                                                                                                     // control at some
-                                                                                                     // point
+      // TODO convert to using FileCopier
+      Version version = NetcdfFormatWriter.convertToNetcdfFileWriterVersion(data.format);
+      NetcdfFileWriter writer = NetcdfFileWriter.createNew(version, data.outputFilename, null);
       CFGridWriter2.writeFile(gridDataset, getSelectedGrids(), null, null, 1, null, null, 1, false, writer);
       JOptionPane.showMessageDialog(this, "File successfully written");
     } catch (Exception ioe) {
@@ -546,7 +549,7 @@ public class GeoGridTable extends JPanel {
 
       setNGrids(gset.getGrids().size());
 
-      ProjectionImpl proj = gcs.getProjection();
+      Projection proj = gcs.getProjection();
       if (proj != null)
         setProjection(proj.getClassName());
 

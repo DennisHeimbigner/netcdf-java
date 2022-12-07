@@ -1,13 +1,17 @@
 /*
- * Copyright (c) 1998-2017 University Corporation for Atmospheric Research/Unidata
+ * Copyright (c) 1998-2020 University Corporation for Atmospheric Research/Unidata
  * See LICENSE.txt for license information.
  */
 
 package thredds.inventory;
 
 import thredds.featurecollection.FeatureCollectionConfig;
-import thredds.filesystem.MFileOS;
-import thredds.inventory.filter.*;
+import thredds.filesystem.ControllerOS;
+import thredds.inventory.filter.CompositeMFileFilter;
+import thredds.inventory.filter.LastModifiedLimit;
+import thredds.inventory.filter.RegExpMatchOnName;
+import thredds.inventory.filter.WildcardMatchOnName;
+import thredds.inventory.filter.WildcardMatchOnPath;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.units.TimeDuration;
 import javax.annotation.concurrent.GuardedBy;
@@ -32,20 +36,26 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @ThreadSafe
 public class MFileCollectionManager extends CollectionManagerAbstract {
-  private static MController controller;
+  private MController controller;
 
   /**
    * Set the MController used by scan. Defaults to thredds.filesystem.ControllerOS() if not set.
    *
    * @param _controller use this MController
    */
-  public static void setController(MController _controller) {
+  public void setController(MController _controller) {
     controller = _controller;
   }
 
-  public static MController getController() {
-    if (null == controller)
-      controller = new thredds.filesystem.ControllerOS(); // default
+  public MController getController() {
+    if (null == controller) {
+      if (!scanList.isEmpty()) {
+        CollectionConfig mc = scanList.get(0);
+        controller = MControllers.create(mc.getDirectoryName());
+      } else {
+        controller = new ControllerOS();
+      }
+    }
     return controller;
   }
 
@@ -81,7 +91,7 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
 
   private MFileCollectionManager(String collectionName, String collectionSpec, String olderThan, Formatter errlog) {
     super(collectionName, null);
-    CollectionSpecParser sp = new CollectionSpecParser(collectionSpec, errlog);
+    CollectionSpecParserAbstract sp = CollectionSpecParsers.create(collectionSpec, errlog);
     this.recheck = null;
     this.protoChoice = FeatureCollectionConfig.ProtoChoice.Penultimate; // default
     this.root = sp.getRootDir();
@@ -93,7 +103,7 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
 
     dateExtractor = (sp.getDateFormatMark() == null) ? new DateExtractorNone()
         : new DateExtractorFromName(sp.getDateFormatMark(), true);
-    scanList.add(new CollectionConfig(sp.getRootDir(), sp.getRootDir(), sp.wantSubdirs(), filters, null));
+    scanList.add(new CollectionConfig(sp.getRootDir(), getScanRootDir(sp), sp.wantSubdirs(), filters, null));
   }
 
   // this is the full featured constructor, using FeatureCollectionConfig for config.
@@ -101,7 +111,7 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
     super(config.collectionName != null ? config.collectionName : config.spec, logger);
     this.config = config;
 
-    CollectionSpecParser sp = config.getCollectionSpecParser(errlog);
+    CollectionSpecParserAbstract sp = config.getCollectionSpecParserAbstract(errlog);
     this.root = sp.getRootDir();
 
     CompositeMFileFilter filters = new CompositeMFileFilter();
@@ -116,7 +126,7 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
     else
       dateExtractor = new DateExtractorNone();
 
-    scanList.add(new CollectionConfig(sp.getRootDir(), sp.getRootDir(), sp.wantSubdirs(), filters, null));
+    scanList.add(new CollectionConfig(sp.getRootDir(), getScanRootDir(sp), sp.wantSubdirs(), filters, null));
 
     if (config.protoConfig != null)
       protoChoice = config.protoConfig.choice;
@@ -171,7 +181,7 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
 
   public MFileCollectionManager(String name, String spec, Formatter errlog, org.slf4j.Logger logger) {
     super(name, logger);
-    CollectionSpecParser sp = new CollectionSpecParser(spec, errlog);
+    CollectionSpecParserAbstract sp = CollectionSpecParsers.create(spec, errlog);
     this.root = sp.getRootDir();
 
     CompositeMFileFilter filters = new CompositeMFileFilter();
@@ -180,11 +190,15 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
 
     dateExtractor = (sp.getDateFormatMark() == null) ? new DateExtractorNone()
         : new DateExtractorFromName(sp.getDateFormatMark(), true);
-    scanList.add(new CollectionConfig(sp.getRootDir(), sp.getRootDir(), sp.wantSubdirs(), filters, null));
+    scanList.add(new CollectionConfig(sp.getRootDir(), getScanRootDir(sp), sp.wantSubdirs(), filters, null));
 
     this.recheck = null;
     this.protoChoice = FeatureCollectionConfig.ProtoChoice.Penultimate; // default
     this.olderThanInMsecs = -1;
+  }
+
+  private static String getScanRootDir(CollectionSpecParserAbstract specParser) {
+    return specParser.getRootDir() + specParser.getFragment();
   }
 
   public MFileCollectionManager(String name, CollectionConfig mc, CalendarDate startPartition,
@@ -351,7 +365,7 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
       // but we should still make a new map to see if the files
       // have been updated since the last recheck
       for (String file : oldMap.keySet()) {
-        newMap.put(file, MFileOS.getExistingFile(file));
+        newMap.put(file, MFiles.create(file));
       }
     } else {
       // we have a directory scan, so scan it
@@ -372,9 +386,9 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
           logger.debug("{}: scan found Dataset changed= {}", collectionName, path);
 
         } else if (changeChecker != null && changeChecker.hasntChangedSince(newFile, oldFile.getLastModified())) { // the
-                                                                                                                   // ancilliary
+                                                                                                                   // ancillary
                                                                                                                    // file
-                                                                                                                   // hasnt
+                                                                                                                   // hasn't
                                                                                                                    // changed
           nchange++;
           logger.debug("{}: scan changeChecker found Dataset changed= {}", collectionName, path);
@@ -440,7 +454,7 @@ public class MFileCollectionManager extends CollectionManagerAbstract {
     // update MFileCollection map of files
     List<MFile> files = new ArrayList<>(filesRunDateMap.size());
     for (String file : filesRunDateMap.keySet()) {
-      files.add(MFileOS.getExistingFile(file));
+      files.add(MFiles.create(file));
     }
     setFiles(files);
   }

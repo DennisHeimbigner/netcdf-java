@@ -11,8 +11,9 @@ package ucar.nc2;
  * @link CDMNode.java
  *
  * @author Dennis Heimbigner
+ * @deprecated Will move to Dap4 module in version 6.
  */
-
+@Deprecated
 public enum CDMSort {
   ATTRIBUTE, DIMENSION, ENUMERATION, VARIABLE, // Atomic
   SEQUENCE, STRUCTURE, GROUP

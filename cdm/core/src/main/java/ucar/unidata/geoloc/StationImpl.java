@@ -10,7 +10,9 @@ import javax.annotation.Nonnull;
  * Implementation of Station
  * 
  * @author caron
+ * @deprecated only use Station in 6.
  */
+@Deprecated
 public class StationImpl extends EarthLocationImpl implements Station {
   protected String name, desc, wmoId;
   protected int nobs = -1;

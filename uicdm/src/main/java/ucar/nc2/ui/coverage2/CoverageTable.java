@@ -414,7 +414,7 @@ public class CoverageTable extends JPanel {
     // create from a dataset
     public CoverageBean(Coverage geogrid) {
       this.geogrid = geogrid;
-      name = geogrid.getName();
+      name = geogrid.getShortName();
       desc = (geogrid.getDescription());
       units = (geogrid.getUnitsString());
       dataType = (geogrid.getDataType());
@@ -447,7 +447,7 @@ public class CoverageTable extends JPanel {
     }
 
     public String getShape() {
-      return Misc.showInts(geogrid.getCoordSys().getShape());
+      return Arrays.toString(geogrid.getCoordSys().getShape());
     }
   }
 
@@ -542,8 +542,9 @@ public class CoverageTable extends JPanel {
       this.isHoriz = gcs.isHoriz();
 
       Formatter buff = new Formatter();
-      for (Attribute att : gcs.getAttributes())
+      for (Attribute att : gcs.attributes()) {
         buff.format("%s, ", att);
+      }
       params = buff.toString();
     }
 

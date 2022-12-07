@@ -1,0 +1,50 @@
+apply plugin: 'java-library'
+apply from: "$rootDir/gradle/any/javadoc.gradle"
+apply from: "$rootDir/gradle/any/testing.gradle"
+apply from: "$rootDir/gradle/any/archiving.gradle"
+apply from: "$rootDir/gradle/any/coverage.gradle"
+apply from: "$rootDir/gradle/any/publishing.gradle"
+apply from: "$rootDir/gradle/any/spotless.gradle"
+
+apply plugin: 'maven-publish'
+
+def sourceJar = tasks.register('sourceJar', Jar) {
+  classifier 'sources'
+  from sourceSets.main.allJava
+}
+
+def javadocJar = tasks.register('javadocJar', Jar) {
+  dependsOn javadoc
+  classifier 'javadoc'
+  from files(javadoc.destinationDir)
+}
+
+publish.configure {
+  dependsOn sourceJar
+  dependsOn javadocJar
+}
+
+publishing {
+  publications {
+    mavenSources(MavenPublication) {
+      from components.java
+      artifact tasks.sourceJar
+      artifact tasks.javadocJar
+    }
+  }
+}
+
+tasks.withType(JavaCompile).configureEach {
+  options.encoding = 'UTF-8'
+  // whatever java is being used to run gradle will be used to compile java classes
+  // in src/main, but this makes sure it outputs bytecode compatible with Java 8
+  if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+    options.setRelease(8)
+  } else {
+    // java 8 does not have a release option, so use source and target compatibility
+    setSourceCompatibility(JavaVersion.VERSION_1_8)
+    setTargetCompatibility(JavaVersion.VERSION_1_8)
+  }
+  // show deprecation details
+  //options.compilerArgs = ['-Xlint:deprecation']
+}

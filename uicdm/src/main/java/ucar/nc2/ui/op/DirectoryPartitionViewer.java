@@ -279,6 +279,7 @@ public class DirectoryPartitionViewer extends JPanel {
     org.jdom2.Document doc;
     try {
       SAXBuilder builder = new SAXBuilder();
+      builder.setExpandEntities(false);
       doc = builder.build(f.toFile());
     } catch (Exception e) {
       javax.swing.JOptionPane.showMessageDialog(this, "Error parsing featureCollection: " + e.getMessage());
@@ -293,7 +294,7 @@ public class DirectoryPartitionViewer extends JPanel {
     Formatter errlog = new Formatter();
     FeatureCollectionConfigBuilder builder = new FeatureCollectionConfigBuilder(errlog);
     config = builder.readConfig(doc.getRootElement());
-    CollectionSpecParser spec = new CollectionSpecParser(config.spec, errlog);
+    CollectionSpecParserAbstract spec = CollectionSpecParsers.create(config.spec, errlog);
     partitionTreeBrowser.setRoot(Paths.get(spec.getRootDir()));
   }
 

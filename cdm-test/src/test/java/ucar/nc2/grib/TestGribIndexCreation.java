@@ -1,8 +1,16 @@
+/*
+ * Copyright (c) 1998-2018 John Caron and University Corporation for Atmospheric Research/Unidata
+ * See LICENSE for license information.
+ */
+
 package ucar.nc2.grib;
+
+import static thredds.inventory.CollectionUpdateType.always;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
@@ -12,6 +20,7 @@ import thredds.featurecollection.FeatureCollectionType;
 import thredds.inventory.CollectionUpdateType;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFiles;
 import ucar.nc2.grib.collection.*;
 import ucar.nc2.util.DebugFlagsImpl;
 import ucar.nc2.util.DiskCache2;
@@ -25,12 +34,9 @@ import java.lang.invoke.MethodHandles;
 import java.util.Formatter;
 
 /**
- * Test that the CDM Index Creation works
- *
- * @author caron
- * @since 11/14/2014
+ * Test that the CDM Index Creation works.
+ * Jenkins recreates indices, and so needs this to run.
  */
-@Category(NeedsCdmUnitTest.class)
 public class TestGribIndexCreation {
   private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -86,6 +92,17 @@ public class TestGribIndexCreation {
   /////////////////////////////////////////////////////////
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
+  public void shouldReturnFalseForEmptyPartition() throws IOException {
+    FeatureCollectionConfig config = new FeatureCollectionConfig("empty", "test/empty", FeatureCollectionType.GRIB2,
+        TestDir.cdmUnitTestDir + "gribCollections/Emptiness/.*grib2", null, null, null, "file", null);
+
+    boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
+    Assert.assertFalse(changed);
+  }
+
+  @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testGdsHashChange() throws IOException {
     Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
     FeatureCollectionConfig config =
@@ -95,15 +112,15 @@ public class TestGribIndexCreation {
     config.gribConfig.addGdsHash("-1506003048", "-1505079527");
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
+    String location = TestDir.cdmUnitTestDir + "gribCollections/gdsHashChange/noaaport/NDFD-CONUS_noaaport.ncx4";
     // LOOK add check that records were combined
-    try (NetcdfFile ncfile = NetcdfFile
-        .open(TestDir.cdmUnitTestDir + "gribCollections/gdsHashChange/noaaport/NDFD-CONUS_noaaport.ncx4", null)) {
+    try (NetcdfFile ncfile = NetcdfFiles.open(location, null)) {
       Group root = ncfile.getRootGroup();
       Assert.assertEquals(2, root.getGroups().size());
     }
 
-    Grib.setDebugFlags(new DebugFlagsImpl(""));
+    Grib.setDebugFlags(new DebugFlagsImpl());
   }
 
   /*
@@ -129,6 +146,7 @@ public class TestGribIndexCreation {
    * </featureCollection>
    */
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void createNDFD() throws IOException {
     Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
     FeatureCollectionConfig config =
@@ -138,10 +156,11 @@ public class TestGribIndexCreation {
     config.gribConfig.useGenType = true;
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testCfrsAnalysisOnly() throws IOException {
     // this dataset 0-6 hour forecasts x 124 runtimes (4x31)
     // there are 2 groups, likely miscoded, the smaller group are 0 hour, duplicates, possibly miscoded
@@ -152,95 +171,102 @@ public class TestGribIndexCreation {
     config.gribConfig.addGdsHash("1450192070", "1450218978");
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testDgex() throws IOException {
     FeatureCollectionConfig config = new FeatureCollectionConfig("dgex_46", "test/dgex", FeatureCollectionType.GRIB2,
         TestDir.cdmUnitTestDir + "gribCollections/dgex/**/.*grib2", null, null, null, "file", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testGFSconus80_file() throws IOException {
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("gfsConus80_file", "test/gfsConus80", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "gribCollections/gfs_conus80/**/.*grib1", null, null, null, "file", null);
 
-    System.out.printf("===testGFSconus80_file %n");
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testGFSconus80_dir() throws IOException {
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("gfsConus80_dir", "test/gfsConus80", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "gribCollections/gfs_conus80/**/.*grib1", null, null, null, "directory", null);
 
-    System.out.printf("===testGFSconus80_dir %n");
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testGFSconus80ncss() throws IOException {
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("GFS_CONUS_80km", "test/gfsConus80", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "ncss/GFS/CONUS_80km/.*grib1", null, null, null, "file", null);
 
-    System.out.printf("===testGFSconus80ncss %n");
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testGFS_2p5deg() throws IOException {
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("gfs_2p5deg", "test/gfs_2p5deg", FeatureCollectionType.GRIB2,
             TestDir.cdmUnitTestDir + "gribCollections/gfs_2p5deg/.*grib2", null, null, null, "file", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testSeanProblem() throws IOException {
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("gfs_2p5deg", "test/gfs_2p5deg", FeatureCollectionType.GRIB2,
             TestDir.cdmUnitTestDir + "gribCollections/gfs_2p5deg/.*grib2", null, null, null, "file", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
+  @Ignore("This data directory no longer has .grib2 files so partition creation fails")
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testEnsembles() throws IOException {
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("gefs_ens", "test/gefs_ens", FeatureCollectionType.GRIB2,
             TestDir.cdmUnitTestDir + "gribCollections/ens/.*grib2", null, null, null, "file", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   ////////////////
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testRdvamds083p2_PofP() throws IOException {
     FeatureCollectionConfig config = new FeatureCollectionConfig("ds083.2-pofp", "test/ds083.2-pofp",
         FeatureCollectionType.GRIB1, TestDir.cdmUnitTestDir + "gribCollections/rdavm/ds083.2/PofP/**/.*grib1", null,
         null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
     Grib.setDebugFlags(new DebugFlagsImpl());
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testRdvamds083p2() throws IOException {
     Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
     FeatureCollectionConfig config = new FeatureCollectionConfig("ds083.2_Aggregation", "test/ds083.2",
@@ -248,7 +274,7 @@ public class TestGribIndexCreation {
         null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, CollectionUpdateType.always, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
     Grib.setDebugFlags(new DebugFlagsImpl());
   }
 
@@ -268,6 +294,7 @@ public class TestGribIndexCreation {
    */
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testRdvamds627p0() throws IOException {
     Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
     FeatureCollectionConfig config = new FeatureCollectionConfig("ds627.0_46", "test/ds627.0",
@@ -275,12 +302,13 @@ public class TestGribIndexCreation {
         null, "#ei.oper.an.pv/#yyyyMM", null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
     Grib.setDebugFlags(new DebugFlagsImpl());
   }
 
 
-  @Test // has one file for for each month, all in same directory
+  @Test // has one file for each month, all in same directory
+  @Category(NeedsCdmUnitTest.class)
   public void testRdvamds627p1() throws IOException {
     Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
     FeatureCollectionConfig config =
@@ -288,38 +316,28 @@ public class TestGribIndexCreation {
             TestDir.cdmUnitTestDir + "gribCollections/rdavm/ds627.1/.*gbx9", null, null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
     Grib.setDebugFlags(new DebugFlagsImpl());
   }
 
   ////////////////
 
-  @Test // has one file for for each month, all in same directory
+  @Test // has one file for each month, all in same directory
+  @Category(NeedsCdmUnitTest.class)
   public void testTimePartition() throws IOException {
     Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
     FeatureCollectionConfig config = new FeatureCollectionConfig("yearPartition", "test/yearPartition",
         FeatureCollectionType.GRIB1, TestDir.cdmUnitTestDir + "gribCollections/rdavm/ds627.1/.*gbx9", null,
         "#ei.mdfa.fc12hr.sfc.regn128sc.#yyyyMMddhh", null, "year", null);
-    System.out.printf("config = %s%n", config);
+    logger.debug("config = " + config);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
     Grib.setDebugFlags(new DebugFlagsImpl());
   }
 
   @Test
-  public void testWW3() throws IOException {
-    // String name, String path, FeatureCollectionType fcType,
-    // String spec, String collectionName,
-    // String dateFormatMark, String olderThan, String timePartition, Element innerNcml)
-    FeatureCollectionConfig config = new FeatureCollectionConfig("ds093.1", "test/ds093.1", FeatureCollectionType.GRIB2,
-        TestDir.cdmUnitTestDir + "tds/ncep/WW3_Coastal_Alaska_20140804_0000.grib2", null, null, null, "file", null);
-
-    boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
-  }
-
-  @Test
+  @Category(NeedsCdmUnitTest.class)
   public void testMRUTP() throws IOException { // should be a TP (multiple runtime, single offset
     // String name, String path, FeatureCollectionType fcType,
     // String spec, String collectionName,
@@ -329,66 +347,121 @@ public class TestGribIndexCreation {
             TestDir.cdmUnitTestDir + "gribCollections/tp/.*grib2", null, null, null, "file", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
+  @Ignore("There appears to be an issue with the encoding of these messages, so they have been moved to "
+      + "cdmUnitTest/gribCollections/ecmwf/exclude/bcs/ until we can figure out what ECMWF has done to make these.")
   public void createECMWFbcs() throws IOException { // SRC
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("ECMWFbcs", "test/ECMWFbcs", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "gribCollections/ecmwf/bcs/.*001$", null, null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void createECMWFemd() throws IOException { // SRC
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("ECMWFemd", "test/ECMWFemd", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "gribCollections/ecmwf/emd/.*grib$", null, null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void createECMWFmad() throws IOException { // SRC
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("ECMWFmad", "test/ECMWFmad", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "gribCollections/ecmwf/mad/.*001$", null, null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void createECMWFmee() throws IOException { // SRC
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("ECMWFmee", "test/ECMWFmee", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "gribCollections/ecmwf/mee/.*001$", null, null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void createECMWFmwp() throws IOException { // SRC
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("ECMWFmwp", "test/ECMWFmwp", FeatureCollectionType.GRIB1,
             TestDir.cdmUnitTestDir + "gribCollections/ecmwf/mwp/.*001$", null, null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
   }
 
   @Test
+  @Category(NeedsCdmUnitTest.class)
   public void createHRRRanalysis() throws IOException { // MRUTC
     FeatureCollectionConfig config =
         new FeatureCollectionConfig("HRRRanalysis", "test/HRRRanalysis", FeatureCollectionType.GRIB2,
             TestDir.cdmUnitTestDir + "gribCollections/anal/.*grib2$", null, null, null, "directory", null);
 
     boolean changed = GribCdmIndex.updateGribCollection(config, updateMode, logger);
-    System.out.printf("changed = %s%n", changed);
+    Assert.assertTrue(changed);
+  }
+
+  @Test
+  @Category(NeedsCdmUnitTest.class)
+  public void createNBMOcean() throws IOException { // TWOD
+    Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
+    FeatureCollectionConfig config =
+        new FeatureCollectionConfig("NCEP_OCEAN_MODEL_FIXED", "test/NCEP_OCEAN_MODEL", FeatureCollectionType.GRIB2,
+            TestDir.cdmUnitTestDir + "tds_index/NCEP/NBM/Ocean/.*gbx9", null, null, null, "file", null);
+
+    boolean changed = GribCdmIndex.updateGribCollection(config, always, logger);
+    Assert.assertTrue(changed);
+    Grib.setDebugFlags(new DebugFlagsImpl());
+  }
+
+  @Test
+  @Category(NeedsCdmUnitTest.class)
+  public void createNndfCpc() throws IOException { // TWOD
+    Grib.setDebugFlags(new DebugFlagsImpl("Grib/debugGbxIndexOnly"));
+    FeatureCollectionConfig config =
+        new FeatureCollectionConfig("NCEP_NDFD_CPC_Experimental", "test/NCEP_NDFD_CPC", FeatureCollectionType.GRIB2,
+            TestDir.cdmUnitTestDir + "tds_index/NCEP/NDFD/CPC/.*gbx9", null, null, null, "file", null);
+
+    boolean changed = GribCdmIndex.updateGribCollection(config, always, logger);
+    Assert.assertTrue(changed);
+    Grib.setDebugFlags(new DebugFlagsImpl());
+  }
+
+  @Test
+  @Ignore("Missing grib2 files in test datasets.")
+  public void createNdfdSpc() throws IOException {
+    FeatureCollectionConfig config =
+        new FeatureCollectionConfig("NDFD-SPC", "test/NDFD-SPC", FeatureCollectionType.GRIB2,
+            TestDir.cdmUnitTestDir + "gribCollections/ndfd_spc/.*grib2$", null, null, null, "file", null);
+
+    boolean changed = GribCdmIndex.updateGribCollection(config, always, logger);
+    Assert.assertTrue(changed);
+  }
+
+  @Test
+  public void makeGradleHappy() {
+    // We have a special gradle task (:cdm-test:testIndexCreation) that creates grib index files before running the
+    // full :cdm-test:test task. The build logic was rearranged a bit to keep intellij happy when running individual
+    // tests out of the cdm-test subproject. However, gradle became upset that the special task no long found any tests
+    // to run, and the entire build would fail. This test exists so that gradle can find something to do in our special
+    // task.
+    Assert.assertTrue(true);
   }
 }

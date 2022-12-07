@@ -26,11 +26,12 @@ import ucar.unidata.util.Parameter;
  * @see <a href=
  *      "http://zeus.pin.unifi.it/projectsSites/galeon2-ncml-gml/">http://zeus.pin.unifi.it/projectsSites/galeon2-ncml-gml/</a>
  * @author caron
+ * @deprecated do not use
  */
-
+@Deprecated
 public class NcMLGWriter {
   private static Logger logger = LoggerFactory.getLogger(NcMLGWriter.class);
-  protected static final String schemaLocation = "http://www.unidata.ucar.edu/schemas/netcdf-cs.xsd";
+  protected static final String schemaLocation = "https://schemas.unidata.ucar.edu/netcdf-cs.xsd";
 
   /**
    * Write a NetcdfDataset as an NcML-G document to the specified stream.
@@ -258,7 +259,7 @@ public class NcMLGWriter {
     varElem.setAttribute("type", dt.toString());
 
     // attributes
-    for (Attribute att : var.getAttributes()) {
+    for (Attribute att : var.attributes()) {
       varElem.addContent(makeAttribute(att, "attribute"));
     }
 
@@ -378,7 +379,7 @@ public class NcMLGWriter {
       varElem.setAttribute("type", dt.toString());
 
     // attributes
-    for (Attribute att : var.getAttributes()) {
+    for (Attribute att : var.attributes()) {
       varElem.addContent(makeAttribute(att, "attribute"));
     }
 

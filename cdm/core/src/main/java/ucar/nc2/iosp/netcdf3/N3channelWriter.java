@@ -18,7 +18,9 @@ import java.nio.ByteBuffer;
  * Experimental
  * 
  * @author john
+ * @deprecated do not use
  */
+@Deprecated
 public class N3channelWriter extends N3streamWriter {
   private static int buffer_size = 1000 * 1000;
   private static boolean debugWrite;
@@ -47,7 +49,7 @@ public class N3channelWriter extends N3streamWriter {
       ncfile.sendIospMessage(NetcdfFile.IOSP_MESSAGE_ADD_RECORD_STRUCTURE);
 
       Structure recordVar = (Structure) ncfile.findVariable("record");
-      Section section = new Section().appendRange(null);
+      Section.Builder sb = Section.builder().appendRangeAll();
 
       long bytesDone = 0;
       long done = 0;
@@ -59,9 +61,9 @@ public class N3channelWriter extends N3streamWriter {
         long last = Math.min(nrecs, done + readAtaTime); // dont go over nrecs
         int need = (int) (last - done); // how many to read this time
 
-        section.setRange(0, new Range(count, count + need - 1));
+        sb.setRange(0, new Range(count, count + need - 1));
         try {
-          bytesDone += recordVar.readToByteChannel(section, channel);
+          bytesDone += recordVar.readToByteChannel(sb.build(), channel);
           done += need;
         } catch (InvalidRangeException e) {
           e.printStackTrace();

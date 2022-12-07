@@ -1,41 +1,29 @@
 package ucar.nc2.ft2.simpgeometry;
 
-import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
-import ucar.nc2.ft2.coverage.CoverageReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Assert;
-import org.junit.Test;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static ucar.nc2.ft2.simpgeometry.GeometryType.LINE;
 import static ucar.nc2.ft2.simpgeometry.GeometryType.POINT;
 import static ucar.nc2.ft2.simpgeometry.GeometryType.POLYGON;
-import static org.mockito.BDDMockito.*;
-import ucar.nc2.ft2.simpgeometry.CFLine;
-import ucar.nc2.ft2.simpgeometry.CFPoint;
-import ucar.nc2.ft2.simpgeometry.CFPolygon;
-import ucar.nc2.ft2.simpgeometry.GeometryType;
-import ucar.nc2.ft2.simpgeometry.Line;
-import ucar.nc2.ft2.simpgeometry.Point;
-import ucar.nc2.ft2.simpgeometry.Polygon;
-import ucar.nc2.ft2.simpgeometry.SimpleGeometryFeature;
+import java.io.IOException;
+import org.junit.Assert;
+import org.junit.Test;
+import ucar.ma2.DataType;
+import ucar.ma2.InvalidRangeException;
+import ucar.nc2.AttributeContainer;
+import ucar.nc2.AttributeContainerMutable;
 import ucar.nc2.ft2.simpgeometry.adapter.SimpleGeometryCS;
 
 public class TestSimpleGeometryFeature {
 
   private String name = "name";
   private DataType dt;
-  private List<Attribute> att = new ArrayList<Attribute>();
+  private AttributeContainer att = new AttributeContainerMutable("name");
   private String coordSysName = "coordsysname";
   private String units = "units";
   private String description = "desc";
   private Object user;
   private GeometryType geometry;
-
-
 
   @Test(expected = RuntimeException.class)
   public void testSetCoordSysNull() {
@@ -87,7 +75,4 @@ public class TestSimpleGeometryFeature {
     Assert.assertEquals(cov.readGeometry(index), cs.getPolygon(name, index));
 
   }
-
-
-
 }

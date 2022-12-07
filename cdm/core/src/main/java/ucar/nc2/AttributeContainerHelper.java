@@ -1,6 +1,8 @@
 /* Copyright */
 package ucar.nc2;
 
+import com.google.common.collect.ImmutableList;
+import javax.annotation.concurrent.Immutable;
 import ucar.nc2.util.Indent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,14 +10,50 @@ import java.util.Formatter;
 import java.util.List;
 
 /**
- * manages Collections of Attributes.
+ * A mutable collection of Attributes.
  *
  * @author caron
  * @since 5/5/2015
+ * @deprecated Use AttributeContainerMutable.
  */
+@Deprecated
 public class AttributeContainerHelper implements AttributeContainer {
-  final String name;
-  List<Attribute> atts;
+
+  /**
+   * Create a new AttributeContainer, removing any whose name starts with one in the given list.
+   * 
+   * @param atts Start with this set of Attributes.
+   * @param remove Remove any whose name starts with one of these.
+   * @return new AttributeContainer with attributes removed.
+   * @deprecated use AttributeContainer.filter().
+   */
+  @Deprecated
+  public static AttributeContainer filter(AttributeContainer atts, String... remove) {
+    List<Attribute> result = new ArrayList<>();
+    for (Attribute att : atts.getAttributes()) {
+      boolean ok = true;
+      for (String s : remove) {
+        if (att.getShortName().startsWith(s)) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        result.add(att);
+      }
+    }
+    return new AttributeContainerHelper(atts.getName(), result);
+  }
+
+  @Deprecated
+  public static void show(AttributeContainer atts, Indent indent, Formatter f) {
+    for (Attribute att : atts.getAttributes()) {
+      f.format("%s%s%n", indent, att);
+    }
+  }
+
+  private final String name;
+  private List<Attribute> atts;
 
   public AttributeContainerHelper(String name) {
     this.name = name;
@@ -32,8 +70,14 @@ public class AttributeContainerHelper implements AttributeContainer {
     return name;
   }
 
+  @Deprecated
   public void setImmutable() {
     this.atts = Collections.unmodifiableList(atts);
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return atts.isEmpty();
   }
 
   @Override
@@ -56,15 +100,32 @@ public class AttributeContainerHelper implements AttributeContainer {
     return att;
   }
 
-  /** Add all; replace old if has same name */
-  @Override
+  /** Add Attribute; name and value must not be null. */
+  public Attribute addAttribute(String name, String value) {
+    if (name == null || value == null) {
+      return null;
+    }
+    Attribute att = new Attribute(name, value);
+    return addAttribute(att);
+  }
+
+  /** Add Attribute; name and value must not be null. */
+  public Attribute addAttribute(String name, Number value) {
+    if (name == null || value == null) {
+      return null;
+    }
+    Attribute att = new Attribute(name, value);
+    return addAttribute(att);
+  }
+
+  /** Add all; replace old if has same name. */
   public void addAll(Iterable<Attribute> atts) {
     for (Attribute att : atts)
       addAttribute(att);
   }
 
   @Override
-  public String findAttValueIgnoreCase(String attName, String defaultValue) {
+  public String findAttributeString(String attName, String defaultValue) {
     String attValue = null;
     Attribute att = findAttributeIgnoreCase(attName);
 
@@ -95,15 +156,48 @@ public class AttributeContainerHelper implements AttributeContainer {
     return null;
   }
 
+
+  @Override
+  public double findAttributeDouble(String attName, double defaultValue) {
+    Attribute att = findAttributeIgnoreCase(attName);
+    if (att == null)
+      return defaultValue;
+    if (att.isString())
+      return Double.parseDouble(att.getStringValue());
+    else
+      return att.getNumericValue().doubleValue();
+  }
+
+  @Override
+  public int findAttributeInteger(String attName, int defaultValue) {
+    Attribute att = findAttributeIgnoreCase(attName);
+    if (att == null)
+      return defaultValue;
+    if (att.isString())
+      return Integer.parseInt(att.getStringValue());
+    else
+      return att.getNumericValue().intValue();
+  }
+
   /**
    * Remove an Attribute : uses the attribute hashCode to find it.
    *
    * @param a remove this attribute
    * @return true if was found and removed
    */
-  @Override
   public boolean remove(Attribute a) {
     return a != null && atts.remove(a);
+  }
+
+  /**
+   * Replace an Attribute with a different name, same value.
+   *
+   * @param a remove this attribute
+   */
+  public void replace(Attribute a, String newName) {
+    atts.remove(a);
+    Attribute newAtt = a.toBuilder().setName(newName).build();
+    addAttribute(newAtt);
   }
 
   /**
@@ -112,7 +206,6 @@ public class AttributeContainerHelper implements AttributeContainer {
    * @param attName if exists, remove this attribute
    * @return true if was found and removed
    */
-  @Override
   public boolean removeAttribute(String attName) {
     Attribute att = findAttribute(attName);
     return att != null && atts.remove(att);
@@ -124,29 +217,101 @@ public class AttributeContainerHelper implements AttributeContainer {
    * @param attName if exists, remove this attribute
    * @return true if was found and removed
    */
-  @Override
   public boolean removeAttributeIgnoreCase(String attName) {
     Attribute att = findAttributeIgnoreCase(attName);
     return att != null && atts.remove(att);
   }
 
-  public static AttributeContainer filter(AttributeContainer atts, String... remove) {
-    List<Attribute> result = new ArrayList<>();
-    for (Attribute att : atts.getAttributes()) {
-      boolean ok = true;
-      for (String s : remove)
-        if (att.getShortName().startsWith(s))
-          ok = false;
-      if (ok)
-        result.add(att);
-    }
-    return new AttributeContainerHelper(atts.getName(), result);
+  public AttributeContainer toImmutable() {
+    return new AttributeContainerImmutable(name, atts);
   }
 
-  public static void show(AttributeContainer atts, Indent indent, Formatter f) {
-    for (Attribute att : atts.getAttributes()) {
-      f.format("%s%s%n", indent, att);
+  @Immutable
+  private static class AttributeContainerImmutable implements AttributeContainer {
+    private final String name;
+    private final ImmutableList<Attribute> atts;
+
+    private AttributeContainerImmutable(String name, List<Attribute> atts) {
+      this.name = name;
+      this.atts = ImmutableList.copyOf(atts);
+    }
+
+    @Override
+    public List<Attribute> getAttributes() {
+      return atts;
+    }
+
+    @Override
+    public String findAttributeString(String attName, String defaultValue) {
+      return atts.stream().filter(a -> a.getShortName().equals(attName)).findFirst().map(Attribute::getStringValue)
+          .orElse(defaultValue);
+    }
+
+    @Override
+    public Attribute findAttribute(String attName) {
+      return atts.stream().filter(a -> a.getShortName().equals(attName)).findFirst().orElse(null);
+    }
+
+    @Override
+    public Attribute findAttributeIgnoreCase(String attName) {
+      return atts.stream().filter(a -> a.getShortName().equalsIgnoreCase(attName)).findFirst().orElse(null);
+    }
+
+    @Override
+    public double findAttributeDouble(String attName, double defaultValue) {
+      Attribute att = findAttributeIgnoreCase(attName);
+      if (att == null)
+        return defaultValue;
+      if (att.isString())
+        return Double.parseDouble(att.getStringValue());
+      else
+        return att.getNumericValue().doubleValue();
+    }
+
+    @Override
+    public int findAttributeInteger(String attName, int defaultValue) {
+      Attribute att = findAttributeIgnoreCase(attName);
+      if (att == null)
+        return defaultValue;
+      if (att.isString())
+        return Integer.parseInt(att.getStringValue());
+      else
+        return att.getNumericValue().intValue();
+    }
+
+    @Override
+    public String getName() {
+      return name;
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return atts.isEmpty();
+    }
+
+    @Deprecated
+    public void addAll(Iterable<Attribute> atts) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Deprecated
+    public Attribute addAttribute(Attribute att) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Deprecated
+    public boolean remove(Attribute a) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Deprecated
+    public boolean removeAttribute(String attName) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Deprecated
+    public boolean removeAttributeIgnoreCase(String attName) {
+      throw new UnsupportedOperationException();
     }
   }
-
 }

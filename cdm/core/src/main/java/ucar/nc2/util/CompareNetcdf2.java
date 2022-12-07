@@ -7,6 +7,8 @@
 
 package ucar.nc2.util;
 
+import java.util.Arrays;
+import javax.annotation.Nullable;
 import ucar.nc2.constants.CDM;
 import ucar.nc2.dataset.*;
 import ucar.nc2.*;
@@ -20,22 +22,47 @@ import java.util.ArrayList;
 
 /**
  * Compare two NetcdfFile.
- * Dont use assert, place results in Formatter.
- *
- * @author john
+ * Doesnt fail (eg doesnt use assert), places results in Formatter.
+ * 
+ * TODO will move to test classes in ver6.
  */
 public class CompareNetcdf2 {
+  public static final ObjFilter IDENTITY_FILTER = new ObjFilter() {};
 
   public interface ObjFilter {
-    // if true, compare attribute, else skip comparision
-    boolean attCheckOk(Variable v, Attribute att);
+    // if true, compare attribute, else skip comparison
+    default boolean attCheckOk(Variable v, Attribute att) {
+      return true;
+    }
 
-    // if true, compare variable, else skip comparision
-    boolean varDataTypeCheckOk(Variable v);
+    // override att comparison if needed
+    default boolean attsAreEqual(Attribute att1, Attribute att2) {
+      return att1.equals(att2);
+    }
+
+    // override dimension comparison if needed
+    default boolean enumsAreEqual(EnumTypedef enum1, EnumTypedef enum2) {
+      return enum1.equals(enum2);
+    }
+
+    // if true, compare variable, else skip comparison
+    default boolean varDataTypeCheckOk(Variable v) {
+      return true;
+    }
+
+    // if true, compare dimension, else skip comparison
+    default boolean checkDimensionsForFile(String filename) {
+      return true;
+    }
+
+    // if true, compare dimension, else skip comparison
+    default boolean compareCoordinateTransform(CoordinateTransform ct1, CoordinateTransform ct2) {
+      return ct1.equals(ct2);
+    }
   }
 
   public static class Netcdf4ObjectFilter implements ObjFilter {
-    @Override
+
     public boolean attCheckOk(Variable v, Attribute att) {
       // if (v != null && v.isMemberOfStructure()) return false;
       String name = att.getShortName();
@@ -69,6 +96,37 @@ public class CompareNetcdf2 {
         return false; // temp workaround
       return v.getDataType() != DataType.STRING;
     }
+
+    // override att comparision if needed
+    public boolean attsAreEqual(Attribute att1, Attribute att2) {
+      if (att1.getShortName().equalsIgnoreCase(CDM.UNITS) && att2.getShortName().equalsIgnoreCase(CDM.UNITS)) {
+        return att1.getStringValue().trim().equals(att2.getStringValue().trim());
+      }
+      return att1.equals(att2);
+    }
+  }
+
+  public boolean enumsAreEqual(EnumTypedef enum1, EnumTypedef enum2) {
+    String name1 = enum1.getShortName();
+    String name2 = enum2.getShortName();
+    if (name1.endsWith("_t")) {
+      name1 = name1.substring(0, name1.length() - 2);
+    }
+    if (name2.endsWith("_t")) {
+      name2 = name2.substring(0, name2.length() - 2);
+    }
+    return com.google.common.base.Objects.equal(name1, name2)
+        && com.google.common.base.Objects.equal(enum1.getMap(), enum2.getMap())
+        && enum1.getBaseType() == enum2.getBaseType();
+  }
+
+  public static boolean compareData(String name, Array data1, Array data2) {
+    return new CompareNetcdf2().compareData(name, data1, data2, false, true);
+  }
+
+  public static boolean compareData(String name, Array data1, double[] data2) {
+    Array data2a = Array.factory(DataType.DOUBLE, new int[] {data2.length}, data2);
+    return compareData(name, data1, data2a);
   }
 
   public static boolean compareFiles(NetcdfFile org, NetcdfFile copy, Formatter f) {
@@ -87,7 +145,7 @@ public class CompareNetcdf2 {
     return ok1 && ok2;
   }
 
-  private static boolean checkContains(String what, List container, List wantList, Formatter f) {
+  public static boolean checkContains(String what, List<Object> container, List<Object> wantList, Formatter f) {
     boolean ok = true;
 
     for (Object want1 : wantList) {
@@ -113,7 +171,7 @@ public class CompareNetcdf2 {
   }
 
   public CompareNetcdf2(Formatter f) {
-    this(f, false, false, false);
+    this(f, false, false, System.getProperty("allTests") != null);
   }
 
   public CompareNetcdf2(Formatter f, boolean showCompare, boolean showEach, boolean compareData) {
@@ -127,12 +185,22 @@ public class CompareNetcdf2 {
     return compare(org, copy, showCompare, showEach, compareData);
   }
 
+  public boolean compare(NetcdfFile org, NetcdfFile copy, @Nullable ObjFilter filter) {
+    return compare(org, copy, filter, showCompare, showEach, compareData);
+  }
+
+  /** @deprecated use constructor to set options, then compare(NetcdfFile org, NetcdfFile copy) */
+  @Deprecated
   public boolean compare(NetcdfFile org, NetcdfFile copy, boolean showCompare, boolean showEach, boolean compareData) {
     return compare(org, copy, null, showCompare, showEach, compareData);
   }
 
-  public boolean compare(NetcdfFile org, NetcdfFile copy, ObjFilter filter, boolean showCompare, boolean showEach,
-      boolean compareData) {
+  /** @deprecated use constructor to set options, then compare(NetcdfFile org, NetcdfFile copy, ObjFilter filter) */
+  @Deprecated
+  public boolean compare(NetcdfFile org, NetcdfFile copy, @Nullable ObjFilter objFilter, boolean showCompare,
+      boolean showEach, boolean compareData) {
+    if (objFilter == null)
+      objFilter = IDENTITY_FILTER;
     this.compareData = compareData;
     this.showCompare = showCompare;
     this.showEach = showEach;
@@ -142,7 +210,7 @@ public class CompareNetcdf2 {
 
     long start = System.currentTimeMillis();
 
-    boolean ok = compareGroups(org.getRootGroup(), copy.getRootGroup(), filter);
+    boolean ok = compareGroups(org.getRootGroup(), copy.getRootGroup(), objFilter);
     f.format(" Files are the same = %s%n", ok);
 
     long took = System.currentTimeMillis() - start;
@@ -153,12 +221,16 @@ public class CompareNetcdf2 {
       NetcdfDataset orgds = (NetcdfDataset) org;
       NetcdfDataset copyds = (NetcdfDataset) copy;
 
-      List matches = new ArrayList();
-      ok &= checkAll("Dataset CS:", orgds.getCoordinateSystems(), copyds.getCoordinateSystems(), matches);
-      for (int i = 0; i < matches.size(); i += 2) {
-        CoordinateSystem orgCs = (CoordinateSystem) matches.get(i);
-        CoordinateSystem copyCs = (CoordinateSystem) matches.get(i + 1);
-        ok &= compareCoordinateSystem(orgCs, copyCs, filter);
+      // coordinate systems
+      for (CoordinateSystem cs1 : orgds.getCoordinateSystems()) {
+        CoordinateSystem cs2 = copyds.getCoordinateSystems().stream().filter(cs -> cs.getName().equals(cs1.getName()))
+            .findFirst().orElse(null);
+        if (cs2 == null) {
+          ok = false;
+          f.format("  ** Cant find CoordinateSystem '%s' in file2 %n", cs1.getName());
+        } else {
+          ok &= compareCoordinateSystem(cs1, cs2, objFilter);
+        }
       }
     }
 
@@ -195,22 +267,9 @@ public class CompareNetcdf2 {
     return ok;
   }
 
-  /*
-   * private boolean compare(List<Dimension> dims1, List<Dimension> dims2) {
-   * if (dims1.size() != dims2.size()) return false;
-   * for (int i = 0; i < dims1.size(); i++) {
-   * Dimension dim1 = dims1.get(i);
-   * Dimension dim2 = dims2.get(i);
-   * //if (!dim1.getName().equals(dim2.getName())) return false;
-   * if (dim1.getLength() != dim2.getLength()) return false;
-   * }
-   * return true;
-   * }
-   */
-
   private boolean compareGroups(Group org, Group copy, ObjFilter filter) {
     if (showCompare)
-      f.format("compare Group %s to %s %n", org.getShortName(), copy.getShortName());
+      f.format("compare Group '%s' to '%s' %n", org.getShortName(), copy.getShortName());
     boolean ok = true;
 
     if (!org.getShortName().equals(copy.getShortName())) {
@@ -219,19 +278,21 @@ public class CompareNetcdf2 {
     }
 
     // dimensions
-    ok &= checkDimensions(org.getDimensions(), copy.getDimensions());
-    ok &= checkDimensions(copy.getDimensions(), org.getDimensions());
+    if (filter.checkDimensionsForFile(org.getNetcdfFile().getLocation())) {
+      ok &= checkGroupDimensions(org, copy, "copy");
+      ok &= checkGroupDimensions(copy, org, "org");
+    }
 
     // attributes
-    ok &= checkAttributes(null, org.getAttributes(), copy.getAttributes(), filter);
+    ok &= checkAttributes(null, org.attributes(), copy.attributes(), filter);
 
     // enums
-    ok &= checkEnums(org, copy);
+    ok &= checkEnums(org, copy, filter);
 
     // variables
     // cant use object equality, just match on short name
     for (Variable orgV : org.getVariables()) {
-      Variable copyVar = copy.findVariable(orgV.getShortName());
+      Variable copyVar = copy.findVariableLocal(orgV.getShortName());
       if (copyVar == null) {
         f.format(" ** cant find variable %s in 2nd file%n", orgV.getFullName());
         ok = false;
@@ -241,7 +302,7 @@ public class CompareNetcdf2 {
     }
 
     for (Variable copyV : copy.getVariables()) {
-      Variable orgV = org.findVariable(copyV.getShortName());
+      Variable orgV = org.findVariableLocal(copyV.getShortName());
       if (orgV == null) {
         f.format(" ** cant find variable %s in 1st file%n", copyV.getFullName());
         ok = false;
@@ -250,7 +311,7 @@ public class CompareNetcdf2 {
 
     // nested groups
     List groups = new ArrayList();
-    String name = org.isRoot() ? "root" : org.getFullName();
+    String name = org.isRoot() ? "root group" : org.getFullName();
     ok &= checkAll(name, org.getGroups(), copy.getGroups(), groups);
     for (int i = 0; i < groups.size(); i += 2) {
       Group orgGroup = (Group) groups.get(i);
@@ -262,8 +323,8 @@ public class CompareNetcdf2 {
   }
 
 
-  public boolean compareVariable(Variable org, Variable copy) {
-    return compareVariables(org, copy, null, compareData, true);
+  public boolean compareVariable(Variable org, Variable copy, ObjFilter filter) {
+    return compareVariables(org, copy, filter, compareData, true);
   }
 
   private boolean compareVariables(Variable org, Variable copy, ObjFilter filter, boolean compareData,
@@ -276,17 +337,17 @@ public class CompareNetcdf2 {
       f.format(" ** names are different %s != %s %n", org.getFullName(), copy.getFullName());
       ok = false;
     }
-    if (filter != null && filter.varDataTypeCheckOk(org) && (org.getDataType() != copy.getDataType())) {
+    if (filter.varDataTypeCheckOk(org) && (org.getDataType() != copy.getDataType())) {
       f.format(" ** %s dataTypes are different %s != %s %n", org.getFullName(), org.getDataType(), copy.getDataType());
       ok = false;
     }
 
     // dimensions
-    ok &= checkDimensions(org.getDimensions(), copy.getDimensions());
-    ok &= checkDimensions(copy.getDimensions(), org.getDimensions());
+    ok &= checkDimensions(org.getDimensions(), copy.getDimensions(), copy.getFullName() + " copy");
+    ok &= checkDimensions(copy.getDimensions(), org.getDimensions(), org.getFullName() + " org");
 
     // attributes
-    ok &= checkAttributes(org, org.getAttributes(), copy.getAttributes(), filter);
+    ok &= checkAttributes(org, org.attributes(), copy.attributes(), filter);
 
     // data !!
     if (compareData) {
@@ -309,50 +370,82 @@ public class CompareNetcdf2 {
 
       } else {
         Structure orgS = (Structure) org;
-        Structure ncmlS = (Structure) copy;
+        Structure copyS = (Structure) copy;
 
-        List vars = new ArrayList();
-        ok &= checkAll("struct " + orgS.getNameAndDimensions(), orgS.getVariables(), ncmlS.getVariables(), vars);
-        for (int i = 0; i < vars.size(); i += 2) {
-          Variable orgV = (Variable) vars.get(i);
-          Variable ncmlV = (Variable) vars.get(i + 1);
-          ok &= compareVariables(orgV, ncmlV, filter, false, true);
+        for (Variable orgV : orgS.getVariables()) {
+          Variable copyVar = copyS.findVariable(orgV.getShortName());
+          if (copyVar == null) {
+            f.format(" ** cant find variable %s in 2nd file%n", orgV.getFullName());
+            ok = false;
+          } else {
+            boolean compareStructData = compareData && !(orgV instanceof Sequence);
+            ok &= compareVariables(orgV, copyVar, filter, compareStructData, true);
+          }
         }
+
+        /*
+         * List vars = new ArrayList();
+         * ok &= checkAll("struct " + orgS.getNameAndDimensions(), orgS.getVariables(), copyS.getVariables(), vars);
+         * for (int i = 0; i < vars.size(); i += 2) {
+         * Variable orgV = (Variable) vars.get(i);
+         * Variable ncmlV = (Variable) vars.get(i + 1);
+         * ok &= compareVariables(orgV, ncmlV, filter, false, true);
+         * }
+         */
       }
     }
 
     // coordinate systems
     if (org instanceof VariableEnhanced && copy instanceof VariableEnhanced) {
-      VariableEnhanced orgds = (VariableEnhanced) org;
-      VariableEnhanced copyds = (VariableEnhanced) copy;
+      VariableEnhanced orge = (VariableEnhanced) org;
+      VariableEnhanced copye = (VariableEnhanced) copy;
 
-      List matches = new ArrayList();
-      ok &= checkAll(orgds.getFullName(), orgds.getCoordinateSystems(), copyds.getCoordinateSystems(), matches);
-      for (int i = 0; i < matches.size(); i += 2) {
-        CoordinateSystem orgCs = (CoordinateSystem) matches.get(i);
-        CoordinateSystem copyCs = (CoordinateSystem) matches.get(i + 1);
-        ok &= compareCoordinateSystem(orgCs, copyCs, filter);
+      for (CoordinateSystem cs1 : orge.getCoordinateSystems()) {
+        CoordinateSystem cs2 = copye.getCoordinateSystems().stream().filter(cs -> cs.getName().equals(cs1.getName()))
+            .findFirst().orElse(null);
+        if (cs2 == null) {
+          ok = false;
+          f.format("  ** Cant find CoordinateSystem '%s' in file2 for var %s %n", cs1.getName(), org.getShortName());
+        } else {
+          ok &= compareCoordinateSystem(cs1, cs2, filter);
+        }
       }
     }
 
+    // f.format(" Variable '%s' ok %s %n", org.getName(), ok);
     return ok;
   }
-
 
   private boolean compareCoordinateSystem(CoordinateSystem cs1, CoordinateSystem cs2, ObjFilter filter) {
     if (showCompare)
       f.format("compare CoordinateSystem '%s' to '%s' %n", cs1.getName(), cs2.getName());
 
-    List matchAxes = new ArrayList();
-    boolean ok = checkAll(cs1.getName(), cs1.getCoordinateAxes(), cs2.getCoordinateAxes(), matchAxes);
-    for (int i = 0; i < matchAxes.size(); i += 2) {
-      CoordinateAxis orgCs = (CoordinateAxis) matchAxes.get(i);
-      CoordinateAxis copyCs = (CoordinateAxis) matchAxes.get(i + 1);
-      ok &= compareCoordinateAxis(orgCs, copyCs, filter);
+    boolean ok = true;
+    for (CoordinateAxis ct1 : cs1.getCoordinateAxes()) {
+      CoordinateAxis ct2 = cs2.getCoordinateAxes().stream().filter(ct -> ct.getFullName().equals(ct1.getFullName()))
+          .findFirst().orElse(null);
+      if (ct2 == null) {
+        ok = false;
+        f.format("  ** Cant find coordinateAxis %s in file2 %n", ct1.getFullName());
+      } else {
+        ok &= compareCoordinateAxis(ct1, ct2, filter);
+      }
     }
 
-    List matchTransforms = new ArrayList();
-    ok &= checkAll(cs1.getName(), cs1.getCoordinateTransforms(), cs2.getCoordinateTransforms(), matchTransforms);
+    for (CoordinateTransform ct1 : cs1.getCoordinateTransforms()) {
+      CoordinateTransform ct2 = cs2.getCoordinateTransforms().stream()
+          .filter(ct -> filter.compareCoordinateTransform(ct1, ct)).findFirst().orElse(null);
+      if (ct2 == null) {
+        ok = false;
+        f.format("  ** Cant find transform %s in file2 %n", ct1.getName());
+      } else {
+        boolean ctOk = filter.compareCoordinateTransform(ct1, ct2);
+        if (!ctOk)
+          f.format("  ** compareCoordinateTransform failed on ct %s for cs %s %n", ct1.getName(), cs1.getName());
+        ok = ok && ctOk;
+      }
+    }
+
     return ok;
   }
 
@@ -360,7 +453,7 @@ public class CompareNetcdf2 {
     if (showCompare)
       f.format("  compare CoordinateAxis '%s' to '%s' %n", a1.getShortName(), a2.getShortName());
 
-    compareVariable(a1, a2);
+    compareVariable(a1, a2, filter);
     return true;
   }
 
@@ -370,31 +463,36 @@ public class CompareNetcdf2 {
   // make sure each object in each list are in the other list, using equals().
   // return an arrayList of paired objects.
 
-  private boolean checkAttributes(Variable v, List<Attribute> list1, List<Attribute> list2, ObjFilter filter) {
+  private boolean checkAttributes(Variable v, AttributeContainer list1, AttributeContainer list2, ObjFilter objFilter) {
     boolean ok = true;
 
     String name = v == null ? "global" : "variable " + v.getFullName();
     for (Attribute att1 : list1) {
-      if (filter == null || filter.attCheckOk(v, att1))
-        ok &= checkEach(name, att1, "file1", list1, "file2", list2, null);
+      if (objFilter.attCheckOk(v, att1))
+        ok &= checkAtt(name, att1, "file1", list1, "file2", list2, objFilter);
     }
 
     for (Attribute att2 : list2) {
-      if (filter == null || filter.attCheckOk(v, att2))
-        ok &= checkEach(name, att2, "file2", list2, "file1", list1, null);
+      if (objFilter.attCheckOk(v, att2))
+        ok &= checkAtt(name, att2, "file2", list2, "file1", list1, objFilter);
     }
 
     return ok;
   }
 
-  private boolean checkDimensions(List<Dimension> list1, List<Dimension> list2) {
+  // Theres a bug in old HDF4 (eg "MOD021KM.A2004328.1735.004.2004329164007.hdf) where dimensions
+  // are not properly moved up (eg dim BAND_250M is in both root and Data_Fields).
+  // So we are going to allow that to be ok (until proven otherwise) but we have to adjust
+  // dimension comparision. Currently Dimension.equals() checks the Group.
+  private boolean checkDimensions(List<Dimension> list1, List<Dimension> list2, String where) {
     boolean ok = true;
 
     for (Dimension d1 : list1) {
       if (d1.isShared()) {
-        boolean hasit = list2.contains(d1);
-        if (!hasit)
-          f.format("  ** Missing dim %s not in file2 %n", d1);
+        boolean hasit = listContains(list2, d1);
+        if (!hasit) {
+          f.format("  ** Missing Variable dim '%s' not in %s %n", d1, where);
+        }
         ok &= hasit;
       }
     }
@@ -402,41 +500,104 @@ public class CompareNetcdf2 {
     return ok;
   }
 
+  // Check contains not using Group
+  private boolean listContains(List<Dimension> list, Dimension d2) {
+    for (Dimension d1 : list) {
+      if (equalInValue(d1, d2)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public Dimension findDimension(Group g, Dimension dim) {
+    if (dim == null) {
+      return null;
+    }
+    for (Dimension d : g.getDimensions()) {
+      if (equalInValue(d, dim)) {
+        return d;
+      }
+    }
+    Group parent = g.getParentGroup();
+    if (parent != null) {
+      return findDimension(parent, dim);
+    }
+    return null;
+  }
+
+  public EnumTypedef findEnum(Group g, EnumTypedef typedef, ObjFilter filter) {
+    if (typedef == null) {
+      return null;
+    }
+    for (EnumTypedef other : g.getEnumTypedefs()) {
+      if (filter.enumsAreEqual(typedef, other)) {
+        return other;
+      }
+    }
+    Group parent = g.getParentGroup();
+    if (parent != null) {
+      return findEnum(parent, typedef, filter);
+    }
+    return null;
+  }
+
+  // values equal, not using Group
+  private boolean equalInValue(Dimension d1, Dimension other) {
+    if ((d1.getShortName() == null) && (other.getShortName() != null))
+      return false;
+    if ((d1.getShortName() != null) && !d1.getShortName().equals(other.getShortName()))
+      return false;
+    return (d1.getLength() == other.getLength()) && (d1.isUnlimited() == other.isUnlimited())
+        && (d1.isVariableLength() == other.isVariableLength()) && (d1.isShared() == other.isShared());
+  }
+
+  private boolean checkGroupDimensions(Group group1, Group group2, String where) {
+    boolean ok = true;
+    for (Dimension d1 : group1.getDimensions()) {
+      if (d1.isShared()) {
+        if (!group2.getDimensions().contains(d1)) {
+          // not in local, is it in a parent?
+          if (findDimension(group2, d1) != null) {
+            f.format("  ** Dimension '%s' found in parent group of %s %s%n", d1, where, group2.getFullName());
+          } else {
+            f.format("  ** Missing Group dim '%s' not in %s %s%n", d1, where, group2.getFullName());
+            ok = false;
+          }
+        }
+      }
+    }
+    return ok;
+  }
 
   // make sure each object in each list are in the other list, using equals().
   // return an arrayList of paired objects.
 
-  private boolean checkEnums(Group org, Group copy) {
+  private boolean checkEnums(Group org, Group copy, ObjFilter filter) {
     boolean ok = true;
 
     for (EnumTypedef enum1 : org.getEnumTypedefs()) {
       if (showCompare)
         f.format("compare Enum %s%n", enum1.getShortName());
-      EnumTypedef enum2 = copy.findEnumeration(enum1.getShortName());
+      EnumTypedef enum2 = findEnum(copy, enum1, filter);
       if (enum2 == null) {
+        findEnum(org, enum1, filter);
         f.format("  ** Enum %s not in file2 %n", enum1.getShortName());
         ok = false;
         continue;
       }
-      if (!enum1.equals(enum2)) {
-        f.format("  ** Enum %s not equal%n  %s%n  %s%n", enum1.getShortName(), enum1, enum2);
-        ok = false;
-      }
     }
 
     for (EnumTypedef enum2 : copy.getEnumTypedefs()) {
-      EnumTypedef enum1 = org.findEnumeration(enum2.getShortName());
+      EnumTypedef enum1 = findEnum(org, enum2, filter);
       if (enum1 == null) {
+        findEnum(org, enum2, filter);
         f.format("  ** Enum %s not in file1 %n", enum2.getShortName());
         ok = false;
       }
     }
     return ok;
   }
-
-
-  // make sure each object in each list are in the other list, using equals().
-  // return an arrayList of paired objects.
 
   private boolean checkAll(String what, List list1, List list2, List result) {
     boolean ok = true;
@@ -453,7 +614,6 @@ public class CompareNetcdf2 {
   }
 
   // check that want is in both list1 and list2, using object.equals()
-
   private boolean checkEach(String what, Object want1, String name1, List list1, String name2, List list2,
       List result) {
     boolean ok = true;
@@ -489,8 +649,29 @@ public class CompareNetcdf2 {
     } catch (Throwable t) {
       t.printStackTrace();
       f.format(" *** Throwable= %s %n", t.getMessage());
+      ok = false;
     }
 
+    return ok;
+  }
+
+  // check that want is in both list1 and list2, using object.equals()
+  private boolean checkAtt(String what, Attribute want, String name1, AttributeContainer list1, String name2,
+      AttributeContainer list2, ObjFilter objFilter) {
+    boolean ok = true;
+    Attribute found = list2.findAttributeIgnoreCase(want.getShortName());
+    if (found == null) {
+      f.format("  ** %s: %s (%s) not in %s %n", what, want, name1, name2);
+      ok = false;
+    } else {
+      if (!objFilter.attsAreEqual(want, found)) {
+        f.format("  ** %s: %s 0x%x (%s) not equal to %s 0x%x (%s) %n", what, want, want.hashCode(), name1, found,
+            found.hashCode(), name2);
+        ok = false;
+      } else if (showEach) {
+        f.format("  OK <%s> equals <%s>%n", want, found);
+      }
+    }
     return ok;
   }
 
@@ -508,11 +689,6 @@ public class CompareNetcdf2 {
     return ok;
   }
 
-  public boolean compareData(String name, Array data1, double[] data2) {
-    Array data2a = Array.factory(DataType.DOUBLE, new int[] {data2.length}, data2);
-    return compareData(name, data1, data2a, false, false);
-  }
-
   public boolean compareData(String name, double[] data1, double[] data2) {
     Array data1a = Array.factory(DataType.DOUBLE, new int[] {data1.length}, data1);
     Array data2a = Array.factory(DataType.DOUBLE, new int[] {data2.length}, data2);
@@ -523,19 +699,15 @@ public class CompareNetcdf2 {
     return compareData(name, data1, data2, justOne, true);
   }
 
-  public boolean compareData(String name, Array data1, Array data2) {
-    return compareData(name, data1, data2, false, true);
-  }
-
   private boolean compareData(String name, Array data1, Array data2, boolean justOne, boolean testTypes) {
     boolean ok = true;
     if (data1.getSize() != data2.getSize()) {
-      f.format(" DIFF %s: size %d !== %d%n", name, data1.getSize(), data2.getSize());
+      f.format(" DIFF %s: data size %d !== %d%n", name, data1.getSize(), data2.getSize());
       ok = false;
     }
 
     if (testTypes && data1.getElementType() != data2.getElementType()) {
-      f.format(" DIFF %s: element type %s !== %s%n", name, data1.getElementType(), data2.getElementType());
+      f.format(" DIFF %s: data element type %s !== %s%n", name, data1.getElementType(), data2.getElementType());
       ok = false;
     }
 
@@ -544,8 +716,15 @@ public class CompareNetcdf2 {
       ok = false;
     }
 
-    if (!ok)
+    if (!Misc.compare(data1.getShape(), data2.getShape(), f)) {
+      f.format(" DIFF %s: data shape %s !== %s%n", name, Arrays.toString(data1.getShape()),
+          Arrays.toString(data2.getShape()));
+      ok = false;
+    }
+
+    if (!ok) {
       return false;
+    }
 
     DataType dt = data1.getDataType();
 
@@ -687,7 +866,7 @@ public class CompareNetcdf2 {
         Misc.relativeDifference(v1.doubleValue(), v2.doubleValue()));
   }
 
-  public boolean compareStructureData(StructureData sdata1, StructureData sdata2, boolean justOne) {
+  private boolean compareStructureData(StructureData sdata1, StructureData sdata2, boolean justOne) {
     boolean ok = true;
 
     StructureMembers sm1 = sdata1.getStructureMembers();
@@ -698,7 +877,6 @@ public class CompareNetcdf2 {
     }
 
     for (StructureMembers.Member m1 : sm1.getMembers()) {
-      // if (m1.getName().equals("time")) continue;
       StructureMembers.Member m2 = sm2.findMember(m1.getName());
       Array data1 = sdata1.getArray(m1);
       Array data2 = sdata2.getArray(m2);
@@ -729,8 +907,8 @@ public class CompareNetcdf2 {
         compareData = true;
     }
 
-    NetcdfFile ncfile1 = NetcdfDataset.open(file1);
-    NetcdfFile ncfile2 = NetcdfDataset.open(file2);
+    NetcdfFile ncfile1 = NetcdfDatasets.openFile(file1, null);
+    NetcdfFile ncfile2 = NetcdfDatasets.openFile(file2, null);
     compareFiles(ncfile1, ncfile2, new Formatter(System.out), true, compareData, showEach);
     ncfile1.close();
     ncfile2.close();

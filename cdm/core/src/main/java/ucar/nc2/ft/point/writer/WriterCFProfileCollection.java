@@ -5,6 +5,7 @@
 
 package ucar.nc2.ft.point.writer;
 
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.*;
 import ucar.ma2.*;
@@ -36,7 +37,7 @@ public class WriterCFProfileCollection extends CFPointWriter {
 
   ///////////////////////////////////////////////////
   // private Formatter coordNames = new Formatter();
-  protected Structure profileStruct; // used for netcdf4 extended
+  private Structure profileStruct; // used for netcdf4 extended
   private Map<String, Variable> featureVarMap = new HashMap<>();
   private boolean headerDone;
 
@@ -70,9 +71,9 @@ public class WriterCFProfileCollection extends CFPointWriter {
     Formatter coordNames = new Formatter().format("%s %s %s", profileTimeName, latName, lonName);
     List<VariableSimpleIF> coords = new ArrayList<>();
     if (useAlt) {
-      coords.add(VariableSimpleImpl.makeScalar(altitudeCoordinateName, "obs altitude", altUnits, DataType.DOUBLE)
-          .add(new Attribute(CF.STANDARD_NAME, "altitude"))
-          .add(new Attribute(CF.POSITIVE, CF1Convention.getZisPositive(altitudeCoordinateName, altUnits))));
+      coords.add(VariableSimpleBuilder.makeScalar(altitudeCoordinateName, "obs altitude", altUnits, DataType.DOUBLE)
+          .addAttribute(CF.STANDARD_NAME, "altitude")
+          .addAttribute(CF.POSITIVE, CF1Convention.getZisPositive(altitudeCoordinateName, altUnits)).build());
       coordNames.format(" %s", altitudeCoordinateName);
     }
 
@@ -88,17 +89,20 @@ public class WriterCFProfileCollection extends CFPointWriter {
 
     // add the profile Variables using the profile dimension
     List<VariableSimpleIF> profileVars = new ArrayList<>();
-    profileVars.add(VariableSimpleImpl.makeScalar(latName, "profile latitude", CDM.LAT_UNITS, DataType.DOUBLE));
-    profileVars.add(VariableSimpleImpl.makeScalar(lonName, "profile longitude", CDM.LON_UNITS, DataType.DOUBLE));
-    profileVars.add(VariableSimpleImpl.makeString(profileIdName, "profile identifier", null, id_strlen)
-        .add(new Attribute(CF.CF_ROLE, CF.PROFILE_ID))); // profileId:cf_role = "profile_id";
+    profileVars
+        .add(VariableSimpleBuilder.makeScalar(latName, "profile latitude", CDM.LAT_UNITS, DataType.DOUBLE).build());
+    profileVars
+        .add(VariableSimpleBuilder.makeScalar(lonName, "profile longitude", CDM.LON_UNITS, DataType.DOUBLE).build());
+    profileVars.add(VariableSimpleBuilder.makeString(profileIdName, "profile identifier", null, id_strlen)
+        .addAttribute(CF.CF_ROLE, CF.PROFILE_ID).build()); // profileId:cf_role = "profile_id";
 
-    profileVars.add(VariableSimpleImpl.makeScalar(numberOfObsName, "number of obs for this profile", null, DataType.INT)
-        .add(new Attribute(CF.SAMPLE_DIMENSION, recordDimName))); // rowSize:sample_dimension = "obs"
+    profileVars
+        .add(VariableSimpleBuilder.makeScalar(numberOfObsName, "number of obs for this profile", null, DataType.INT)
+            .addAttribute(CF.SAMPLE_DIMENSION, recordDimName).build()); // rowSize:sample_dimension = "obs"
 
-    profileVars.add(
-        VariableSimpleImpl.makeScalar(profileTimeName, "nominal time of profile", timeUnit.getUdUnit(), DataType.DOUBLE)
-            .add(new Attribute(CF.CALENDAR, timeUnit.getCalendar().toString())));
+    profileVars.add(VariableSimpleBuilder
+        .makeScalar(profileTimeName, "nominal time of profile", timeUnit.getUdUnit(), DataType.DOUBLE)
+        .addAttribute(CF.CALENDAR, timeUnit.getCalendar().toString()).build());
 
 
     for (StructureMembers.Member m : featureData.getMembers()) {
@@ -117,39 +121,37 @@ public class WriterCFProfileCollection extends CFPointWriter {
 
   private int profileRecno;
 
-  public void writeProfileData(ProfileFeature profile, int nobs) throws IOException {
+  private void writeProfileData(ProfileFeature profile, int nobs) throws IOException {
     trackBB(profile.getLatLon(), profile.getTime());
 
-    StructureDataScalar profileCoords = new StructureDataScalar("Coords");
-    profileCoords.addMember(latName, null, null, DataType.DOUBLE, profile.getLatLon().getLatitude());
-    profileCoords.addMember(lonName, null, null, DataType.DOUBLE, profile.getLatLon().getLongitude());
-    if (profile.getTime() != null) // LOOK time not always part of profile
-      profileCoords.addMember(profileTimeName, null, null, DataType.DOUBLE,
+    StructureMembers.Builder smb = StructureMembers.builder().setName("Coords");
+    smb.addMemberScalar(latName, null, null, DataType.DOUBLE, profile.getLatLon().getLatitude());
+    smb.addMemberScalar(lonName, null, null, DataType.DOUBLE, profile.getLatLon().getLongitude());
+    if (profile.getTime() != null) {// LOOK time not always part of profile
+      smb.addMemberScalar(profileTimeName, null, null, DataType.DOUBLE,
           timeUnit.makeOffsetFromRefDate(profile.getTime()));
-    profileCoords.addMemberString(profileIdName, null, null, profile.getName().trim(), id_strlen);
-    profileCoords.addMember(numberOfObsName, null, null, DataType.INT, nobs);
+    }
+    smb.addMemberString(profileIdName, null, null, profile.getName().trim(), id_strlen);
+    smb.addMemberScalar(numberOfObsName, null, null, DataType.INT, nobs);
+    StructureData profileCoords = new StructureDataFromMember(smb.build());
 
-    StructureData profileData = profile.getFeatureData();
-    StructureDataComposite sdall = new StructureDataComposite();
-    sdall.add(profileCoords); // coords first so it takes precedence
-    sdall.add(profileData);
-
+    // coords first so it takes precedence
+    StructureDataComposite sdall =
+        StructureDataComposite.create(ImmutableList.of(profileCoords, profile.getFeatureData()));
     profileRecno = super.writeStructureData(profileRecno, profileStruct, sdall, featureVarMap);
   }
 
 
   private int obsRecno;
 
-  public void writeObsData(PointFeature pf) throws IOException {
-
-    StructureDataScalar coords = new StructureDataScalar("Coords");
+  private void writeObsData(PointFeature pf) throws IOException {
+    StructureMembers.Builder smb = StructureMembers.builder().setName("Coords");
     if (useAlt)
-      coords.addMember(altitudeCoordinateName, null, null, DataType.DOUBLE, pf.getLocation().getAltitude());
+      smb.addMemberScalar(altitudeCoordinateName, null, null, DataType.DOUBLE, pf.getLocation().getAltitude());
+    StructureData coords = new StructureDataFromMember(smb.build());
 
-    StructureDataComposite sdall = new StructureDataComposite();
-    sdall.add(coords); // coords first so it takes precedence
-    sdall.add(pf.getFeatureData());
-
+    // coords first so it takes precedence
+    StructureDataComposite sdall = StructureDataComposite.create(ImmutableList.of(coords, pf.getFeatureData()));
     obsRecno = super.writeStructureData(obsRecno, record, sdall, dataMap);
   }
 

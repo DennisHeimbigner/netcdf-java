@@ -7,10 +7,8 @@ package ucar.nc2.dataset;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import thredds.client.catalog.ServiceType;
-import thredds.client.catalog.tools.DataFactory;
 import ucar.httpservices.HTTPFactory;
 import ucar.httpservices.HTTPMethod;
-import ucar.nc2.stream.CdmRemote;
 import ucar.nc2.util.EscapeStrings;
 import ucar.unidata.util.StringUtil2;
 import ucar.unidata.util.Urlencoded;
@@ -19,18 +17,17 @@ import java.util.*;
 
 /**
  * Detection of the protocol from a location string.
- * Split out from NetcdfDataset.
- * LOOK should be refactored
+ * TODO: Review and refactor as needed. Perhaps BiMap\<ServiceType, String>?
  *
  * @author caron
  * @since 10/20/2015.
  */
 public class DatasetUrl {
-  static final protected String alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  static final protected String slashalpha = "\\/" + alpha;
+  private static final String alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  private static final String slashalpha = "\\/" + alpha;
 
-  static final String[] FRAGPROTOCOLS = {"dap4", "dap2", "dods", "cdmremote", "thredds", "ncml"};
-  static final ServiceType[] FRAGPROTOSVCTYPE = {ServiceType.DAP4, ServiceType.OPENDAP, ServiceType.OPENDAP,
+  private static final String[] FRAGPROTOCOLS = {"dap4", "dap2", "dods", "cdmremote", "thredds", "ncml"};
+  private static final ServiceType[] FRAGPROTOSVCTYPE = {ServiceType.DAP4, ServiceType.OPENDAP, ServiceType.OPENDAP,
       ServiceType.THREDDS, ServiceType.THREDDS, ServiceType.NCML};
 
 
@@ -45,7 +42,8 @@ public class DatasetUrl {
    * @param url the url whose protocols to return
    * @return list of leading protocols without the trailing :
    */
-  static public List<String> getProtocols(String url) {
+  @VisibleForTesting
+  public static List<String> getProtocols(String url) {
     List<String> allprotocols = new ArrayList<>(); // all leading protocols upto path or host
 
     // Note, we cannot use split because of the context sensitivity
@@ -181,7 +179,7 @@ public class DatasetUrl {
       }
       trueurl = buf.toString();
     }
-    return new DatasetUrl(svctype, trueurl);
+    return DatasetUrl.create(serviceType, trueUrl);
   }
 
   /**
@@ -313,21 +311,20 @@ public class DatasetUrl {
    * @return ServiceType indicating how to handle the url, or null.
    */
   @Urlencoded
-  static private ServiceType decodeLeadProtocol(String protocol) throws IOException {
-    if (protocol.equals("dods"))
-      return ServiceType.OPENDAP;
-
-    else if (protocol.equals("dap4"))
-      return ServiceType.DAP4;
-
-    else if (protocol.equals("httpserver") || protocol.equals("nodods"))
-      return ServiceType.HTTPServer;
-
-    else if (protocol.equals(CdmRemote.PROTOCOL))
-      return ServiceType.CdmRemote;
-
-    else if (protocol.equals(DataFactory.PROTOCOL)) // thredds
-      return ServiceType.THREDDS;
+  private static ServiceType decodeLeadProtocol(String protocol) {
+    switch (protocol) {
+      case "dods":
+        return ServiceType.OPENDAP;
+      case "dap4":
+        return ServiceType.DAP4;
+      case "httpserver":
+      case "nodods":
+        return ServiceType.HTTPServer;
+      case "cdmremote":
+        return ServiceType.CdmRemote;
+      case "thredds":
+        return ServiceType.THREDDS;
+    }
 
     return null;
   }
@@ -535,9 +532,24 @@ public class DatasetUrl {
   }
 
   /////////////////////////////////////////////////////////////////////
+  // TODO this could be an @AutoValue
+  @Deprecated // use getServiceType()()
   public final ServiceType serviceType;
+  @Deprecated // use getTrueurl()
   public final String trueurl;
 
+  /**
+   * Create a DatasetUrl, which annotates a url with its service type.
+   * 
+   * @param serviceType The serviceType, may be null if not known.
+   * @param trueurl The actual URL
+   */
+  public static DatasetUrl create(@Nullable ServiceType serviceType, String trueurl) {
+    return new DatasetUrl(serviceType, trueurl);
+  }
+
+  /** @deprecated use create() */
+  @Deprecated
   public DatasetUrl(ServiceType serviceType, String trueurl) {
     this.serviceType = serviceType;
     this.trueurl = trueurl;
@@ -558,5 +570,13 @@ public class DatasetUrl {
   @Override
   public int hashCode() {
     return Objects.hash(serviceType, trueurl);
+  }
+
+  public ServiceType getServiceType() {
+    return serviceType;
+  }
+
+  public String getTrueurl() {
+    return trueurl;
   }
 }

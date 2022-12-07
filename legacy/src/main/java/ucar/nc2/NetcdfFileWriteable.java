@@ -135,11 +135,11 @@ public class NetcdfFileWriteable extends NetcdfFile {
     if (isExisting) {
       if (iospw == null) {
         raf = new ucar.unidata.io.RandomAccessFile(location, "rw");
-        spi = SPFactory.getServiceProvider();
-        spiw = (IOServiceProviderWriter) spi;
+        iosp = SPFactory.getServiceProvider();
+        spiw = (IOServiceProviderWriter) iosp;
       } else {
         spiw = iospw;
-        spi = spiw;
+        iosp = spiw;
       }
       spiw.open(raf, this, null);
       spiw.setFill(fill);
@@ -395,7 +395,7 @@ public class NetcdfFileWriteable extends NetcdfFile {
    *
    * @param varName name of Variable, must be unique with the file.
    * @param dataType type of underlying element
-   * @param dims names of Dimensions for the variable, blank seperated.
+   * @param dims names of Dimensions for the variable, blank separated.
    *        Must already have been added. Use an empty string for a scalar variable.
    * @return the Variable that has been added
    */
@@ -513,7 +513,7 @@ public class NetcdfFileWriteable extends NetcdfFile {
       att = new Attribute(attName, att.getValues());
     }
 
-    Variable v = rootGroup.findVariable(varName);
+    Variable v = rootGroup.findVariableLocal(varName);
     if (null == v)
       throw new IllegalArgumentException("addVariableAttribute variable name not found = <" + varName + ">");
     v.addAttribute(att);
@@ -631,11 +631,11 @@ public class NetcdfFileWriteable extends NetcdfFile {
       throw new UnsupportedOperationException("not in define mode");
 
     if (cached_spiw == null) {
-      spi = SPFactory.getServiceProvider();
-      spiw = (IOServiceProviderWriter) spi;
+      iosp = SPFactory.getServiceProvider();
+      spiw = (IOServiceProviderWriter) iosp;
     } else {
       spiw = cached_spiw;
-      spi = spiw;
+      iosp = spiw;
     }
     spiw.setFill(fill);
     spiw.create(location, this, extraHeader, preallocateSize, isLargeFile);
@@ -837,7 +837,7 @@ public class NetcdfFileWriteable extends NetcdfFile {
       spiw.close();
       spiw = null;
     }
-    spi = null;
+    iosp = null;
   }
 
   public String getFileTypeId() {
@@ -886,8 +886,8 @@ public class NetcdfFileWriteable extends NetcdfFile {
     super();
     this.location = location;
     ucar.unidata.io.RandomAccessFile raf = new ucar.unidata.io.RandomAccessFile(location, "rw");
-    spi = SPFactory.getServiceProvider();
-    spiw = (IOServiceProviderWriter) spi;
+    iosp = SPFactory.getServiceProvider();
+    spiw = (IOServiceProviderWriter) iosp;
     spiw.open(raf, this, null);
   }
 

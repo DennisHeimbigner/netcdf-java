@@ -12,6 +12,7 @@ import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.nc2.util.NamedObject;
 import ucar.nc2.units.*;
+import ucar.nc2.write.Ncdump;
 import ucar.unidata.geoloc.*;
 import ucar.unidata.geoloc.projection.LatLonProjection;
 import ucar.unidata.geoloc.projection.VerticalPerspectiveView;
@@ -19,10 +20,10 @@ import ucar.unidata.geoloc.projection.RotatedPole;
 import ucar.unidata.geoloc.projection.RotatedLatLon;
 import ucar.unidata.geoloc.projection.sat.MSGnavigation;
 import ucar.unidata.geoloc.projection.sat.Geostationary;
-import ucar.unidata.geoloc.vertical.*;
 import ucar.ma2.*;
 import java.util.*;
 import java.io.IOException;
+import ucar.unidata.geoloc.vertical.VerticalTransform;
 
 /**
  * A georeferencing "gridded" CoordinateSystem. This describes a "grid" of coordinates, which
@@ -63,11 +64,11 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
    *
    * @param sbuff place information messages here, may be null
    * @param cs the CoordinateSystem to test
-   * @param v can it be used for this variable; v may be null
+   * @param ve can it be used for this variable; v may be null
    * @return true if it can be made into a GridCoordSys.
    * @see CoordinateSystem#isGeoReferencing
    */
-  public static boolean isGridCoordSys(Formatter sbuff, CoordinateSystem cs, VariableEnhanced v) {
+  public static boolean isGridCoordSys(Formatter sbuff, CoordinateSystem cs, VariableEnhanced ve) {
     // must be at least 2 axes
     if (cs.getRankDomain() < 2) {
       if (sbuff != null) {
@@ -197,7 +198,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
     if (ens != null)
       testAxis.add(ens);
 
-    if (v != null) { // test to see that v doesnt have extra dimensions. LOOK RELAX THIS
+    if (ve != null) { // test to see that v doesnt have extra dimensions. LOOK RELAX THIS
       List<Dimension> testDomain = new ArrayList<>();
       for (CoordinateAxis axis : testAxis) {
         for (Dimension dim : axis.getDimensions()) {
@@ -205,7 +206,8 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
             testDomain.add(dim);
         }
       }
-      if (!CoordinateSystem.isSubset(v.getDimensionsAll(), testDomain)) {
+      Variable v = (Variable) ve;
+      if (!CoordinateSystem.isSubset(Dimensions.makeDimensionsAll(v), testDomain)) {
         if (sbuff != null)
           sbuff.format(" NOT complete%n");
         return false;
@@ -226,7 +228,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
   public static GridCoordSys makeGridCoordSys(Formatter sbuff, CoordinateSystem cs, VariableEnhanced v) {
     if (sbuff != null) {
       sbuff.format(" ");
-      v.getNameAndDimensions(sbuff, false, true);
+      ((Variable) v).getNameAndDimensions(sbuff, false, true);
       sbuff.format(" check CS %s: ", cs.getName());
     }
 
@@ -405,7 +407,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
     }
 
     // WRF NMM
-    Attribute att = getXHorizAxis().findAttribute(_Coordinate.Stagger);
+    Attribute att = getXHorizAxis().attributes().findAttribute(_Coordinate.Stagger);
     if (att != null)
       setHorizStaggerType(att.getStringValue());
   }
@@ -514,7 +516,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
         if ((rt_range == null) && (t_range == null))
           tAxis = taxis;
         else {
-          Section timeSection = new Section().appendRange(rt_range).appendRange(t_range);
+          Section timeSection = Section.builder().appendRange(rt_range).appendRange(t_range).build();
           tAxis = (CoordinateAxis) taxis.section(timeSection);
         }
         coordAxes.add(tAxis);
@@ -876,7 +878,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
   @Override
   public int[] findXYindexFromLatLon(double lat, double lon, int[] result) {
     Projection dataProjection = getProjection();
-    ProjectionPoint pp = dataProjection.latLonToProj(new LatLonPointImpl(lat, lon), new ProjectionPointImpl());
+    ProjectionPoint pp = dataProjection.latLonToProj(LatLonPoint.create(lat, lon));
 
     return findXYindexFromCoord(pp.getX(), pp.getY(), result);
   }
@@ -893,7 +895,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
   @Override
   public int[] findXYindexFromLatLonBounded(double lat, double lon, int[] result) {
     Projection dataProjection = getProjection();
-    ProjectionPoint pp = dataProjection.latLonToProj(new LatLonPointImpl(lat, lon), new ProjectionPointImpl());
+    ProjectionPoint pp = dataProjection.latLonToProj(LatLonPoint.create(lat, lon));
 
     return findXYindexFromCoordBounded(pp.getX(), pp.getY(), result);
   }
@@ -1025,18 +1027,20 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
       y = horiz2D.getCoordValue(yindex, xindex);
     }
 
-    return isLatLon() ? new LatLonPointImpl(y, x) : getLatLon(x, y);
+    return isLatLon() ? LatLonPoint.create(y, x) : getLatLon(x, y);
   }
 
   public LatLonPoint getLatLon(double xcoord, double ycoord) {
     Projection dataProjection = getProjection();
-    return dataProjection.projToLatLon(new ProjectionPointImpl(xcoord, ycoord), new LatLonPointImpl());
+    return dataProjection.projToLatLon(ProjectionPoint.create(xcoord, ycoord));
   }
 
   private LatLonRect llbb;
 
   /**
    * Get horizontal bounding box in lat, lon coordinates.
+   * If projection coordinates are used, the lat/ lon box is calculated from the perimeter of the projection coordinates
+   * box
    *
    * @return lat, lon bounding box.
    */
@@ -1052,13 +1056,20 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
         double deltaLat = horizYaxis.getMaxValue() - startLat;
         double deltaLon = horizXaxis.getMaxValue() - startLon;
 
-        LatLonPoint llpt = new LatLonPointImpl(startLat, startLon);
+        LatLonPoint llpt = LatLonPoint.create(startLat, startLon);
         llbb = new LatLonRect(llpt, deltaLat, deltaLon);
 
       } else {
         ProjectionImpl dataProjection = getProjection();
         ProjectionRect bb = getBoundingBox();
-        llbb = dataProjection.projToLatLonBB(bb);
+        LatLonRect approxLatLonBoundingBox = dataProjection.projToLatLonBB(bb);
+
+        try {
+          llbb = getPreciseLatLonBoundingBox(approxLatLonBoundingBox);
+        } catch (IOException e) {
+          log.error("Could not read axis values when computing LatLon bounding box: " + e.getMessage());
+          llbb = approxLatLonBoundingBox;
+        }
       }
     }
 
@@ -1088,7 +1099,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
      * includesSouthPole = true;
      * 
      * if (includesNorthPole && !includesSouthPole) {
-     * llbb = new LatLonRect(llpt, new LatLonPointImpl(90.0, 0.0)); // ??? lon=???
+     * llbb = new LatLonRect(llpt, LatLonPoint.create(90.0, 0.0)); // ??? lon=???
      * llbb.extend(lrpt);
      * llbb.extend(urpt);
      * llbb.extend(ulpt);
@@ -1098,7 +1109,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
      * //llbb.extend( new LatLonRect( urpt, ulpt ) );
      * //llbb.extend( new LatLonRect( ulpt, llpt ) );
      * } else if (includesSouthPole && !includesNorthPole) {
-     * llbb = new LatLonRect(llpt, new LatLonPointImpl(-90.0, -180.0)); // ??? lon=???
+     * llbb = new LatLonRect(llpt, LatLonPoint.create(-90.0, -180.0)); // ??? lon=???
      * llbb.extend(lrpt);
      * llbb.extend(urpt);
      * llbb.extend(ulpt);
@@ -1119,6 +1130,51 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
      * }
      */
 
+  }
+
+  /*
+   * Get precise lat/lon bounding box by looking at all points on the perimeter
+   */
+  private LatLonRect getPreciseLatLonBoundingBox(LatLonRect approximateBoundingBox) throws IOException {
+    LatLonRect boundingBox = approximateBoundingBox;
+    final Array xValues = horizXaxis.read();
+    final Array yValues = horizYaxis.read();
+
+    final double yMin = yValues.getDouble(0);
+    final double yMax = yValues.getDouble((int) (yValues.getSize() - 1));
+
+    boundingBox = extendLatLonBoundingBox(boundingBox, xValues, yMin, yMax, true);
+
+    final double xMin = xValues.getDouble(0);
+    final double xMax = xValues.getDouble((int) (xValues.getSize() - 1));
+
+    boundingBox = extendLatLonBoundingBox(boundingBox, yValues, xMin, xMax, false);
+
+    return boundingBox;
+  }
+
+  /*
+   * Extend the bounding box by looking at all values on the x- or y-axis
+   */
+  private LatLonRect extendLatLonBoundingBox(LatLonRect boundingBox, Array axisValues, double otherAxisMin,
+      double otherAxisMax, boolean isXAxis) {
+    IndexIterator iterator = axisValues.getIndexIterator();
+
+    while (iterator.hasNext()) {
+      double value = iterator.getDoubleNext();
+      final LatLonPoint firstEdge =
+          isXAxis ? proj.projToLatLon(value, otherAxisMin) : proj.projToLatLon(otherAxisMin, value);
+      if (!boundingBox.contains(firstEdge)) {
+        boundingBox = LatLonRect.extend(boundingBox, firstEdge);
+      }
+      final LatLonPoint secondEdge =
+          isXAxis ? proj.projToLatLon(value, otherAxisMax) : proj.projToLatLon(otherAxisMax, value);
+      if (!boundingBox.contains(secondEdge)) {
+        boundingBox = LatLonRect.extend(boundingBox, secondEdge);
+      }
+    }
+
+    return boundingBox;
   }
 
   /**
@@ -1158,10 +1214,10 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
 
     if (isLatLon()) {
 
-      LatLonPointImpl llpt = rect.getLowerLeftPoint();
-      LatLonPointImpl urpt = rect.getUpperRightPoint();
-      LatLonPointImpl lrpt = rect.getLowerRightPoint();
-      LatLonPointImpl ulpt = rect.getUpperLeftPoint();
+      LatLonPoint llpt = rect.getLowerLeftPoint();
+      LatLonPoint urpt = rect.getUpperRightPoint();
+      LatLonPoint lrpt = rect.getLowerRightPoint();
+      LatLonPoint ulpt = rect.getUpperLeftPoint();
 
       minx = getMinOrMaxLon(llpt.getLongitude(), ulpt.getLongitude(), true);
       miny = Math.min(llpt.getLatitude(), lrpt.getLatitude());
@@ -1170,8 +1226,8 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
 
       // normalize to [minLon,minLon+360]
       double minLon = xaxis.getMinValue();
-      minx = LatLonPointImpl.lonNormalFrom(minx, minLon);
-      maxx = LatLonPointImpl.lonNormalFrom(maxx, minLon);
+      minx = LatLonPoints.lonNormalFrom(minx, minLon);
+      maxx = LatLonPoints.lonNormalFrom(maxx, minLon);
 
     } else {
       ProjectionRect prect = getProjection().latLonToProjBB(rect); // allow projection to override
@@ -1183,10 +1239,10 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
       /*
        * see ProjectionImpl.latLonToProjBB2()
        * Projection dataProjection = getProjection();
-       * ProjectionPoint ll = dataProjection.latLonToProj(llpt, new ProjectionPointImpl());
-       * ProjectionPoint ur = dataProjection.latLonToProj(urpt, new ProjectionPointImpl());
-       * ProjectionPoint lr = dataProjection.latLonToProj(lrpt, new ProjectionPointImpl());
-       * ProjectionPoint ul = dataProjection.latLonToProj(ulpt, new ProjectionPointImpl());
+       * ProjectionPoint ll = dataProjection.latLonToProj(llpt, ProjectionPoint.create());
+       * ProjectionPoint ur = dataProjection.latLonToProj(urpt, ProjectionPoint.create());
+       * ProjectionPoint lr = dataProjection.latLonToProj(lrpt, ProjectionPoint.create());
+       * ProjectionPoint ul = dataProjection.latLonToProj(ulpt, ProjectionPoint.create());
        * 
        * minx = Math.min(ll.getX(), ul.getX());
        * miny = Math.min(ll.getY(), lr.getY());
@@ -1380,7 +1436,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
           }
         }
       } else {
-        f.format("%s", NCdumpW.printVariableData(axis, null));
+        f.format("%s", Ncdump.printVariableData(axis, null));
       }
     } catch (IOException ioe) {
       f.format(ioe.getMessage());
@@ -1448,7 +1504,9 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
    * The ith one refers to the ith level coordinate.
    *
    * @return List of ucar.nc2.util.NamedObject, or empty list.
+   * @deprecated will move in ver 6
    */
+  @Deprecated
   public List<NamedObject> getLevels() {
     if (vertZaxis == null)
       return new ArrayList<>(0);
@@ -1495,7 +1553,9 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
    * The ith one refers to the ith time coordinate.
    *
    * @return List of ucar.nc2.util.NamedObject, or empty list.
+   * @deprecated will move in ver 6
    */
+  @Deprecated
   public List<NamedObject> getTimes() {
     List<CalendarDate> cdates = getCalendarDates();
     List<NamedObject> times = new ArrayList<>(cdates.size());
@@ -1696,12 +1756,14 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
 
   private static double getMinOrMaxLon(double lon1, double lon2, boolean wantMin) {
     double midpoint = (lon1 + lon2) / 2;
-    lon1 = LatLonPointImpl.lonNormal(lon1, midpoint);
-    lon2 = LatLonPointImpl.lonNormal(lon2, midpoint);
+    lon1 = LatLonPoints.lonNormal(lon1, midpoint);
+    lon2 = LatLonPoints.lonNormal(lon2, midpoint);
 
     return wantMin ? Math.min(lon1, lon2) : Math.max(lon1, lon2);
   }
 
+  /** @deprecated use Projection.projToLatlonBB */
+  @Deprecated
   public static LatLonRect getLatLonBoundingBox(Projection proj, double startx, double starty, double endx,
       double endy) {
 
@@ -1709,7 +1771,7 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
       double deltaLat = endy - starty;
       double deltaLon = endx - startx;
 
-      LatLonPoint llpt = new LatLonPointImpl(starty, startx);
+      LatLonPoint llpt = LatLonPoint.create(starty, startx);
       return new LatLonRect(llpt, deltaLat, deltaLon);
 
     }
@@ -1717,10 +1779,10 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
     ProjectionRect bb = new ProjectionRect(startx, starty, endx, endy);
 
     // look at all 4 corners of the bounding box
-    LatLonPointImpl llpt = (LatLonPointImpl) proj.projToLatLon(bb.getLowerLeftPoint(), new LatLonPointImpl());
-    LatLonPointImpl lrpt = (LatLonPointImpl) proj.projToLatLon(bb.getLowerRightPoint(), new LatLonPointImpl());
-    LatLonPointImpl urpt = (LatLonPointImpl) proj.projToLatLon(bb.getUpperRightPoint(), new LatLonPointImpl());
-    LatLonPointImpl ulpt = (LatLonPointImpl) proj.projToLatLon(bb.getUpperLeftPoint(), new LatLonPointImpl());
+    LatLonPointImpl llpt = (LatLonPointImpl) proj.projToLatLon(bb.getLowerLeftPoint());
+    LatLonPointImpl lrpt = (LatLonPointImpl) proj.projToLatLon(bb.getLowerRightPoint());
+    LatLonPointImpl urpt = (LatLonPointImpl) proj.projToLatLon(bb.getUpperRightPoint());
+    LatLonPointImpl ulpt = (LatLonPointImpl) proj.projToLatLon(bb.getUpperLeftPoint());
 
     // Check if grid contains poles. LOOK disabled
     boolean includesNorthPole = false;
@@ -1742,13 +1804,13 @@ public class GridCoordSys extends CoordinateSystem implements ucar.nc2.dt.GridCo
     LatLonRect llbb;
 
     if (includesNorthPole && !includesSouthPole) {
-      llbb = new LatLonRect(llpt, new LatLonPointImpl(90.0, 0.0)); // ??? lon=???
+      llbb = new LatLonRect(llpt, LatLonPoint.create(90.0, 0.0)); // ??? lon=???
       llbb.extend(lrpt);
       llbb.extend(urpt);
       llbb.extend(ulpt);
 
     } else if (includesSouthPole && !includesNorthPole) {
-      llbb = new LatLonRect(llpt, new LatLonPointImpl(-90.0, -180.0)); // ??? lon=???
+      llbb = new LatLonRect(llpt, LatLonPoint.create(-90.0, -180.0)); // ??? lon=???
       llbb.extend(lrpt);
       llbb.extend(urpt);
       llbb.extend(ulpt);
