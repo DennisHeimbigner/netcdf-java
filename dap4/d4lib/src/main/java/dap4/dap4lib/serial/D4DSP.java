@@ -78,7 +78,7 @@ public abstract class D4DSP extends AbstractDSP {
   }
 
   /**
-   * Build the data from the incoming serial data
+   * Build the data from the incoming serial data (A DAP object)
    * Note that some DSP's will not use
    *
    * @param dmr
@@ -86,7 +86,7 @@ public abstract class D4DSP extends AbstractDSP {
    * @param order
    * @throws DapException
    */
-  protected void build(DapDataset dmr, byte[] serialdata, ByteOrder order) throws DapException {
+  protected void buildData(DapDataset dmr, byte[] serialdata, ByteOrder order) throws DapException {
     setDMR(dmr);
     // "Compile" the databuffer section of the server response
     this.databuffer = ByteBuffer.wrap(serialdata).order(order);

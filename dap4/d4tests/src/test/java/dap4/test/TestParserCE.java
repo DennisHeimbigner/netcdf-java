@@ -5,222 +5,169 @@
 
 package dap4.test;
 
-
 import dap4.core.ce.CECompiler;
 import dap4.core.ce.CEConstraint;
 import dap4.core.ce.parser.CEParserImpl;
 import dap4.core.dmr.DMRFactory;
 import dap4.core.dmr.DapDataset;
+import dap4.core.dmr.ErrorResponse;
 import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
+import dap4.core.dmr.parser.ParseUtil;
+import dap4.core.dmr.DMRPrinter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.IOException;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public class TestParserCE extends DapTestCommon {
-  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+/**
+ * This Test uses the JUNIT Version 4 parameterized test mechanism.
+ * The set of arguments for each test is encapsulated in a class
+ * called TestCase. This allows for code re-use and for extending
+ * tests by adding fields to the TestCase object.
+ */
+
+/**
+ * This tests the Constraint Expression (CE) Parser;
+ * it is completely self-contained.
+ */
+
+@RunWith(Parameterized.class)
+public class TestParserCE extends DapTestCommon implements Dap4ManifestIF {
 
   //////////////////////////////////////////////////
   // Constants
-  static final boolean DUMPDMR = false;
+
   static final boolean DMRPARSEDEBUG = false;
   static final boolean CEPARSEDEBUG = false;
 
-  static final String TESTCASEDIR = "src/test/data/resources/TestParsers"; // relative to dap4 root
+  // DMR Constants
+  static final String CE1_DMR = "<Dataset\n" + "    name=\"ce1\"\n" + "    dapVersion=\"4.0\"\n" + "    dmrVersion=\"1.0\"\n"
+        + "    ns=\"http://xml.opendap.org/ns/DAP/4.0#\">\n" + "  <Dimension name=\"d10\" size=\"10\"/>\n"
+        + "  <Dimension name=\"d17\" size=\"17\"/>\n" + "  <Int32 name=\"a\">\n" + "    <Dim name=\"/d17\"/>\n"
+        + "  </Int32>\n" + "  <Int32 name=\"b\">\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n"
+        + "  <Int32 name=\"c\">\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"d\">\n"
+        + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"e\">\n"
+        + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"f\">\n"
+        + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Structure name=\"s\">\n"
+        + "    <Int32 name=\"x\"/>\n" + "    <Int32 name=\"y\"/>\n" + "    <Dim name=\"/d10\"/>\n"
+        + "    <Dim name=\"/d10\"/>\n" + "  </Structure>\n" + "  <Sequence name=\"seq\">\n"
+        + "    <Int32 name=\"i1\"/>\n" + "    <Int16 name=\"sh1\"/>\n" + "  </Sequence>\n" + "</Dataset>";
 
-  static final boolean USEDOM = false;
+    static final String CE2_DMR = "<Dataset" + "    name=\"ce2\"" + "    dapVersion=\"4.0\"" + "    dmrVersion=\"1.0\""
+        + "    ns=\"http://xml.opendap.org/ns/DAP/4.0#\">" + "  <Dimension name=\"d2\" size=\"2\"/>"
+        + "  <Opaque name=\"vo\">" + "    <Dim name=\"/d2\"/>" + "    <Dim name=\"/d2\"/>" + "  </Opaque>"
+        + "</Dataset>";
+
+  static final String[][] testinputs =
+      {{"/a[1]", null, CE1_DMR}, {"/b[10:16]", null, CE1_DMR}, {"/c[8:2:15]", null, CE1_DMR},
+          {"/a[1];/b[10:16];/c[8:2:15]", null, CE1_DMR}, {"/d[1][0:2:2];/a[1];/e[1][0];/f[0][1]", null, CE1_DMR},
+          {"/s[0:3][0:2].x;/s[0:3][0:2].y", "/s[0:3][0:2]", CE1_DMR}, {"/seq|i1<0", null, CE1_DMR},
+          {"/seq|0<i1<10", "/seq|i1>0,i1<10", CE1_DMR}, {"vo[1:1][0,0]", "/vo[1][0,0]", CE2_DMR}};
 
   //////////////////////////////////////////////////
-  // Type decls
-  static class TestSet {
-    public String dmr;
-    public String constraint;
-    public String expected = null;
-    public String[] debug = null;
-    public int id = 0;
+  // Static Fields
 
-    public TestSet(int id, String cedmr, String ces, String expected) throws IOException {
-      this.id = id;
-      this.dmr = cedmr;
-      this.constraint = ces;
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  //////////////////////////////////////////////////
+  // Test Case Class
+
+  // Encapulate the arguments for each test
+  static class TestCase {
+    public String ce;
+    public String expected; // null => same as ce
+    public String dmr; // DMR against which the CE is defined
+
+    public TestCase(String ce, String expected, String dmr) {
+      this.ce = ce;
       this.expected = expected;
+      this.dmr = dmr;
+      if (this.expected == null)
+        this.expected = ce;
     }
 
-    public TestSet setdebug(String[] debug) {
-      this.debug = debug;
-      return this;
-    }
-
-    public TestSet setdebug(String debug) {
-      return setdebug(new String[] {debug});
-    }
-
+    // This defines how the test is reported by JUNIT.
     public String toString() {
-      return constraint;
+      return this.ce;
     }
-
   }
 
   //////////////////////////////////////////////////
-  // Instance methods
+  // Test Generator
 
-  // All test cases
-  List<TestSet> alltestsets = new ArrayList<>();
-  List<TestSet> chosentests = new ArrayList<>();
-
-  DapDataset dmr = null;
+  @Parameterized.Parameters(name = "{index}: {0}")
+  static public List<Object> defineTestCases() {
+    List<Object> testcases = new ArrayList<>();
+    for (String[] triple : testinputs) {
+      TestCase tc = new TestCase(triple[0], triple[1], triple[2]);
+      testcases.add(tc);
+    }
+    // int choice=0; testcases = testcases.sublist(choice,choice+1); // choose single test for debugging
+    return testcases;
+  }
 
   //////////////////////////////////////////////////
+  // Test Fields
+
+  TestCase tc;
+
+  //////////////////////////////////////////////////
+  // Constructor(s)
+
+  public TestParserCE(Object otc) {
+    super();
+    this.tc = (TestCase) otc;
+  }
+
+  //////////////////////////////////////////////////
+  // Junit test method(s)
+
   @Before
   public void setup() {
-    try {
-      defineAllTestCases();
-      chooseTestcases();
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    // Set any properties
   }
-
-  //////////////////////////////////////////////////
-  // Misc. methods
-
-  protected void chooseTestcases() {
-    if (false) {
-      chosentests = locate(7);
-      assert chosentests.size() > 0 : "Not tests chosen";
-    } else {
-      for (TestSet tc : alltestsets) {
-        chosentests.add(tc);
-      }
-    }
-  }
-
-  // Locate the test cases
-  List<TestSet> locate(Object ce) {
-    List<TestSet> results = new ArrayList<>();
-    for (TestSet ct : this.alltestsets) {
-      if (ce instanceof String) {
-        if (ct.constraint.equals(ce))
-          results.add(ct);
-      } else if (ce instanceof Integer) {
-        if (ct.id == ((Integer) ce))
-          results.add(ct);
-      }
-    }
-    return results;
-  }
-
-  protected void defineAllTestCases() throws IOException {
-    alltestsets.add(new TestSet(1, CE1_DMR, "/a[1]", "/a[1]"));
-    alltestsets.add(new TestSet(2, CE1_DMR, "/b[10:16]", "/b[10:16]"));
-    alltestsets.add(new TestSet(3, CE1_DMR, "/c[8:2:15]", "/c[8:2:15]"));
-    alltestsets.add(new TestSet(4, CE1_DMR, "/a[1];/b[10:16];/c[8:2:15]", "/a[1];/b[10:16];/c[8:2:15]"));
-    alltestsets
-        .add(new TestSet(5, CE1_DMR, "/d[1][0:2:2];/a[1];/e[1][0];/f[0][1]", "/d[1][0:2:2];/a[1];/e[1][0];/f[0][1]"));
-    alltestsets.add(new TestSet(6, CE1_DMR, "/s[0:3][0:2].x;/s[0:3][0:2].y", "/s[0:3][0:2]"));
-    alltestsets.add(new TestSet(7, CE1_DMR, "/seq|i1<0", "/seq|i1<0"));
-    alltestsets.add(new TestSet(8, CE1_DMR, "/seq|0<i1<10", "/seq|i1>0,i1<10"));
-    alltestsets.add(new TestSet(9, CE2_DMR, "vo[1:1][0,0]", "/vo[1][0,0]"));
-  }
-
-  //////////////////////////////////////////////////
-  // Junit test method
 
   @Test
-  public void testParserCE() throws Exception {
-    for (TestSet testset : chosentests) {
-      if (!doOneTest(testset)) {
-        Assert.assertTrue(false);
-        System.exit(1);
-      }
-    }
-  }
-
-  boolean doOneTest(TestSet testset) throws Exception {
-    boolean pass = true;
-
-    System.out.println("Test Set: " + testset.constraint);
-
-    if (DUMPDMR) {
-      visual("DMR:", testset.dmr);
-    }
+  public void test() throws Exception {
+    int i, c;
 
     // Create the DMR tree
-    System.out.println("Parsing DMR");
-    Dap4Parser parser;
-    if (!USEDOM)
-      parser = new DOM4Parser(new DMRFactory());
+    Dap4Parser parser = new DOM4Parser(new DMRFactory());
     if (DMRPARSEDEBUG)
       parser.setDebugLevel(1);
-    boolean parseok = parser.parse(testset.dmr);
-    if (parseok)
-      dmr = parser.getDMR();
-    if (dmr == null)
-      parseok = false;
-    if (!parseok)
-      throw new Exception("DMR Parse failed");
-    System.out.flush();
-    System.err.flush();
+    // Parse document
+    Assert.assertTrue("DMR Parse failed", parser.parse(tc.dmr));
+    Assert.assertNull("DMR Parser returned Error response", parser.getErrorResponse()); // Check result
+    DapDataset dmr = parser.getDMR();
+    Assert.assertNotNull("No DMR created", dmr);
 
-    // Iterate over the constraints
-    String results = "";
-    CEConstraint ceroot = null;
-    System.out.println("constraint: " + testset.constraint);
-    System.out.flush();
-    CEParserImpl ceparser = null;
-    try {
-      ceparser = new CEParserImpl(dmr);
-      if (CEPARSEDEBUG)
-        ceparser.setDebugLevel(1);
-      parseok = ceparser.parse(testset.constraint);
-      CECompiler compiler = new CECompiler();
-      ceroot = compiler.compile(dmr, ceparser.getCEAST());
-    } catch (Exception e) {
-      e.printStackTrace();
-      parseok = false;
-    }
-    if (ceroot == null)
-      parseok = false;
-    if (!parseok)
-      throw new Exception("CE Parse failed");
+    // Parse the constraint expression against the DMR
+    CEParserImpl ceparser = new CEParserImpl(dmr);
+    if (CEPARSEDEBUG)
+      ceparser.setDebugLevel(1);
+    Assert.assertTrue("CE Parse failed", ceparser.parse(tc.ce));
+    CECompiler compiler = new CECompiler();
+    CEConstraint ceroot = compiler.compile(dmr, ceparser.getCEAST());
+    Assert.assertNotNull("No CEConstraint created", ceroot);
 
     // Dump the parsed CE for comparison purposes
     String cedump = ceroot.toConstraintString();
-    if (prop_visual)
-      visual("|" + testset.constraint + "|", cedump);
-    results += (cedump + "\n");
-    if (prop_diff) { // compare with baseline
-      // Read the baseline file
-      String baselinecontent = testset.expected;
-      pass = same(getTitle(), baselinecontent, results);
-    }
-    return pass;
+    if (props.prop_visual)
+      visual("|" + tc.ce + "|", cedump);
+    Assert.assertTrue("expected :: CE mismatch", same(getTitle(), tc.expected, cedump));
+    System.out.println(tc.ce + ": Passed");
   }
 
-
-  ////////////////////////////////////
-  // Data for the tests
-
-  String CE1_DMR = "<Dataset" + "         name=\"ce1\"" + "         dapVersion=\"4.0\"" + "         dmrVersion=\"1.0\""
-      + "         ns=\"http://xml.opendap.org/ns/DAP/4.0#\">" + "  <Dimension name=\"d10\" size=\"10\"/>"
-      + "  <Dimension name=\"d17\" size=\"17\"/>" + "  <Int32 name=\"a\">" + "    <Dim name=\"/d17\"/>" + "  </Int32>"
-      + "  <Int32 name=\"b\">" + "    <Dim name=\"/d17\"/>" + "  </Int32>" + "  <Int32 name=\"c\">"
-      + "    <Dim name=\"/d17\"/>" + "  </Int32>" + "  <Int32 name=\"d\">" + "    <Dim name=\"/d10\"/>"
-      + "    <Dim name=\"/d17\"/>" + "  </Int32>" + "  <Int32 name=\"e\">" + "    <Dim name=\"/d10\"/>"
-      + "    <Dim name=\"/d17\"/>" + "  </Int32>" + "  <Int32 name=\"f\">" + "    <Dim name=\"/d10\"/>"
-      + "    <Dim name=\"/d17\"/>" + "  </Int32>" + "  <Structure name=\"s\">" + "      <Int32 name=\"x\"/>"
-      + "      <Int32 name=\"y\"/>" + "    <Dim name=\"/d10\"/>" + "    <Dim name=\"/d10\"/>" + "  </Structure>"
-      + "  <Sequence name=\"seq\">" + "    <Int32 name=\"i1\"/>" + "    <Int16 name=\"sh1\"/>" + "  </Sequence>"
-      + "</Dataset>";
-
-
-  String CE2_DMR = "<Dataset" + "         name=\"ce2\"" + "         dapVersion=\"4.0\"" + "         dmrVersion=\"1.0\""
-      + "         ns=\"http://xml.opendap.org/ns/DAP/4.0#\">" + "  <Dimension name=\"d2\" size=\"2\"/>"
-      + "  <Opaque name=\"vo\">" + "    <Dim name=\"/d2\"/>" + "    <Dim name=\"/d2\"/>" + "  </Opaque>" + "</Dataset>";
 }

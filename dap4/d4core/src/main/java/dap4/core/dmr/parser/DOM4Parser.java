@@ -692,8 +692,8 @@ public class DOM4Parser implements Dap4Parser {
       throw new ParseException("Dimdef: Empty dimension declaration size");
     try {
       lvalue = Long.parseLong(size);
-      if (lvalue <= 0)
-        throw new ParseException("Dimdef: value <= 0: " + lvalue);
+      // Allow zero length dimensions ; they will be elided later
+      // if (lvalue <= 0) throw new ParseException("Dimdef: value <= 0: " + lvalue);
     } catch (NumberFormatException nfe) {
       throw new ParseException("Dimdef: non-integer value: " + size);
     }
@@ -916,27 +916,7 @@ public class DOM4Parser implements Dap4Parser {
     String name = pull(node, "name");
     if (isempty(name))
       throw new ParseException("Mapref: Empty map name");
-    DapVariable target;
-    try {
-      target = (DapVariable) this.root.findByFQN(name, DapSort.VARIABLE, DapSort.SEQUENCE, DapSort.STRUCTURE);
-    } catch (DapException de) {
-      throw new ParseException(de);
-    }
-    if (target == null)
-      throw new ParseException("Mapref: undefined target variable: " + name);
-    // Verify that this is a legal map =>
-    // 1. it is outside the scope of its parent if the parent
-    // is a structure.
-    DapNode container = target.getContainer();
-    DapNode scope;
-    try {
-      scope = getParentScope();
-    } catch (DapException de) {
-      throw new ParseException(de);
-    }
-    if ((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE) && container == scope)
-      throw new ParseException("Mapref: map target variable not in outer scope: " + name);
-    DapMap map = factory.newMap(target);
+    DapMap map = factory.newMap(name);
     if (trace)
       trace("map.exit");
     return map;

@@ -20,10 +20,12 @@ import java.util.List;
  * DAP4 Related Constants both client and server side.
  */
 
-public abstract class DapConstants
-{
+public abstract class DapConstants {
   //////////////////////////////////////////////////
   // Constants
+
+  // Default http protocol
+  public static final String HTTPSCHEME = "https:";
 
   // XML Tags for DAP4
   public static final String X_DAP_SERVER = "TDS-5";
@@ -49,7 +51,13 @@ public abstract class DapConstants
   public static final String DIGESTER = "CRC32";
   public static final String CHECKSUMATTRNAME = "_DAP4_Checksum_CRC32";
   public static final String LITTLEENDIANATTRNAME = "_DAP4_Little_Endian";
-  public static final String CEATTRNAME = "_"+CONSTRAINTTAG;
+  public static final String CEATTRNAME = "_" + CONSTRAINTTAG;
+
+
+  //////////////////////////////////////////////////
+  // Dap4 Annotations
+
+  public static final String DAP4ENDIANTAG = "ucar.littleendian"; // value = 1 | 0
+  // public static final String DAP4TESTTAG = "ucar.testing"; // value = NONE|DAP|DMR|ALL
 
 }
-

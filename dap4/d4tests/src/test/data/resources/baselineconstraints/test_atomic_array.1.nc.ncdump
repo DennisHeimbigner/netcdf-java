@@ -1,0 +1,28 @@
+netcdf test_atomic_array.1 {
+  variables:
+    ubyte vu8(1, 2);
+
+    double vd(1);
+
+    String vs(1, 1);
+
+    opaque vo(1, 1);
+
+  // global attributes:
+  string :_dap4.ce = "/vu8[1][0:2:2];/vd[1];/vs[1][0];/vo[0][1]";
+  :_DAP4_Little_Endian = 1B;
+  string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
+
+  data:
+    vu8 = 
+      {
+        {3, 5}
+      }
+    vd = 
+      {1024.8}
+    vs = 
+      {  "Καλημέα"
+      }
+    vo =       0xabcdef0000000000;
+
+}

@@ -13,7 +13,10 @@ import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.dmr.parser.ParseUtil;
 import dap4.core.dmr.DMRPrinter;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
@@ -21,224 +24,158 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+/**
+ * This Test uses the JUNIT Version 4 parameterized test mechanism.
+ * The set of arguments for each test is encapsulated in a class
+ * called TestCase. This allows for code re-use and for extending
+ * tests by adding fields to the TestCase object.
+ */
 
-public class TestParserDMR extends DapTestCommon {
-  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-  static final boolean PARSEDEBUG = false;
-
-  // Do a special test to compare the dmr parser print output
-  // to the original input. This will often fail in non-essential
-  // ways, so it must be verified by hand.
-  static final boolean BACKCOMPARE = false;
+@RunWith(Parameterized.class)
+public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
 
   //////////////////////////////////////////////////
   // Constants
-  // Define the input set(s)
-  static protected final String DIR1 = "/TestParsers/dmrset"; // relative to dap4 root
-  static protected final String DIR2 = "/TestServlet/baseline"; // relative to dap4 root
-  static protected final String BASELINE = "/TestParsers/baseline"; // relative to dap4 root
+
+  static final boolean PARSEDEBUG = false;
+
+  // Define the input set location(s)
+  static protected final String INPUTDIR = "/rawtestfiles";
+  static protected final String INPUTEXT = ".nc.dmr";
+
+  // Define some common DMR filter regular expression
+  static String RE_ENDIAN = "\n[ \t]*<Attribute[ \t]+name=[\"]_DAP4_Little_Endian[\"].*?</Attribute>[ \t]*";
+  static String RE_NCPROPS = "\n[ \t]*<Attribute[ \t]+name=[\"]_NCProperties[\"].*?</Attribute>[ \t]*";
+  static protected final String RE_UNLIMITED = "[ \t]+_edu.ucar.isunlimited=\"1\"";
 
   //////////////////////////////////////////////////
+  // Static Fields
 
-  static protected class TestCase {
-    static public String resourceroot = null;
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    String name;
-    String dir;
-    String ext;
-    String input;
-    String baseline;
+  static public String resourceroot;
 
-    public TestCase(String dir, String name, String ext) {
-      this.name = name;
-      this.dir = dir;
-      this.ext = ext;
-      this.input = resourceroot + dir + "/" + name + "." + ext;
-      this.baseline = resourceroot + BASELINE + "/" + name + "." + "dmp";
+  static {
+    resourceroot = getResourceRoot();
+  }
+
+  //////////////////////////////////////////////////
+  // Test Case Class
+
+  // Encapulate the arguments for each test
+  static class TestCase {
+    public String name; // Name from manifest
+    public String input; // Full path or URL for the input file
+
+    public TestCase(String filename, String input) {
+      this.name = filename;
+      this.input = input;
+    }
+
+    // This defines how the test is reported by JUNIT.
+    public String toString() {
+      return this.name;
     }
   }
-  //////////////////////////////////////////////////
-  // Instance methods
-
-  // Test cases
-  protected List<TestCase> alltestcases = new ArrayList<TestCase>();
-  protected List<TestCase> chosentests = new ArrayList<TestCase>();
-  protected int flags = ParseUtil.FLAG_NONE;
-  protected boolean debug = false;
 
   //////////////////////////////////////////////////
+  // Test Generator
 
-  public TestParserDMR() {
+  @Parameterized.Parameters(name = "{index}: {0}")
+  static public List<Object> defineTestCases() {
+    List<Object> testcases = new ArrayList<>();
+    for (String[] tuple : dap4_manifest) {
+      String name = tuple[0];
+      String path = resourceroot + INPUTDIR + "/" + name + INPUTEXT;
+      TestCase tc = new TestCase(name, path);
+      testcases.add(tc);
+    }
+    // Include the constraint tests also
+    for (String[] triple : constraint_manifest) {
+      String file = triple[0]; // unpack
+      String index = triple[1];
+      String ce = triple[2]; // unused
+      String path = resourceroot + INPUTDIR + "/" + file + "." + index + INPUTEXT;
+      TestCase tc = new TestCase(file + "." + index, path);
+      testcases.add(tc);
+    }
+    // testcases = testcases.sublist(0,0+1); // choose single test for debugging
+    return testcases;
+  }
+
+  //////////////////////////////////////////////////
+  // Test Fields
+
+  TestCase tc;
+
+  //////////////////////////////////////////////////
+  // Constructor(s)
+
+  public TestParserDMR(Object otc) {
     super();
-    setControls();
-    defineTestCases();
-    chooseTestcases();
+    this.tc = (TestCase) otc;
   }
 
   //////////////////////////////////////////////////
-  // Misc. methods
+  // Junit test method(s)
 
-  protected void chooseTestcases() {
-    if (false) {
-      chosentests = locate("test_struct_nested.hdf5");
-      prop_visual = true;
-      assert chosentests.size() > 0 : "No tests chosen";
-    } else {
-      for (TestCase tc : alltestcases) {
-        chosentests.add(tc);
-      }
-    }
+  @Before
+  public void setup() {
+    // Set any properties
+    // props.prop_visual = true;
   }
-
-  // Locate the test cases with given prefix
-  List<TestCase> locate(String prefix) {
-    List<TestCase> results = new ArrayList<TestCase>();
-    for (TestCase ct : this.alltestcases) {
-      if (ct.name.startsWith(prefix))
-        results.add(ct);
-    }
-    return results;
-  }
-
-  protected void defineTestCases() {
-    String root = getResourceRoot();
-    TestCase.resourceroot = root;
-    loadDir(DIR1, "dmr");
-    loadDir(DIR2, "dmr");
-  }
-
-  void loadDir(String dirsuffix, String... extensions) {
-    File dir = new File(TestCase.resourceroot + dirsuffix);
-    File[] filelist = dir.listFiles();
-    for (int i = 0; i < filelist.length; i++) {
-      File file = filelist[i];
-      String name = file.getName();
-      // check the extension
-      String match = null;
-      for (String ext : extensions) {
-        if (name.endsWith(ext)) {
-          match = ext;
-          break;
-        }
-      }
-      if (match != null) {
-        String basename = name.substring(0, name.length() - (match.length() + 1));
-        TestCase ct = new TestCase(dirsuffix, basename, match);
-        addtestcase(ct);
-      }
-    }
-  }
-
-  protected void addtestcase(TestCase ct) {
-    if (DEBUG) {
-      System.err.printf("Adding Test: input=%s%n", ct.input);
-      if (!new File(ct.input).exists())
-        System.err.printf("             +++%s does not exist%n", ct.input);
-      System.err.printf("             baseline=%s%n", ct.baseline);
-      if (!new File(ct.baseline).exists())
-        System.err.printf("             ***%s does not exist%n", ct.baseline);
-      System.err.flush();
-    }
-    this.alltestcases.add(ct);
-  }
-
-  void setControls() {
-    if (prop_controls == null)
-      return;
-    flags = ParseUtil.FLAG_NOCR; // always
-    for (int i = 0; i < prop_controls.length(); i++) {
-      char c = prop_controls.charAt(i);
-      switch (c) {
-        case 'w':
-          flags |= ParseUtil.FLAG_TRIMTEXT;
-          break;
-        case 'l':
-          flags |= ParseUtil.FLAG_ELIDETEXT;
-          break;
-        case 'e':
-          flags |= ParseUtil.FLAG_ESCAPE;
-          break;
-        case 'T':
-          flags |= ParseUtil.FLAG_TRACE;
-          break;
-        case 'd':
-          debug = true;
-          break;
-        default:
-          System.err.println("unknown X option: " + c);
-          break;
-      }
-    }
-  }
-
-  //////////////////////////////////////////////////
-  // Junit test method
 
   @Test
-  public void testParser() throws Exception {
-    int ntests = 0;
-    for (TestCase testcase : chosentests) {
-      ntests++;
-      doOneTest(testcase);
-    }
-    Assert.assertTrue("***Pass ", true);
-  }
-
-  void doOneTest(TestCase testcase) throws Exception {
+  public void test() throws Exception {
     String document;
     int i, c;
 
-    String testinput = testcase.input;
-    String baseline = testcase.baseline;
+    document = readfile(tc.input);
 
-    System.err.println("Testcase: " + testinput);
-    System.err.println("Baseline: " + baseline);
-    System.err.flush();
-
-    document = readfile(testinput);
+    // Remove unneeded attributes
+    StringBuilder sb = new StringBuilder();
+    sb.append(document);
+    regexpFilters(sb, new String[] {RE_ENDIAN, RE_NCPROPS}, false);
+    regexpFilters(sb, new String[] {RE_UNLIMITED}, true);
+    document = sb.toString();
 
     Dap4Parser parser = new DOM4Parser(new DMRFactory());
-    if (PARSEDEBUG || debug)
+    if (PARSEDEBUG)
       parser.setDebugLevel(1);
+    // Parse document
+    Assert.assertTrue("Parse failed", parser.parse(document));
 
-    if (!parser.parse(document))
-      throw new Exception("DMR Parse failed: " + testinput);
-    DapDataset dmr = parser.getDMR();
+    // Check result
     ErrorResponse err = parser.getErrorResponse();
     if (err != null)
-      System.err.println("Error response:\n" + err.buildXML());
-    if (dmr == null) {
-      System.err.println("No dataset created");
-      return;
-    }
+      Assert.fail("Error response:\n" + err.buildXML());
+
+    DapDataset dmr = parser.getDMR();
+    Assert.assertNotNull("No dataset created", dmr);
 
     // Dump the parsed DMR for comparison purposes
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     DMRPrinter dapprinter = new DMRPrinter(dmr, pw);
-    dapprinter.testprint();
+    dapprinter.print();
     pw.close();
     sw.close();
     String testresult = sw.toString();
 
-    // Read the baseline file
-    String baselinecontent;
-    if (BACKCOMPARE)
-      baselinecontent = document;
-    else
-      baselinecontent = readfile(baseline);
-    if (prop_visual) {
+    // Use the original DMR as the baseline
+    String baselinecontent = document;
+
+    if (props.prop_visual) {
       visual("Baseline", baselinecontent);
       visual("Output", testresult);
     }
-
-    if (prop_baseline) {
-      writefile(baseline, testresult);
-    } else if (prop_diff) { // compare with baseline
-      Assert.assertTrue("Files are different", same(getTitle(), baselinecontent, testresult));
-    }
+    Assert.assertTrue("Files are different", same(getTitle(), baselinecontent, testresult));
+    System.out.println(tc.name + ": Passed");
   }
+
 }

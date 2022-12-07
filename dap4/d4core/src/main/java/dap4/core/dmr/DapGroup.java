@@ -74,7 +74,7 @@ public class DapGroup extends DapNode implements DapDecl {
             if (newsort != DapSort.ENUMERATION || !DapEnumeration.same((DapEnumeration) decl, (DapEnumeration) newdecl))
               throw new DapException("DapGroup: attempt to add duplicate decl: " + newname);
           }
-	  return; // Duplicate enumeration
+          return; // Duplicate enumeration
         }
       }
     } else { // Anonymous

@@ -5,8 +5,12 @@
 
 package dap4.test;
 
+import dap4.core.util.DapConstants;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
+import dap4.dap4lib.HttpDSP;
+import org.apache.http.Header;
+import ucar.httpservices.HTTPSession;
 import ucar.nc2.NetcdfFile;
 import ucar.unidata.util.test.TestDir;
 import ucar.unidata.util.test.UnitTestCommon;
@@ -14,7 +18,11 @@ import java.io.File;
 import java.io.FileFilter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 abstract public class DapTestCommon extends UnitTestCommon {
 
@@ -33,6 +41,10 @@ abstract public class DapTestCommon extends UnitTestCommon {
 
   // Equivalent to the path to the webapp/d4ts for testing purposes
   static protected final String DFALTRESOURCEPATH = "/src/test/data/resources";
+
+  static protected final String[] LEGALEXTENSIONS = {".dap", ".dmr", ".nc", "dmp", ".ncdump", ".dds", ".das", ".dods"};
+
+  //////////////////////////////////////////////////
 
   static class TestFilter implements FileFilter {
     boolean debug;
@@ -77,6 +89,23 @@ abstract public class DapTestCommon extends UnitTestCommon {
     }
   }
 
+  // Test properties
+  static class TestProperties {
+    boolean prop_diff; // Do comparison with baseline files
+    boolean prop_baseline; // Generate the baseline files
+    boolean prop_visual; // Debug output: display the test output and the baseline output
+    boolean prop_debug; // General debug flag
+    boolean prop_http_debug; // Print request and response headers
+
+    public TestProperties() {
+      prop_diff = true;
+      prop_baseline = false;
+      prop_visual = false;
+      prop_debug = DEBUG;
+      prop_http_debug = false;
+    }
+  }
+
   //////////////////////////////////////////////////
   // Static variables
 
@@ -84,17 +113,19 @@ abstract public class DapTestCommon extends UnitTestCommon {
   static protected String dap4testroot = null;
   static protected String dap4resourcedir = null;
 
+  static protected TestProperties props = null;
+
   static {
     dap4root = locateDAP4Root(threddsroot);
     if (dap4root == null)
       System.err.println("Cannot locate /dap4 parent dir");
     dap4testroot = canonjoin(dap4root, D4TESTDIRNAME);
     dap4resourcedir = canonjoin(dap4testroot, DFALTRESOURCEPATH);
+    props = new TestProperties();
   }
 
   //////////////////////////////////////////////////
   // Static methods
-
 
   static protected String getD4TestsRoot() {
     return dap4testroot;
@@ -118,7 +149,6 @@ abstract public class DapTestCommon extends UnitTestCommon {
   //////////////////////////////////////////////////
   // Instance variables
 
-
   protected String d4tsserver = null;
 
   protected String title = "Dap4 Testing";
@@ -129,7 +159,7 @@ abstract public class DapTestCommon extends UnitTestCommon {
 
   public DapTestCommon(String name) {
     super(name);
-
+    setSystemProperties();
     this.d4tsserver = TestDir.dap4TestServer;
     if (DEBUG)
       System.err.println("DapTestCommon: d4tsServer=" + d4tsserver);
@@ -139,41 +169,25 @@ abstract public class DapTestCommon extends UnitTestCommon {
    * Try to get the system properties
    */
   protected void setSystemProperties() {
-    String testargs = System.getProperty("testargs");
-    if (testargs != null && testargs.length() > 0) {
-      String[] pairs = testargs.split("[  ]*[,][  ]*");
-      for (String pair : pairs) {
-        String[] tuple = pair.split("[  ]*[=][  ]*");
-        String value = (tuple.length == 1 ? "" : tuple[1]);
-        if (tuple[0].length() > 0)
-          System.setProperty(tuple[0], value);
-      }
-    }
     if (System.getProperty("nodiff") != null)
-      prop_diff = false;
+      props.prop_diff = false;
     if (System.getProperty("baseline") != null)
-      prop_baseline = true;
-    if (System.getProperty("nogenerate") != null)
-      prop_generate = false;
+      props.prop_baseline = true;
     if (System.getProperty("debug") != null)
-      prop_debug = true;
+      props.prop_debug = true;
     if (System.getProperty("visual") != null)
-      prop_visual = true;
-    if (System.getProperty("ascii") != null)
-      prop_ascii = true;
-    if (System.getProperty("utf8") != null)
-      prop_ascii = false;
-    if (prop_baseline && prop_diff)
-      prop_diff = false;
-    prop_controls = System.getProperty("controls", "");
+      props.prop_visual = true;
+    if (props.prop_baseline && props.prop_diff)
+      props.prop_diff = false;
+  }
+
+  public void setup() {
+    if (props.prop_http_debug)
+      HttpDSP.setHttpDebug();
   }
 
   //////////////////////////////////////////////////
-  // Overrideable methods
-
-  //////////////////////////////////////////////////
   // Accessor
-
   public void setTitle(String title) {
     this.title = title;
   }
@@ -197,7 +211,7 @@ abstract public class DapTestCommon extends UnitTestCommon {
   }
 
   protected void findServer(String path) throws DapException {
-    String svc = "http://" + this.d4tsserver + "/d4ts";
+    String svc = DapConstants.HTTPSCHEME + "//" + this.d4tsserver + "/d4ts";
     if (!checkServer(svc))
       System.err.println("D4TS Server not reachable: " + svc);
     // Since we will be accessing it thru NetcdfDataset, we need to change the schema.
@@ -228,5 +242,80 @@ abstract public class DapTestCommon extends UnitTestCommon {
     }
     System.err.println("*******************");
     System.err.flush();
+  }
+
+  //////////////////////////////////////////////////
+  // Filename processing utilities
+
+  /**
+   * Given a List of file names, return a list of those names except
+   * for any in the array of filenames to be excluded.
+   * 
+   * @param manifest The list of file names
+   * @param exclusions The array of excluded names
+   * @return manifest with excluded names removed
+   */
+  static public String[][] excludeNames(String[][] manifest, String[] exclusions) {
+    String[][] xlist = new String[manifest.length][];
+    for (int i = 0; i < manifest.length; i++) {
+      String name = manifest[i][0]; // Assume tuple element 0 is always the name
+      boolean matched = false;
+      for (String excluded : exclusions) {
+        if (excluded.equals(name))
+          matched = true;
+      }
+      if (!matched)
+        xlist[i] = manifest[i];
+    }
+    return xlist;
+  }
+
+  // Filter a document with respect to a set of regular expressions
+  // Used to remove e.g. unwanted attributes
+  static public boolean regexpFilter(StringBuilder document, String regexp, boolean repeat) {
+    boolean changed = false;
+    String doc = document.toString();
+    Pattern p = Pattern.compile(regexp, Pattern.DOTALL);
+    Matcher m = p.matcher(doc);
+    if (m.find()) {
+      changed = true;
+      String newdoc = (repeat ? m.replaceAll("") : m.replaceFirst(""));
+      doc = newdoc;
+      document.setLength(0);
+      document.append(doc);
+    }
+    return changed;
+  }
+
+  static public boolean regexpFilters(StringBuilder sbdoc, String[] regexps, boolean repeat) {
+    boolean changed = false;
+    for (String re : regexps) {
+      if (regexpFilter(sbdoc, re, repeat))
+        changed = true;
+      else
+        break;
+    }
+    return changed;
+  }
+
+  // Filter a document with respect to a set of regular expressions
+  // on a per-line basis
+  static public boolean regexpFilterLine(StringBuilder document, String regexp, boolean repeat) {
+    boolean changed = false;
+    Pattern p = Pattern.compile(regexp, Pattern.DOTALL);
+    String[] lines = document.toString().split("\r?\n");
+    document.setLength(0);
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+      Matcher m = p.matcher(line);
+      if (!m.find()) {
+        document.append(line);
+        document.append("\n");
+        changed = true;
+        if (!repeat)
+          break;
+      }
+    }
+    return changed;
   }
 }

@@ -105,6 +105,8 @@ public class DapNetcdfFile extends NetcdfFile {
    * @param location URL for the request. Note that if this is
    *        intended to send to a file oriented
    *        DSP, then if must be converted to an absolute path.
+   *        Note also that the URL path should not have any .dap or .dmr
+   *        extension since using those is the purvue of this class.
    * @param cancelTask check if task is cancelled; may be null.
    * @throws IOException
    */
@@ -122,7 +124,7 @@ public class DapNetcdfFile extends NetcdfFile {
     if (isfile) {
       this.dsplocation = DapUtil.absolutize(xuri.getPath());
     } else { // Not a file url
-      this.dsplocation = xuri.assemble(XURI.URLBASE);
+      this.dsplocation = xuri.assemble(XURI.URLQUERY);
     }
     DapContext cxt = new DapContext();
     cancel = (cancelTask == null ? nullcancel : cancelTask);

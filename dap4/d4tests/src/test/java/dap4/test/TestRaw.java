@@ -1,0 +1,230 @@
+/*
+ * Copyright 2012, UCAR/Unidata.
+ * See the LICENSE file for more information.
+ */
+
+package dap4.test;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.unidata.util.test.StringComparisonUtil;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.invoke.MethodHandles;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * This Test uses the JUNIT Version 4 parameterized test mechanism.
+ * The set of arguments for each test is encapsulated in a class
+ * called TestCase. This allows for code re-use and for extending
+ * tests by adding fields to the TestCase object.
+ */
+
+@RunWith(Parameterized.class)
+public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
+
+  //////////////////////////////////////////////////
+  // Constants
+
+  // Define the input set location(s)
+  static protected final String INPUTDIR = "/rawtestfiles";
+  static protected final String INPUTEXT = ".nc.dap";
+
+  static protected final String BASELINEDIR = "/baselineraw";
+  static protected final String BASELINEEXT = ".nc.ncdump";
+
+  // Following files cannot be tested because of flaws in sequence handling
+  static protected String[] EXCLUSIONS =
+      {"test_vlen2", "test_vlen3", "test_vlen4", "test_vlen5", "test_vlen6", "test_vlen7", "test_vlen8"};
+
+  // Attribute suppression
+  static String RE_ENDIAN = "\n[ \t]*<Attribute[ \t]+name=[\"]_DAP4_Little_Endian[\"].*?</Attribute>[ \t]*";
+  static String RE_CHECKSUM = ":_DAP4_Checksum_CRC32";
+  static String RE_DAP4_ENDIAN = ":_DAP4_Little_Endian";
+  static String RE_DAP4_CE = ":_dap4.ce";
+
+  //////////////////////////////////////////////////
+  // Static Fields
+
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  static public String resourceroot;
+
+  static {
+    resourceroot = getResourceRoot();
+  }
+
+  //////////////////////////////////////////////////
+  // Test Case Class
+
+  // Encapulate the arguments for each test
+  static class TestCase {
+    public String name;
+    public String input;
+    public String baseline;
+
+    public TestCase(String name, String input, String baseline) {
+      this.name = name;
+      this.input = input;
+      this.baseline = baseline;
+    }
+
+    // This defines how the test is reported by JUNIT.
+    public String toString() {
+      return this.name;
+    }
+  }
+
+  //////////////////////////////////////////////////
+  // Test Generator
+
+  @Parameterized.Parameters(name = "{index}: {0}")
+  static public List<Object> defineTestCases() {
+    List<Object> testcases = new ArrayList<>();
+    String[][] manifest = excludeNames(dap4_manifest, EXCLUSIONS);
+    for (String[] tuple : manifest) {
+      String name = tuple[0];
+      String path = resourceroot + INPUTDIR + "/" + name + INPUTEXT;
+      String baseline = resourceroot + BASELINEDIR + "/" + name + BASELINEEXT;
+      TestCase tc = new TestCase(name, path, baseline);
+      testcases.add(tc);
+    }
+    // testcases = testcases.subList(0,0+1); // choose single test for debugging
+    return testcases;
+  }
+
+  //////////////////////////////////////////////////
+  // Test Fields
+
+  TestCase tc;
+
+  //////////////////////////////////////////////////
+  // Constructor(s)
+
+  public TestRaw(Object otc) {
+    super();
+    this.tc = (TestCase) otc;
+  }
+
+  //////////////////////////////////////////////////
+  // Junit test method(s)
+
+  @Before
+  public void setup() {
+    // Set any properties
+    // props.prop_baseline = true;
+  }
+
+  @Test
+  public void test() throws Exception {
+    int i, c;
+    StringBuilder sb = new StringBuilder();
+    String url = buildURL(resourceroot + INPUTDIR, tc.name + INPUTEXT);
+    NetcdfDataset ncfile;
+    try {
+      ncfile = openDataset(url);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new Exception("File open failed: " + url, e);
+    }
+    assert ncfile != null;
+
+    String datasetname = tc.name;
+    String testresult = dumpdata(ncfile, datasetname);
+
+    // Read the baseline file(s) if they exist
+    String baselinecontent = null;
+    try {
+      baselinecontent = readfile(tc.baseline);
+    } catch (NoSuchFileException nsf) {
+      Assert.fail(tc.name + ": ***Fail: test comparison file not found: " + tc.baseline);
+    }
+
+    // Remove unused text
+    sb.setLength(0);
+    sb.append(testresult);
+    regexpFilterLine(sb, RE_DAP4_ENDIAN, true);
+    regexpFilterLine(sb, RE_DAP4_CE, true);
+    testresult = sb.toString();
+
+    // Remove unused text
+    sb.setLength(0);
+    sb.append(baselinecontent);
+    regexpFilterLine(sb, RE_CHECKSUM, true);
+    baselinecontent = sb.toString();
+
+    if (props.prop_visual) {
+      visual("Output", testresult);
+    }
+    if (props.prop_baseline)
+      writefile(tc.baseline, testresult);
+    else if (props.prop_diff) { // compare with baseline
+      System.err.println("Comparison: vs " + tc.baseline);
+      Assert.assertTrue("*** FAIL", same(getTitle(), baselinecontent, testresult));
+      System.out.println(tc.name + ": Passed");
+    }
+  }
+
+  String dumpmetadata(NetcdfDataset ncfile, String datasetname) throws Exception {
+    StringWriter sw = new StringWriter();
+    StringBuilder args = new StringBuilder("-strict");
+    if (datasetname != null) {
+      args.append(" -datasetname ");
+      args.append(datasetname);
+    }
+    // Print the meta-databuffer using these args to NcdumpW
+    try {
+      if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
+        throw new Exception("NcdumpW failed");
+    } catch (IOException ioe) {
+      throw new Exception("NcdumpW failed", ioe);
+    }
+    sw.close();
+    return sw.toString();
+  }
+
+  //////////////////////////////////////////////////
+  // Support Methods
+
+  String buildURL(String prefix, String file) {
+    StringBuilder url = new StringBuilder();
+    url.append("file://");
+    url.append(prefix);
+    url.append("/");
+    url.append(file);
+    url.append("#dap4.checksum=false");
+    return url.toString();
+  }
+
+  String dumpdata(NetcdfDataset ncfile, String datasetname) throws Exception {
+    StringBuilder args = new StringBuilder("-strict -vall");
+    if (datasetname != null) {
+      args.append(" -datasetname ");
+      args.append(datasetname);
+    }
+    StringWriter sw = new StringWriter();
+    // Dump the databuffer
+    try {
+      if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
+        throw new Exception("NCdumpW failed");
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+      throw new Exception("NCdumpW failed", ioe);
+    }
+    sw.close();
+    return sw.toString();
+  }
+}
+
+

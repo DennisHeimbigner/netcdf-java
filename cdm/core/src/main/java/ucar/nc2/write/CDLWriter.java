@@ -294,8 +294,12 @@ public class CDLWriter {
         out.format("enum UNKNOWN");
       else
         out.format("enum %s", NetcdfFile.makeValidCDLName(v.getEnumTypedef().getShortName()));
-    } else
-      out.format("%s", dataType.toString());
+    } else {
+      String printname = dataType.toString();
+      if (strict)
+        printname = printname.toLowerCase();
+      out.format("%s", printname);
+    }
 
     // if (isVariableLength) out.append("(*)"); // LOOK
     out.format(" ");

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -48,13 +49,21 @@ public class DMRPrinter {
   static public final String XMLDOCUMENTHEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
 
   //////////////////////////////////////////////////
+  // Types
+
+  public enum Controls {
+    RESERVED; // print reserved attributes
+  }
+
+  //////////////////////////////////////////////////
   // Static Methods
   static public void print(DapDataset dmr, PrintStream stream) {
     try {
       PrintWriter pw = new PrintWriter(stream);
       new DMRPrinter(dmr, pw).print();
       pw.close();
-    } catch (IOException ioe) {};
+    } catch (IOException ioe) {
+    } ;
   }
 
   static public String printAsString(DapDataset dmr) {
@@ -66,7 +75,9 @@ public class DMRPrinter {
       pw.close();
       s = sw.toString();
       sw.close();
-    } catch (IOException ioe) {s = null;};
+    } catch (IOException ioe) {
+      s = null;
+    } ;
     return s;
   }
 
@@ -78,7 +89,8 @@ public class DMRPrinter {
   protected DapDataset dmr = null;
   protected CEConstraint ce = null;
   protected ResponseFormat format = null;
-  protected boolean testing = false;
+
+  protected EnumSet<Controls> controls = EnumSet.noneOf(Controls.class);
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -112,6 +124,10 @@ public class DMRPrinter {
   //////////////////////////////////////////////////
   // External API
 
+  public void setControl(Controls ctl) {
+    this.controls.add(ctl);
+  }
+
   /**
    * Print a DapDataset:
    * - as DMR
@@ -125,25 +141,12 @@ public class DMRPrinter {
       this.ce = CEConstraint.getUniversal(dmr);
     assert (this.ce != null);
     this.printer.setIndent(0);
-    if(this.format == ResponseFormat.XML) {
+    if (this.format == ResponseFormat.XML) {
       // Print XML Document Header
       this.printer.marginPrintln(XMLDOCUMENTHEADER);
     }
-    if(printNode(dmr)) // start printing at the root
-        printer.eol();
-  }
-
-
-  /**
-   * Same as print() except certain items of
-   * information are suppressed.
-   *
-   * @throws IOException
-   */
-
-  public void testprint() throws IOException {
-    this.testing = true;
-    print();
+    if (printNode(dmr)) // start printing at the root
+      printer.eol();
   }
 
   //////////////////////////////////////////////////
@@ -175,15 +178,16 @@ public class DMRPrinter {
     // Do first level suppression check
     DapSort sort = node.getSort();
     switch (sort) {
-    case DATASET:
-    case GROUP:
-    case DIMENSION:
-    case ENUMERATION:
-    case VARIABLE:
-      if (!this.ce.references(node)) return false;
-      break;
-    default:
-      break;
+      case DATASET:
+      case GROUP:
+      case DIMENSION:
+      case ENUMERATION:
+      case VARIABLE:
+        if (!this.ce.references(node))
+          return false;
+        break;
+      default:
+        break;
     }
 
     String dmrname = sort.getName();
@@ -202,7 +206,7 @@ public class DMRPrinter {
           for (DapNode subnode : group.getDimensions()) {
             if (!this.ce.references(subnode))
               continue;
-            if(printNode(subnode))
+            if (printNode(subnode))
               printer.eol();
           }
         }
@@ -210,7 +214,7 @@ public class DMRPrinter {
           for (DapNode subnode : group.getEnums()) {
             if (!this.ce.references(subnode))
               continue;
-            if(printNode(subnode))
+            if (printNode(subnode))
               printer.eol();
           }
         }
@@ -218,7 +222,7 @@ public class DMRPrinter {
           for (DapNode subnode : group.getVariables()) {
             if (!this.ce.references(subnode))
               continue;
-            if(printNode(subnode))
+            if (printNode(subnode))
               printer.eol();
           }
         printMetadata(node);
@@ -226,7 +230,7 @@ public class DMRPrinter {
           for (DapNode subnode : group.getGroups()) {
             if (!this.ce.references(subnode))
               continue;
-            if(printNode(subnode))
+            if (printNode(subnode))
               printer.eol();
           }
         printer.outdent();
@@ -296,7 +300,7 @@ public class DMRPrinter {
           for (DapVariable field : struct.getFields()) {
             if (!this.ce.references(field))
               continue;
-            if(printNode(field))
+            if (printNode(field))
               printer.eol();
           }
           printDimrefs(var);
@@ -379,7 +383,7 @@ public class DMRPrinter {
       default:
         break; // node either has no attributes or name only
     } // switch
-    if (!this.testing)
+    if (controls.contains(Controls.RESERVED))
       printReserved(node);
     if ((flags & PERLINE) != 0) {
       printer.outdent(2);
@@ -486,8 +490,6 @@ public class DMRPrinter {
   }
 
   void printAttribute(DapAttribute attr) throws IOException {
-    if (this.testing && isSpecial(attr))
-      return;
     printer.marginPrint("<Attribute");
     printXMLAttribute("name", attr.getShortName(), NILFLAGS);
     DapType type = attr.getBaseType();
@@ -559,8 +561,6 @@ public class DMRPrinter {
   }
 
   void printMaps(DapVariable parent) throws IOException {
-    if (this.testing)
-      return;
     List<DapMap> maps = parent.getMaps();
     if (maps.size() == 0)
       return;
@@ -568,11 +568,11 @@ public class DMRPrinter {
       // Optionally suppress field maps
       if (!ALLOWFIELDMAPS) {
         DapVariable mapvar = map.getVariable();
-        if (mapvar.getParent() != null && !mapvar.getParent().getSort().isGroup())
+        if (mapvar != null && mapvar.getParent() != null && !mapvar.getParent().getSort().isGroup())
           continue; // Supress maps with non-top-level vars
       }
       // Separate out name attribute so we can use FQN.
-      String name = map.getFQN();
+      String name = map.getTargetName();
       assert (name != null) : "Illegal <Map> reference";
       printer.marginPrint("<Map");
       name = fqnXMLEscape(name);

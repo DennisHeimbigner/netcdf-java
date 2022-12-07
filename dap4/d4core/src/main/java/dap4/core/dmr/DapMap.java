@@ -12,6 +12,8 @@ package dap4.core.dmr;
 public class DapMap extends DapNode {
   DapVariable actualvar = null;
 
+  String target = null;
+
   //////////////////////////////////////////////////
   // Constructors
 
@@ -19,16 +21,25 @@ public class DapMap extends DapNode {
     super();
   }
 
-  public DapMap(DapVariable var) {
-    this();
-    setVariable(var);
+  public DapMap(String target) {
+    super();
+    this.target = target;
+    // Use for toString()
+    this.setShortName(this.target);
   }
 
   //////////////////////////////////////////////////
   // Get/set
 
+  public String getTargetName() {
+    if (this.actualvar != null)
+      return this.actualvar.getFQN();
+    else
+      return this.target;
+  }
+
   public DapVariable getVariable() {
-    return actualvar;
+    return this.actualvar;
   }
 
   public void setVariable(DapVariable var) {

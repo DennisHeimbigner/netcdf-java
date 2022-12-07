@@ -9,10 +9,8 @@ import dap4.core.dmr.DapDataset;
 import dap4.core.util.*;
 import dap4.dap4lib.serial.D4DSP;
 import org.apache.http.HttpStatus;
-import ucar.httpservices.HTTPException;
-import ucar.httpservices.HTTPFactory;
-import ucar.httpservices.HTTPMethod;
-import ucar.httpservices.HTTPUtil;
+import ucar.httpservices.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,29 +29,14 @@ public class HttpDSP extends D4DSP {
 
   protected static final boolean DEBUG = false;
 
-  protected static final String DAPVERSION = "4.0";
-  protected static final String DMRVERSION = "1.0";
-
-  protected static final String DAP4PROTO = "dap4";
-  protected static final String FILEPROTO = "file";
-
-  protected static final String DMRSUFFIX = "dmr";
-  protected static final String DATASUFFIX = "dap";
-  protected static final String DSRSUFFIX = "dsr";
-
-  protected static final String QUERYSTART = "?";
-  protected static final String PROTOTAG = "protocol";
-
   protected static final int DFALTPRELOADSIZE = 50000; // databuffer
 
-  protected static final String[] DAPEXTENSIONS = new String[] {"dmr", "dap", "dds", "das", "ddx", "dods"};
+  //////////////////////////////////////////////////
+  // Static methods
 
-  protected static final String[] DAP4EXTENSIONS = new String[] {"dmr", "dap"};
-
-  protected static final String[][] DAP4QUERYMARKERS = new String[][] {{"proto", "dap4"}, {"dap4.ce", null},};
-  protected static final String[][] DAP4FRAGMARKERS = new String[][] {{"protocol", "dap4"}, {"dap4", null},};
-
-  protected static final String[] DAP4SCHEMES = {"dap4", "http", "https"};
+  static public void setHttpDebug() {
+    HTTPIntercepts.setDebugInterceptors(true);
+  }
 
   //////////////////////////////////////////////////
   // Instance variables
@@ -77,53 +60,19 @@ public class HttpDSP extends D4DSP {
   // DSP API
 
   /**
-   * A path is a DAP4 path if at least one of the following is true.
-   * 1. it has "dap4:" as its leading protocol
-   * 2. it has #protocol=dap4 in its fragment
-   *
    * @param url
    * @param context Any parameters that may help to decide.
    * @return true if this url appears to be processible by this DSP
    */
   public boolean dspMatch(String url, DapContext context) {
-    try {
-      XURI xuri = new XURI(url);
-      if (true) {
-        boolean found = false;
-        for (String scheme : DAP4SCHEMES) {
-          if (scheme.equalsIgnoreCase(xuri.getScheme())) {
-            found = true;
-            break;
-          }
-        }
-        if (!found)
-          return false;
-        for (String[] pair : DAP4QUERYMARKERS) {
-          String tag = xuri.getQueryFields().get(pair[0]);
-          if (tag != null && (pair[1] == null || pair[1].equalsIgnoreCase(tag)))
-            return true;
-        }
-        for (String[] pair : DAP4FRAGMARKERS) {
-          String tag = xuri.getFragFields().get(pair[0]);
-          if (tag != null && (pair[1] == null || pair[1].equalsIgnoreCase(tag)))
-            return true;
-        }
-      } else
-        return true;
-    } catch (URISyntaxException use) {
-      return false;
-    }
-    return false;
+    return DapProtocol.isDap4URI(url);
   }
 
   @Override
   public HttpDSP open(String url) throws DapException {
     setLocation(url);
     parseURL(url);
-
-    // See if this is a local vs remote request
-    this.basece = this.xuri.getQueryFields().get(DapConstants.CONSTRAINTTAG);
-    build();
+    makerequest();
     return this;
   }
 
@@ -150,8 +99,8 @@ public class HttpDSP extends D4DSP {
    * @throws DapException
    */
 
-  protected void build() throws DapException {
-    String methodurl = buildURL(this.xuri.assemble(XURI.URLONLY), DATASUFFIX, this.dmr, this.basece);
+  protected void makeRequest() throws DapException {
+    String methodurl = xuri.assemble(XURI.URLQUERY);
 
     InputStream stream;
     // Make the request and return an input stream for accessing the databuffer
@@ -175,7 +124,7 @@ public class HttpDSP extends D4DSP {
       // Extract all the remaining bytes
       byte[] bytes = DapUtil.readbinaryfile(reader);
       // use super.build to compile
-      super.build(document, bytes, getOrder());
+      super.buildData(document, bytes, getOrder());
     } catch (Throwable t) {
       t.printStackTrace();
       throw new DapException(t);
@@ -183,7 +132,8 @@ public class HttpDSP extends D4DSP {
       try {
         stream.close();
       } catch (IOException ioe) {
-        /* ignore */}
+        /* ignore */
+      }
     }
   }
 
@@ -203,6 +153,7 @@ public class HttpDSP extends D4DSP {
       HTTPMethod method = null; // Implicitly passed out to caller via stream
       try { // Note that we cannot use try with resources because we export the method stream, so method
         // must not be closed.
+
         method = HTTPFactory.Get(methodurl);
         if (allowCompression)
           method.setCompression("deflate,gzip");
@@ -237,31 +188,6 @@ public class HttpDSP extends D4DSP {
     }
   }
 
-  /**
-   * Provide a method for getting the capabilities document.
-   *
-   * @param url for accessing the document
-   * @throws DapException
-   */
-
-  public String getCapabilities(String url) throws IOException {
-    // Save the original url
-    String saveurl = this.xuri.getOriginal();
-    parseURL(url);
-    String fdsurl = buildURL(this.xuri.assemble(XURI.URLALL), DSRSUFFIX, null, null);
-    try {
-      // Make the request and return an input stream for accessing the databuffer
-      // Should fill in context bigendian and stream fields
-      InputStream stream = callServer(fdsurl);
-      // read the result, convert to string and return.
-      byte[] bytes = DapUtil.readbinaryfile(stream);
-      String document = new String(bytes, DapUtil.UTF8);
-      return document;
-    } finally {
-      parseURL(saveurl);
-    }
-  }
-
   //////////////////////////////////////////////////
   // Utilities
 
@@ -273,7 +199,7 @@ public class HttpDSP extends D4DSP {
       methodurl.append(suffix);
     }
     if (ce != null && ce.length() > 0) {
-      methodurl.append(QUERYSTART);
+      methodurl.append("?");
       methodurl.append(DapConstants.CONSTRAINTTAG);
       methodurl.append('=');
       methodurl.append(ce);

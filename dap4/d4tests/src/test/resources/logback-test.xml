@@ -36,6 +36,14 @@
     </logger>
     -->
     
+    <!-- Log HTTP DSP debug to STDOUT -->
+    <logger name="ucar.httpservices.HTTPUtil.InterceptRequest" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="ucar.httpservices.HTTPIntercepts" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
     <!-- Log all messages at level WARN or higher to STDOUT. -->
     <root level="WARN">
         <appender-ref ref="STDOUT" />

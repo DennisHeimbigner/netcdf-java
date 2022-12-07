@@ -43,7 +43,7 @@ public class DMRFactory {
     return node;
   }
 
-  public DapMap newMap(DapVariable target) {
+  public DapMap newMap(String target) {
     DapMap node = new DapMap(target);
     if (DEBUG)
       debug(node);

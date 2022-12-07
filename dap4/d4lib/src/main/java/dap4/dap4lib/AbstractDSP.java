@@ -11,10 +11,7 @@ import dap4.core.data.DataCursor;
 import dap4.core.dmr.*;
 import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
-import dap4.core.util.DapConstants;
-import dap4.core.util.DapContext;
-import dap4.core.util.DapException;
-import dap4.core.util.DapUtil;
+import dap4.core.util.*;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -114,7 +111,7 @@ public abstract class AbstractDSP implements DSP {
   public void setContext(DapContext context) {
     this.context = context;
     // Extract some things from the context
-    Object o = this.context.get(Dap4Util.DAP4ENDIANTAG);
+    Object o = this.context.get(DapConstants.DAP4ENDIANTAG);
     if (o != null)
       setOrder((ByteOrder) o);
     o = this.context.get(DapConstants.CHECKSUMTAG);
@@ -191,6 +188,7 @@ public abstract class AbstractDSP implements DSP {
       throw new DapException("Error Response Document not supported");
     DapDataset result = parser.getDMR();
     processAttributes(result);
+    processMaps(result);
     return result;
   }
 
@@ -280,6 +278,36 @@ public abstract class AbstractDSP implements DSP {
     } catch (IOException e) {
     }
     return sw.toString();
+  }
+
+  /**
+   * Walk the dataset tree and link <Map targets to the actual variable
+   *
+   * @param dataset
+   */
+  protected void processMaps(DapDataset dataset) throws DapException {
+    List<DapNode> nodes = dataset.getNodeList();
+    for (DapNode node : nodes) {
+      switch (node.getSort()) {
+        case MAP:
+          DapMap map = (DapMap) node;
+          String targetname = map.getTargetName();
+          DapVariable target;
+          target = (DapVariable) dataset.findByFQN(targetname, DapSort.VARIABLE, DapSort.SEQUENCE, DapSort.STRUCTURE);
+          if (target == null)
+            throw new DapException("Mapref: undefined target variable: " + targetname);
+          // Verify that this is a legal map =>
+          // 1. it is outside the scope of its parent if the parent
+          // is a structure.
+          DapNode container = target.getContainer();
+          if ((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE))
+            throw new DapException("Mapref: map target variable not in outer scope: " + targetname);
+          map.setVariable(target);
+          break;
+        default:
+          break; /* ignore */
+      }
+    }
   }
 
 }

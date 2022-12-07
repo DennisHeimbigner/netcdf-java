@@ -6,10 +6,11 @@
 package dap4.dap4lib;
 
 import dap4.core.util.DapContext;
-import dap4.core.util.DapDump;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.dap4lib.serial.D4DSP;
+import dap4.dap4lib.XURI;
+
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;

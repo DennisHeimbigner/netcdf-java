@@ -239,7 +239,7 @@ public abstract class DapNode {
         next = curr.getGroup();
       } while (curr.getSort() != DapSort.DATASET);
       // setDataset((DapDataset) curr);
-      assert(curr != null);
+      assert (curr != null);
     }
     return this.dataset;
   }
@@ -318,9 +318,10 @@ public abstract class DapNode {
   public void setParent(DapNode parent) {
     assert this.parent == null;
     assert ((this.getSort() == DapSort.ENUMCONST && parent.getSort() == DapSort.ENUMERATION)
-        || parent.getSort().isa(DapSort.GROUP) || parent.getSort().isa(DapSort.DATASET) || parent.getSort() == DapSort.VARIABLE
-        || parent.getSort() == DapSort.STRUCTURE || parent.getSort() == DapSort.SEQUENCE
-        || this.getSort() == DapSort.ATTRIBUTE || this.getSort() == DapSort.ATTRIBUTESET);
+        || parent.getSort().isa(DapSort.GROUP) || parent.getSort().isa(DapSort.DATASET)
+        || parent.getSort() == DapSort.VARIABLE || parent.getSort() == DapSort.STRUCTURE
+        || parent.getSort() == DapSort.SEQUENCE || this.getSort() == DapSort.ATTRIBUTE
+        || this.getSort() == DapSort.ATTRIBUTESET);
     this.parent = parent;
   }
 
@@ -468,10 +469,9 @@ public abstract class DapNode {
 
   public String toString() {
     String sortname = (sort == null ? "undefined" : sort.name());
-    // String name = getFQN();
-    String name = null;
+    String name = this.fqn;
     if (name == null)
-      name = getShortName();
+      name = this.shortname;
     if (name == null)
       name = "?";
     return sortname + "::" + name;

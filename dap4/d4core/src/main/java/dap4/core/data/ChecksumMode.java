@@ -18,7 +18,7 @@ public enum ChecksumMode {
 
   static final String[] trues = new String[] {"true", "on", "yes", "1"};
   static final String[] falses = new String[] {"false", "off", "no", "0"};
- 
+
   public static ChecksumMode modeFor(String s) {
     if (s == null || s.length() == 0)
       return NONE;

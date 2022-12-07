@@ -6,6 +6,7 @@
 
 package dap4.test;
 
+import dap4.core.util.DapConstants;
 import dap4.core.util.DapUtil;
 import dap4.core.util.Escape;
 import java.io.IOException;
@@ -168,7 +169,7 @@ public class Dump {
       return;
     int localcrc32 = endchecksum();
     // Get the checksum from the input stream
-    ByteBuffer bbuf = readn(DapUtil.CHECKSUMSIZE);
+    ByteBuffer bbuf = readn(DapConstants.CHECKSUMSIZE);
     int remotecrc32 = bbuf.getInt();
     assert localcrc32 == remotecrc32;
     newline();

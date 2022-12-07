@@ -218,8 +218,8 @@ class N3headerWriter extends N3headerNew {
 
   private void writeAtts(Iterable<Attribute> atts, Formatter fout) throws IOException {
 
-    final List<Attribute> attributesToWrite = StreamSupport.stream(atts.spliterator(), false)
-        .filter(att -> !CDM.isspecial(att)).collect(Collectors.toList());
+    final List<Attribute> attributesToWrite =
+        StreamSupport.stream(atts.spliterator(), false).filter(att -> !CDM.isspecial(att)).collect(Collectors.toList());
 
     int n = Iterables.size(attributesToWrite);
     if (n == 0) {

@@ -145,7 +145,8 @@ public class ChunkInputStream extends InputStream {
         dmr = dmr + "\r\n";
 
       // Figure out the endian-ness of the response
-      this.remoteorder = (flags & DapConstants.CHUNK_LITTLE_ENDIAN) == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
+      this.remoteorder =
+          (flags & DapConstants.CHUNK_LITTLE_ENDIAN) == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
       this.nochecksum = (flags & DapConstants.CHUNK_NOCHECKSUM) != 0;
 
       // Set the state

@@ -10,12 +10,19 @@ package dap4.dap4lib;
  * Define the enum for the possible Request/Response modes
  */
 public enum RequestMode {
-  DMR("dmr"), DAP("dap"), DSR("dsr"), CAPABILITIES(null), ERROR(null);
+  DMR("dmr", "dmr"), DAP("dap", "dap"), DSR("dsr", "dsr"), CAPABILITIES("capabilities", ""), ERROR("error",
+      null), NONE("none", null);
 
+  private String id;
   private String extension;
 
-  RequestMode(String extension) {
+  RequestMode(String id, String extension) {
+    this.id = id;
     this.extension = extension;
+  }
+
+  public String id() {
+    return id;
   }
 
   public String extension() {
@@ -30,8 +37,16 @@ public enum RequestMode {
     return null;
   }
 
+  public static RequestMode idMode(String id) {
+    for (RequestMode mode : RequestMode.values()) {
+      if (mode.id() != null && id.equalsIgnoreCase(mode.id))
+        return mode;
+    }
+    return null;
+  }
+
   public String toString() {
-    return extension;
+    return id;
   }
 }
 

@@ -1,320 +1,196 @@
+/*
+ * Copyright 2012, UCAR/Unidata.
+ * See the LICENSE file for more information.
+ */
+
 package dap4.test;
 
-import dap4.core.util.DapUtil;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.unidata.util.test.UnitTestCommon;
-import ucar.unidata.util.test.category.NotJenkins;
-import ucar.unidata.util.test.category.NotPullRequest;
+import ucar.unidata.util.test.StringComparisonUtil;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Test OpenDap Server at the NetcdfDataset level
+ * This Test uses the JUNIT Version 4 parameterized test mechanism.
+ * The set of arguments for each test is encapsulated in a class
+ * called TestCase. This allows for code re-use and for extending
+ * tests by adding fields to the TestCase object.
  */
-@Ignore
-public class TestHyrax extends DapTestCommon {
-  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  static final boolean DEBUG = false;
+/**
+ * This test set reads DAP4 datasets (both constrained and not)
+ * from the test.opendap.org test server
+ */
 
-  static final boolean NCDUMP = true; // Use NcDumpW instead of NCPrint
+@RunWith(Parameterized.class)
+public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
 
-  static final String EXTENSION = (NCDUMP ? "ncdump" : "dmp");
-
-  static final String TESTEXTENSION = "dmr";
-
-  // Mnemonic
-  static final boolean HEADERONLY = false;
-
-  static final String IP = "ec2-54-204-231-163";
   //////////////////////////////////////////////////
   // Constants
 
-  static final String DATADIR = "src/test/data"; // relative to dap4 root
-  static final String TESTDATADIR = DATADIR + "/resources/TestHyrax";
-  static final String BASELINEDIR = TESTDATADIR + "/baseline";
+  // Define the server to use
+  static protected final String SERVERNAME = "hyrax";
+  static protected final String SERVER = "test.opendap.org";
+  static protected final int SERVERPORT = -1;
+  static protected final String SERVERPATH = "opendap";
 
-  // Define the names of the xfail tests
-  static final String[] XFAIL_TESTS = {"test_struct_array.nc"};
+  // Define the input set location(s)
+  static protected final String INPUTEXT = "";
+  static protected final String INPUTQUERY = "";
+  static protected final String INPUTFRAG = "#dap4";
 
-  // Order is important; testing reachability is in the order
-  // listed
-  static final String[] SOURCES =
-      new String[] {"hyrax", "http://" + IP + ".compute-1.amazonaws.com:8080/opendap/data/reader/dap4/dap4.html",
-          "dap4://" + IP + ".compute-1.amazonaws.com:8080/opendap/data/reader/dap4"};
+  static protected final String BASELINEDIR = "/baselinehyrax";
+  static protected final String BASELINEEXT = ".ncdump";
 
-  static boolean isXfailTest(String t) {
-    for (String s : XFAIL_TESTS) {
-      if (s.equals(t))
-        return true;
-    }
-    return false;
+  // Following files cannot be tested
+  static final String[][] hyrax_manifest = new String[][] {
+      {"AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", "AIRS/AIRH3STM.003/2002.12.01",  "/TotalCounts_A"},};
+
+  static final String[] HYRAX_EXCLUSIONS = {};
+
+  //////////////////////////////////////////////////
+  // Static Fields
+
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+  static public String resourceroot;
+  static public Dap4Server server;
+
+  static {
+    server = new Dap4Server("hyrax", SERVER, SERVERPORT, SERVERPATH);
+    Dap4Server.register(true, server);
+    resourceroot = getResourceRoot();
   }
 
   //////////////////////////////////////////////////
-  // Type Declarations
+  // Test Case Class
 
-  static class Source {
+  // Encapulate the arguments for each test
+  static class TestCase {
     public String name;
-    public String testurl;
-    public String prefix;
+    public String url;
+    public String baseline;
+    public String ce; // optional
 
-    public Source(String name, String testurl, String prefix) {
+    public TestCase(String name, String url, String baseline, String ce) {
       this.name = name;
-      this.prefix = prefix;
-      this.testurl = testurl;
-    }
-  }
-
-  static class ClientTest {
-    static String root = null;
-    static String server = null;
-    static int counter = 0;
-
-    boolean checksumming = true;
-    boolean xfail = false;
-    boolean headeronly = false;
-
-    String title;
-    String dataset; // path minus the server url part.
-    String datasetpath; // Hyrax test databuffer is segregated into multiple directories
-    String baselinepath;
-    String constraint;
-    int id;
-
-    ClientTest(String dataset) {
-      this(0, dataset, null);
+      this.url = url;
+      this.baseline = baseline;
+      this.ce = ce;
     }
 
-    ClientTest(int id, String datasetpath, String constraint) {
-      // Break off the final file set name
-      int index = datasetpath.lastIndexOf('/');
-      this.dataset = datasetpath.substring(index + 1, datasetpath.length());
-      this.datasetpath = datasetpath;
-      this.title = this.dataset;
-      this.id = id;
-      this.constraint = (constraint.length() == 0 ? null : constraint);
-      this.baselinepath = root + "/" + BASELINEDIR + "/" + dataset;
-      if (this.constraint != null)
-        this.baselinepath += ("." + String.valueOf(this.id));
-    }
-
-    public ClientTest nochecksum() {
-      this.checksumming = false;
-      return this;
-    }
-
-    public ClientTest xfail() {
-      this.xfail = true;
-      return this;
-    }
-
-    public ClientTest headeronly() {
-      this.headeronly = true;
-      return this;
-    }
-
-    String makeurl() {
-      String url = url = server + "/" + datasetpath;
-      if (constraint != null)
-        url += ("?" + constraint);
-      return url;
-    }
-
+    // This defines how the test is reported by JUNIT.
     public String toString() {
-      return dataset;
+      return this.name;
     }
   }
 
   //////////////////////////////////////////////////
-  // Instance variables
+  // Test Generator
 
-  // Test cases
-
-  List<ClientTest> alltestcases = new ArrayList<ClientTest>();
-  List<ClientTest> chosentests = new ArrayList<ClientTest>();
-
-  String resourceroot = null;
-  String datasetpath = null;
-
-  String sourceurl = null;
+  @Parameterized.Parameters(name = "{index}: {0}")
+  static public List<Object> defineTestCases() {
+    assert (server != null);
+    List<Object> testcases = new ArrayList<>();
+    String[][] manifest = excludeNames(hyrax_manifest, HYRAX_EXCLUSIONS);
+    // Separate the manifest string into pieces
+    for (String[] tuple : manifest) {
+      String file = tuple[0];
+      String prefix = tuple[1];
+      String query = tuple[2]; // excluding leading '?'
+      // Unfortunately, The OPeNDAP test server does not appear to support https:
+      String url = server.getURL("http:") + "/" + prefix + "/" + file + INPUTEXT + INPUTQUERY;
+      if (query != null)
+        url += ("?" + "dap4.ce=" + query);
+      url += INPUTFRAG;
+      String baseline = resourceroot + BASELINEDIR + "/" + file + BASELINEEXT;
+      TestCase tc = new TestCase(file, url, baseline, query);
+      testcases.add(tc);
+    }
+    // int only = 1; testcases = testcases.subList(only, only + 1); // choose single test for debugging
+    return testcases;
+  }
 
   //////////////////////////////////////////////////
+  // Test Fields
+
+  TestCase tc;
+
+  //////////////////////////////////////////////////
+  // Constructor(s)
+
+  public TestHyrax(Object otc) {
+    super();
+    this.tc = (TestCase) otc;
+  }
+
+  //////////////////////////////////////////////////
+  // Junit test method(s)
 
   @Before
-  public void setup() throws Exception {
-    this.resourceroot = getResourceRoot();
-    this.resourceroot = DapUtil.absolutize(this.resourceroot); // handle problem of windows paths
-    System.out.println("Using source url " + this.sourceurl);
-    defineAllTestcases(this.resourceroot, this.sourceurl);
-    chooseTestcases();
+  public void setup() {
+    // Set any properties
+    props.prop_baseline = true;
+    super.setup();
   }
-
-  //////////////////////////////////////////////////
-  // Define test cases
-
-  void chooseTestcases() {
-    if (false) {
-      chosentests = locate("dmr-testsuite/test_array_7.xml");
-    } else {
-      for (ClientTest tc : alltestcases) {
-        chosentests.add(tc);
-      }
-    }
-  }
-
-  boolean defineAllTestcases(String root, String server) {
-
-    boolean what = HEADERONLY;
-
-    ClientTest.root = root;
-    ClientTest.server = server;
-    if (false) {
-      alltestcases.add(new ClientTest(1, "D4-xml/DMR_4.xml", "b1"));
-    }
-    if (false) {
-      alltestcases.add(new ClientTest("test_simple_1.dmr"));
-      // deleted: alltestcases.add(new TestCase("dmr-testsuite/testall.xml"));
-    }
-    if (false) {
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_1.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_2.xml"));
-      strings: alltestcases.add(new ClientTest("dmr-testsuite/test_array_3.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_4.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_5.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_6.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_7.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_8.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_10.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_array_11.xml"));
-
-    }
-    if (false) {
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_1.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_2.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_3.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_4.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_5.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_6.xml"));
-      // sequence: alltestcases.add(new TestCase("dmr-testsuite/test_simple_7.xml"));
-      // sequence: alltestcases.add(new TestCase("dmr-testsuite/test_simple_8.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_9.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_9.1.xml"));
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_10.xml"));
-    }
-    if (false) {
-      // alltestcases.add(new TestCase("D4-xml/DMR_0.1.xml")); needs fixing
-      alltestcases.add(new ClientTest("D4-xml/DMR_0.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_1.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_2.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_2.1.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_3.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_3.1.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_3.2.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_3.3.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_3.4.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_3.5.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_4.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_4.1.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_5.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_5.1.xml"));
-      // serial: alltestcases.add(new TestCase("D4-xml/DMR_6.xml"));
-      // serial: alltestcases.add(new TestCase("D4-xml/DMR_6.1.xml"));
-      // serial: alltestcases.add(new TestCase("D4-xml/DMR_6.2.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_7.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_7.1.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_7.2.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_7.3.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_7.4.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_7.5.xml"));
-      alltestcases.add(new ClientTest("D4-xml/DMR_8.xml"));
-    }
-
-    if (false) {
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_3_error_1.xml").xfail());
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_3_error_2.xml").xfail());
-      alltestcases.add(new ClientTest("dmr-testsuite/test_simple_3_error_3.xml").xfail());
-    }
-    for (ClientTest test : alltestcases) {
-      if (what == HEADERONLY)
-        test.headeronly();
-    }
-    return true;
-  }
-
-  //////////////////////////////////////////////////
-  // Junit test method
 
   @Test
-  @Category({NotJenkins.class, NotPullRequest.class})
-  public void testHyrax() throws Exception {
-    boolean pass = true;
-    for (ClientTest testcase : chosentests) {
-      if (!doOneTest(testcase))
-        pass = false;
-    }
-    Assert.assertTrue("*** Fail: TestHyrax", pass);
-  }
+  public void test() throws Exception {
+    int i, c;
+    StringBuilder sb = new StringBuilder();
 
-  //////////////////////////////////////////////////
-  // Primary test method
-  boolean doOneTest(ClientTest testcase) throws Exception {
-    boolean pass = true;
-    System.out.println("Testcase: " + testcase.dataset);
-    String url = testcase.makeurl();
-    NetcdfDataset ncfile = null;
+    NetcdfDataset ncfile;
     try {
-      ncfile = openDataset(url);
+      ncfile = openDataset(tc.url);
     } catch (Exception e) {
-      System.err.println(testcase.xfail ? "XFail" : "Fail");
       e.printStackTrace();
-      return testcase.xfail;
+      throw new Exception("File open failed: " + tc.url, e);
     }
-    String usethisname = UnitTestCommon.extractDatasetname(url, null);
-    String metadata = (NCDUMP ? ncdumpmetadata(ncfile, usethisname) : null);
-    if (prop_visual) {
-      visual(testcase.title + ".dmr", metadata);
-    }
+    assert ncfile != null;
 
-    String data = null;
-    if (!testcase.headeronly) {
-      data = (NCDUMP ? ncdumpdata(ncfile, usethisname) : null);
-      if (prop_visual) {
-        visual(testcase.title + ".dap", data);
+    String datasetname = tc.name;
+    String testresult = dumpmetadata(ncfile, datasetname);
+
+    // Read the baseline file(s) if they exist
+    String baselinecontent = null;
+    if (!props.prop_baseline) {
+      try {
+        baselinecontent = readfile(tc.baseline);
+      } catch (NoSuchFileException nsf) {
+        Assert.fail(tc.name + ": ***Fail: test comparison file not found: " + tc.baseline);
       }
     }
 
-    String testoutput = (testcase.headeronly ? metadata : (NCDUMP ? data : metadata + data));
-
-    String baselinefile = testcase.baselinepath + "." + EXTENSION;
-
-    if (prop_baseline)
-      writefile(baselinefile, testoutput);
-
-    if (prop_diff) { // compare with baseline
-      // Read the baseline file(s)
-      String baselinecontent = readfile(baselinefile);
-      System.out.println("Comparison: vs " + baselinefile);
-      pass = pass && same(getTitle(), baselinecontent, testoutput);
-      System.out.println(pass ? "Pass" : "Fail");
+    if (props.prop_visual) {
+      visual("Output", testresult);
     }
-    return pass;
+    if (props.prop_baseline)
+      writefile(tc.baseline, testresult);
+    else if (props.prop_diff) { // compare with baseline
+      System.err.println("Comparison: vs " + tc.baseline);
+      Assert.assertTrue("*** FAIL", same(getTitle(), baselinecontent, testresult));
+      System.out.println(tc.name + ": Passed");
+    }
   }
 
-
-  String ncdumpmetadata(NetcdfDataset ncfile, String datasetname) throws Exception {
+  String dumpmetadata(NetcdfDataset ncfile, String datasetname) throws Exception {
     StringWriter sw = new StringWriter();
-
     StringBuilder args = new StringBuilder("-strict");
     if (datasetname != null) {
       args.append(" -datasetname ");
@@ -331,17 +207,17 @@ public class TestHyrax extends DapTestCommon {
     return sw.toString();
   }
 
-  String ncdumpdata(NetcdfDataset ncfile, String datasetname) throws Exception {
-    StringWriter sw = new StringWriter();
+  //////////////////////////////////////////////////
+  // Support Methods
 
+  String dumpdata(NetcdfDataset ncfile, String datasetname) throws Exception {
     StringBuilder args = new StringBuilder("-strict -vall");
     if (datasetname != null) {
       args.append(" -datasetname ");
       args.append(datasetname);
     }
-
+    StringWriter sw = new StringWriter();
     // Dump the databuffer
-    sw = new StringWriter();
     try {
       if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
         throw new Exception("NCdumpW failed");
@@ -352,42 +228,4 @@ public class TestHyrax extends DapTestCommon {
     sw.close();
     return sw.toString();
   }
-
-  //////////////////////////////////////////////////
-  // Utility methods
-
-
-  // Locate the test cases with given prefix
-  List<ClientTest> locate(String prefix) {
-    List<ClientTest> results = new ArrayList<ClientTest>();
-    for (ClientTest ct : this.alltestcases) {
-      if (!ct.datasetpath.startsWith(prefix))
-        continue;
-      results.add(ct);
-    }
-    return results;
-  }
-
-  static boolean report(String msg) {
-    System.err.println(msg);
-    return false;
-  }
-
-
-  //////////////////////////////////////////////////
-  // Stand alone
-
-  static public void main(String[] argv) {
-    try {
-      new TestHyrax().testHyrax();
-    } catch (Exception e) {
-      System.err.println("*** FAIL");
-      e.printStackTrace();
-      System.exit(1);
-    }
-    System.err.println("*** PASS");
-    System.exit(0);
-  }// main
-
-} // class TestHyrax
-
+}
