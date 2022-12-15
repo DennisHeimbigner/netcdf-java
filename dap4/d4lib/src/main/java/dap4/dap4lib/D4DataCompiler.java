@@ -13,7 +13,7 @@ import dap4.dap4lib.LibTypeFcns;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
-import static dap4.core.data.DataCursor.Scheme;
+import static dap4.dap4lib.D4Cursor.Scheme;
 
 public class D4DataCompiler {
   public static boolean DEBUG = false;

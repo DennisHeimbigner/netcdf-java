@@ -5,8 +5,8 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.core.data.DataCursor;
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4Cursor;
+import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.core.dmr.DapSequence;
 import dap4.core.dmr.DapStructure;
@@ -90,14 +90,14 @@ import java.util.List;
   // Instance variables
 
   protected Group cdmroot = null;
-  protected AbstractDSP dsp;
+  protected D4DSP dsp;
   protected DapVariable template;
   protected DapType basetype;
   protected long bytesize = 0;
   protected long recordcount = 0;
   protected int nmembers = 0;
 
-  protected DataCursor seqdata = null;
+  protected D4Cursor seqdata = null;
 
   /**
    * Since in CDM a sequence is the last dimension of
@@ -120,18 +120,18 @@ import java.util.List;
    *
    * @param data
    */
-  CDMArraySequence(Group group, DataCursor data) throws DapException {
+  CDMArraySequence(Group group, D4Cursor data) throws DapException {
     super(CDMArrayStructure.computemembers((DapVariable) data.getTemplate()), new SDI(), 0);
     this.template = (DapVariable) data.getTemplate();
     this.basetype = this.template.getBaseType();
     // Currently do not allow non-scalar sequences
     if (this.template.getRank() != 0)
       throw new DapException("Non-scalar sequences unsupported through CDM interface");
-    assert data.getScheme() == DataCursor.Scheme.SEQARRAY;
+    assert data.getScheme() == D4Cursor.Scheme.SEQARRAY;
     this.cdmroot = group;
     this.dsp = dsp;
     // Since this is a scalar, pull out the single instance
-    this.seqdata = ((DataCursor[]) data.read(dap4.core.util.Index.SCALAR))[0];
+    this.seqdata = ((D4Cursor[]) data.read(dap4.core.util.Index.SCALAR))[0];
     this.recordcount = this.seqdata.getRecordCount();
     this.nmembers = ((DapStructure) this.basetype).getFields().size();
 
@@ -173,7 +173,7 @@ import java.util.List;
   }
 
   @Override
-  public AbstractDSP getDSP() {
+  public D4DSP getDSP() {
     return this.dsp;
   }
 

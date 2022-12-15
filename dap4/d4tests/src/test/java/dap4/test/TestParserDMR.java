@@ -104,7 +104,7 @@ public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(file + "." + index, path);
       testcases.add(tc);
     }
-    singleTest(0, testcases); // choose single test for debugging
+    //singleTest(0, testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -128,6 +128,7 @@ public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
   public void setup() {
     // Set any properties
     // props.prop_visual = true;
+    super.setup();
   }
 
   @Test

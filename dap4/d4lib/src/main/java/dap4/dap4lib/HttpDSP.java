@@ -125,7 +125,7 @@ public class HttpDSP extends D4DSP {
     setRequestMode(RequestMode.DAP);
     String methodurl = getMethodUrl(RequestMode.DAP, getChecksumMode());
     try (InputStream stream = makeRequest(RequestMode.DAP, methodurl)) {
-      assert(getDMR() != null);
+      assert (getDMR() != null);
       // Extract and "compile" the server response
       setData(stream, RequestMode.DAP);
       // "Compile" the databuffer section of the server response

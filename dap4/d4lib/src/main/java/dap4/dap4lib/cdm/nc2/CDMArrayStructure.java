@@ -5,8 +5,8 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.core.data.DataCursor;
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4Cursor;
+import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.dmr.DapStructure;
@@ -20,7 +20,7 @@ import ucar.ma2.*;
 import ucar.nc2.Group;
 import java.nio.ByteBuffer;
 import java.util.List;
-import static dap4.core.data.DataCursor.Scheme;
+import static dap4.dap4lib.D4Cursor.Scheme;
 
 /**
  * Implementation of ArrayStructure that wraps
@@ -61,13 +61,13 @@ import static dap4.core.data.DataCursor.Scheme;
 
   // CDMArry variables
   protected Group cdmroot = null;
-  protected AbstractDSP dsp = null;
+  protected D4DSP dsp = null;
   protected DapVariable template = null;
   protected DapType basetype = null;
   protected long dimsize = 0;
   protected int nmembers = 0;
 
-  protected dap4.core.data.DataCursor data = null;
+  protected dap4.dap4lib.D4Cursor data = null;
 
   /**
    * Since we are using StructureDataA,
@@ -94,12 +94,12 @@ import static dap4.core.data.DataCursor.Scheme;
    * @param cdmroot the parent CDMDataset
    * @param data the structure data
    */
-  CDMArrayStructure(Group cdmroot, DataCursor data) {
+  CDMArrayStructure(Group cdmroot, D4Cursor data) {
     super(computemembers((DapVariable) data.getTemplate()),
         CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
     this.template = (DapVariable) data.getTemplate();
     assert data.getScheme() == Scheme.STRUCTARRAY;
-    this.dsp = (AbstractDSP)data.getDSP();
+    this.dsp = (D4DSP) data.getDSP();
     this.cdmroot = cdmroot;
     this.basetype = this.template.getBaseType();
     this.dimsize = DapUtil.dimProduct(template.getDimensions());
@@ -133,7 +133,7 @@ import static dap4.core.data.DataCursor.Scheme;
   // CDMArray Interface
 
   @Override
-  public AbstractDSP getDSP() {
+  public D4DSP getDSP() {
     return this.dsp;
   }
 

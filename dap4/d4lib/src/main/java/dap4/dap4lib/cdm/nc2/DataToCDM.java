@@ -6,8 +6,8 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.core.data.DataCursor;
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4Cursor;
+import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
@@ -38,7 +38,7 @@ public class DataToCDM {
   // Instance variables
 
   protected DapNetcdfFile ncfile = null;
-  protected AbstractDSP dsp = null;
+  protected D4DSP dsp = null;
   protected DapDataset dmr = null;
   protected Group cdmroot = null;
   protected Map<Variable, Array> arraymap = null;
@@ -54,7 +54,7 @@ public class DataToCDM {
    * @param dsp the compiled D4 databuffer
    */
 
-  public DataToCDM(DapNetcdfFile ncfile, AbstractDSP dsp, NodeMap nodemap) throws DapException {
+  public DataToCDM(DapNetcdfFile ncfile, D4DSP dsp, NodeMap nodemap) throws DapException {
     this.ncfile = ncfile;
     this.dsp = dsp;
     this.dmr = dsp.getDMR();
@@ -79,7 +79,7 @@ public class DataToCDM {
   }
 
   //////////////////////////////////////////////////
-  // Compile DataCursor objects to ucar.ma2.Array objects
+  // Compile D4Cursor objects to ucar.ma2.Array objects
 
   /* package access */
   Map<Variable, Array> create() throws DapException {
@@ -87,7 +87,7 @@ public class DataToCDM {
     List<DapVariable> topvars = this.dmr.getTopVariables();
     Map<Variable, Array> map = null;
     for (DapVariable var : topvars) {
-      DataCursor cursor = this.dsp.getVariableData(var);
+      D4Cursor cursor = this.dsp.getVariableData(var);
       Array array = createVar(cursor);
       Variable cdmvar = (Variable) nodemap.get(var);
       this.arraymap.put(cdmvar, array);
@@ -95,7 +95,7 @@ public class DataToCDM {
     return this.arraymap;
   }
 
-  protected Array createVar(DataCursor data) throws DapException {
+  protected Array createVar(D4Cursor data) throws DapException {
     Array array = null;
     DapVariable d4var = (DapVariable) data.getTemplate();
     switch (d4var.getBaseType().getTypeSort()) {
@@ -126,7 +126,7 @@ public class DataToCDM {
    * @return An Array object wrapping d4var.
    * @throws DapException
    */
-  protected CDMArrayAtomic createAtomicVar(DataCursor data) throws DapException {
+  protected CDMArrayAtomic createAtomicVar(D4Cursor data) throws DapException {
     CDMArrayAtomic array = new CDMArrayAtomic(data);
     return array;
   }
@@ -139,7 +139,7 @@ public class DataToCDM {
    * @return A CDMArrayStructure for the databuffer for this struct.
    * @throws DapException
    */
-  protected CDMArrayStructure createStructure(DataCursor data) throws DapException {
+  protected CDMArrayStructure createStructure(D4Cursor data) throws DapException {
     CDMArrayStructure arraystruct = new CDMArrayStructure(this.cdmroot, data);
     DapVariable var = (DapVariable) data.getTemplate();
     DapStructure struct = (DapStructure) var.getBaseType();
@@ -149,10 +149,10 @@ public class DataToCDM {
     while (odom.hasNext()) {
       Index index = odom.next();
       long offset = index.index();
-      dap4.core.interfaces.DataCursor[] cursors = (dap4.core.interfaces.DataCursor[]) data.read(index);
-      dap4.core.interfaces.DataCursor ithelement = cursors[0];
+      D4Cursor[] cursors = (D4Cursor[]) data.read(index);
+      D4Cursor ithelement = cursors[0];
       for (int f = 0; f < nmembers; f++) {
-        DataCursor dc = (DataCursor) ithelement.readField(f);
+        D4Cursor dc = (D4Cursor) ithelement.readField(f);
         Array afield = createVar(dc);
         arraystruct.add(offset, f, afield);
       }
@@ -170,7 +170,7 @@ public class DataToCDM {
    * @throws DapException
    */
 
-  protected CDMArraySequence createSequence(dap4.core.data.DataCursor data) throws DapException {
+  protected CDMArraySequence createSequence(dap4.dap4lib.D4Cursor data) throws DapException {
     CDMArraySequence arrayseq = new CDMArraySequence(this.cdmroot, data);
     DapVariable var = (DapVariable) data.getTemplate();
     DapSequence template = (DapSequence) var.getBaseType();
@@ -180,12 +180,12 @@ public class DataToCDM {
     Odometer odom = Odometer.factory(DapUtil.dimsetToSlices(dimset));
     while (odom.hasNext()) {
       odom.next();
-      dap4.core.interfaces.DataCursor seq = ((dap4.core.interfaces.DataCursor[]) data.read(odom.indices()))[0];
+      D4Cursor seq = ((D4Cursor[]) data.read(odom.indices()))[0];
       long nrecords = seq.getRecordCount();
       for (int r = 0; r < nrecords; r++) {
-        dap4.core.interfaces.DataCursor rec = seq.readRecord(r);
+        D4Cursor rec = seq.readRecord(r);
         for (int f = 0; f < nfields; f++) {
-          DataCursor dc = rec.readField(f);
+          D4Cursor dc = rec.readField(f);
           Array afield = createVar(dc);
           arrayseq.add(r, f, afield);
         }

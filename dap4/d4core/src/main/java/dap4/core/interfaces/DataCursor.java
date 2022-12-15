@@ -3,7 +3,7 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.core.data;
+package dap4.core.interfaces;
 
 import dap4.core.dmr.DapNode;
 import dap4.core.util.DapException;
@@ -22,6 +22,12 @@ import java.util.List;
  * sort. The cursor may (or may not) contain
  * internal subclasses to track various kinds of
  * state.
+ */
+
+/**
+ * This Interface it to allow references to Cursor functionality
+ * where the cursor object is defined in some non contained code tree.
+ * Note also this this Interface is shared by both client and server.
  */
 
 public interface DataCursor {

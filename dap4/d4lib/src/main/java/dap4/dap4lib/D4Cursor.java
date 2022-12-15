@@ -5,9 +5,8 @@
 
 package dap4.dap4lib;
 
-import dap4.core.data.AbstractCursor;
 import dap4.core.dmr.*;
-import dap4.core.data.DataCursor;
+import dap4.core.interfaces.DataCursor;
 import dap4.core.util.*;
 
 import java.nio.ByteBuffer;
@@ -15,8 +14,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class D4Cursor extends AbstractCursor
-{
+/**
+ * For data access, we adopt a cursor model.
+ * This comes from database technology where a
+ * cursor object is used to walk over the
+ * results of a database query. Here the cursor
+ * walks the underlying data and stores enough
+ * state to extract data depending on its
+ * sort. The cursor may (or may not) contain
+ * internal subclasses to track various kinds of
+ * state.
+ */
+
+public class D4Cursor implements DataCursor {
+
   //////////////////////////////////////////////////
   // Mnemonics
   static final long NULLOFFSET = -1;
@@ -42,23 +53,37 @@ public class D4Cursor extends AbstractCursor
   // Track the records of a sequence instance
   protected List<D4Cursor> records = null; // scheme == SEQUENCE
 
-  protected AbstractDSP dsp = null;
+  protected D4DSP dsp = null;
+
+  protected Scheme scheme;
+
+  protected DapNode template;
+
+  protected Index arrayindex = null;
+  protected long recordindex = -1; // scheme == record
+
+  protected D4Cursor container = null;
+
+  protected long recordcount = -1;
 
   //////////////////////////////////////////////////
   // Constructor(s)
 
   public D4Cursor(Scheme scheme, D4DSP dsp, DapNode template, D4Cursor container) {
-    super(scheme, template, container);
+    setScheme(scheme);
+    setTemplate(template);
+    setContainer(container);
     setDSP(dsp);
   }
 
   /**
    * Effectively a clone of c
+   * Is this used?
    *
    * @param c cursor to clone
    */
   public D4Cursor(D4Cursor c) {
-    super(c);
+    this(c.getScheme(), c.getDSP(), c.getTemplate(), (D4Cursor) c.getContainer());
     assert false;
     this.offset = c.offset;
     this.bytestrings = c.bytestrings;
@@ -82,23 +107,192 @@ public class D4Cursor extends AbstractCursor
     }
   }
 
+  public String toString() {
+    StringBuilder buf = new StringBuilder();
+    buf.append(getScheme().toString());
+    if (getScheme() == Scheme.STRUCTARRAY || getScheme() == Scheme.SEQARRAY)
+      buf.append("[]");
+    buf.append(":");
+    buf.append(getTemplate().toString());
+    if (this.arrayindex != null) {
+      buf.append("::");
+      buf.append(this.arrayindex.toString());
+    }
+    if (this.recordindex >= 0) {
+      buf.append("*");
+      buf.append(this.recordindex);
+    }
+    return buf.toString();
+  }
+
   //////////////////////////////////////////////////
-  // simple set/get
+  // set/get
 
-  public AbstractDSP getDSP() {return this.dsp;}
+  public D4DSP getDSP() {
+    return this.dsp;
+  }
 
-  public void setDSP(AbstractDSP dsp) {this.dsp = dsp;}
+  public void setDSP(D4DSP dsp) {
+    this.dsp = dsp;
+  }
+
+  public Scheme getScheme() {
+    return this.scheme;
+  }
+
+  public DapNode getTemplate() {
+    return this.template;
+  }
+
+  public D4Cursor setIndex(Index index) {
+    this.arrayindex = index;
+    return this;
+  }
+
+  public D4Cursor setRecordIndex(long index) {
+    this.recordindex = index;
+    return this;
+  }
+
+  public D4Cursor setRecordCount(long count) {
+    this.recordcount = count;
+    return this;
+  }
+
+  public D4Cursor setContainer(D4Cursor container) {
+    this.container = container;
+    return this;
+  }
+
+  public D4Cursor setScheme(Scheme scheme) {
+    this.scheme = scheme;
+    return this;
+  }
+
+  public D4Cursor setTemplate(DapNode template) {
+    this.template = template;
+    return this;
+  }
+
+  public Index getIndex() throws DapException {
+    if (this.scheme != Scheme.STRUCTURE && this.scheme != Scheme.SEQUENCE)
+      throw new DapException("Not a Sequence|Structure instance");
+    return this.arrayindex;
+  }
+
+  public long getRecordIndex() throws DapException {
+    if (this.scheme != Scheme.RECORD)
+      throw new DapException("Not a Record instance");
+    return this.recordindex;
+  }
+
+  public D4Cursor getContainer() {
+    return this.container;
+  }
+
+  public boolean isScalar() {
+    if (getTemplate().getSort().isVar()) {
+      return ((DapVariable) getTemplate()).getRank() == 0;
+    } else
+      return false;
+  }
+
+  public boolean isField() {
+    return getTemplate().getContainer() != null;
+  }
+
+  public boolean isAtomic() {
+    boolean is = this.scheme == Scheme.ATOMIC;
+    assert !is || getTemplate().getSort() == DapSort.ATOMICTYPE || (getTemplate().getSort() == DapSort.VARIABLE
+        && ((DapVariable) getTemplate()).getBaseType().getTypeSort().isAtomic());
+    return is;
+  }
+
+  public boolean isCompound() {
+    boolean is = (this.scheme == Scheme.SEQUENCE || this.scheme == Scheme.STRUCTURE);
+    assert !is || getTemplate().getSort() == DapSort.SEQUENCE || getTemplate().getSort() == DapSort.STRUCTURE
+        || (getTemplate().getSort() == DapSort.VARIABLE
+            && ((DapVariable) getTemplate()).getBaseType().getTypeSort().isCompoundType());
+    return is;
+  }
+
+  public boolean isCompoundArray() {
+    boolean is = (this.scheme == Scheme.SEQARRAY || this.scheme == Scheme.STRUCTARRAY);
+    assert !is || getTemplate().getSort() == DapSort.SEQUENCE || getTemplate().getSort() == DapSort.STRUCTURE
+        || (getTemplate().getSort() == DapSort.VARIABLE
+            && ((DapVariable) getTemplate()).getBaseType().getTypeSort().isCompoundType());
+    return is;
+  }
 
   //////////////////////////////////////////////////
-  // DataCursor API (Except as Implemented in AbstractCursor)
+  // D4Cursor Extensions
 
+  public D4Cursor setElements(D4Cursor[] instances) {
+    if (!(getScheme() == Scheme.SEQARRAY || getScheme() == Scheme.STRUCTARRAY))
+      throw new IllegalStateException("Adding element to !(structure|sequence array) object");
+    DapVariable var = (DapVariable) getTemplate();
+    this.elements = instances;
+    return this;
+  }
 
-  @Override
+  public D4Cursor setOffset(long pos) {
+    this.offset = pos;
+    return this;
+  }
+
+  public D4Cursor setByteStringOffsets(long total, long[] positions) {
+    this.bytestrings = positions;
+    return this;
+  }
+
+  public D4Cursor addField(int m, D4Cursor field) {
+    if (getScheme() != Scheme.RECORD && getScheme() != Scheme.STRUCTURE)
+      throw new IllegalStateException("Adding field to non-(structure|record) object");
+    if (this.fieldcursors == null) {
+      DapStructure ds = (DapStructure) ((DapVariable) getTemplate()).getBaseType();
+      List<DapVariable> fields = ds.getFields();
+      this.fieldcursors = new D4Cursor[fields.size()];
+    }
+    if (this.fieldcursors[m] != null)
+      throw new IndexOutOfBoundsException("Adding duplicate fields at position:" + m);
+    this.fieldcursors[m] = field;
+    return this;
+  }
+
+  public D4Cursor addRecord(D4Cursor rec) {
+    if (getScheme() != Scheme.SEQUENCE)
+      throw new IllegalStateException("Adding record to non-sequence object");
+    if (this.records == null)
+      this.records = new ArrayList<>();
+    this.records.add(rec);
+    return this;
+  }
+
+  public long getElementSize(DapVariable v) {
+    return v.getBaseType().isFixedSize() ? v.getBaseType().getSize() : 0;
+  }
+
+  static ByteBuffer skip(long n, ByteBuffer b) {
+    if (b.position() + ((int) n) > b.limit())
+      throw new IllegalArgumentException();
+    b.position(b.position() + ((int) n));
+    return b;
+  }
+
+  public static long getLength(ByteBuffer b) {
+    if (b.position() + D4LENSIZE > b.limit())
+      throw new IllegalArgumentException();
+    long n = b.getLong();
+    return n;
+  }
+
+  //////////////////////////////////////////////////
+  // Read API
+
   public Object read(Index index) throws DapException {
     return read(DapUtil.indexToSlices(index));
   }
 
-  @Override
   public Object read(List<Slice> slices) throws DapException {
     switch (this.scheme) {
       case ATOMIC:
@@ -128,7 +322,6 @@ public class D4Cursor extends AbstractCursor
     }
   }
 
-  @Override
   public D4Cursor readField(int findex) throws DapException {
     assert (this.scheme == scheme.RECORD || this.scheme == scheme.STRUCTURE);
     DapStructure basetype = (DapStructure) ((DapVariable) getTemplate()).getBaseType();
@@ -138,7 +331,6 @@ public class D4Cursor extends AbstractCursor
     return field;
   }
 
-  @Override
   public D4Cursor readRecord(long i) {
     assert (this.scheme == Scheme.SEQUENCE);
     if (this.records == null || i < 0 || i > this.records.size())
@@ -146,18 +338,33 @@ public class D4Cursor extends AbstractCursor
     return this.records.get((int) i);
   }
 
-  @Override
   public long getRecordCount() {
     assert (this.scheme == Scheme.SEQUENCE);
     return this.records == null ? 0 : this.records.size();
   }
+
+  @Override
+  public int fieldIndex(String name) throws DapException {
+    DapStructure ds;
+    if (getTemplate().getSort().isCompound())
+      ds = (DapStructure) getTemplate();
+    else if (getTemplate().getSort().isVar() && (((DapVariable) getTemplate()).getBaseType().getSort().isCompound()))
+      ds = (DapStructure) ((DapVariable) getTemplate()).getBaseType();
+    else
+      throw new DapException("Attempt to get field name on non-compound object");
+    int i = ds.indexByName(name);
+    if (i < 0)
+      throw new DapException("Unknown field name: " + name);
+    return i;
+  }
+
 
   //////////////////////////////////////////////////
   // Support methods
 
   protected Object readAtomic(List<Slice> slices) throws DapException {
     if (slices == null)
-      throw new DapException("DataCursor.read: null set of slices");
+      throw new DapException("D4Cursor.read: null set of slices");
     assert this.scheme == Scheme.ATOMIC;
     DapVariable atomvar = (DapVariable) getTemplate();
     int rank = atomvar.getRank();
@@ -321,66 +528,19 @@ public class D4Cursor extends AbstractCursor
     return this.elements[(int) pos];
   }
 
-  //////////////////////////////////////////////////
-  // D4Cursor Extensions
-
-  public D4Cursor setElements(D4Cursor[] instances) {
-    if (!(getScheme() == Scheme.SEQARRAY || getScheme() == Scheme.STRUCTARRAY))
-      throw new IllegalStateException("Adding element to !(structure|sequence array) object");
-    DapVariable var = (DapVariable) getTemplate();
-    this.elements = instances;
-    return this;
-  }
-
-  public D4Cursor setOffset(long pos) {
-    this.offset = pos;
-    return this;
-  }
-
-  public D4Cursor setByteStringOffsets(long total, long[] positions) {
-    this.bytestrings = positions;
-    return this;
-  }
-
-  public D4Cursor addField(int m, D4Cursor field) {
-    if (getScheme() != Scheme.RECORD && getScheme() != Scheme.STRUCTURE)
-      throw new IllegalStateException("Adding field to non-(structure|record) object");
-    if (this.fieldcursors == null) {
-      DapStructure ds = (DapStructure) ((DapVariable) getTemplate()).getBaseType();
-      List<DapVariable> fields = ds.getFields();
-      this.fieldcursors = new D4Cursor[fields.size()];
+  public static Scheme schemeFor(DapVariable field) {
+    DapType ftype = field.getBaseType();
+    Scheme scheme = null;
+    boolean isscalar = field.getRank() == 0;
+    if (ftype.getTypeSort().isAtomic())
+      scheme = Scheme.ATOMIC;
+    else {
+      if (ftype.getTypeSort().isStructType())
+        scheme = Scheme.STRUCTARRAY;
+      else if (ftype.getTypeSort().isSeqType())
+        scheme = Scheme.SEQARRAY;
     }
-    if (this.fieldcursors[m] != null)
-      throw new IndexOutOfBoundsException("Adding duplicate fields at position:" + m);
-    this.fieldcursors[m] = field;
-    return this;
-  }
-
-  public D4Cursor addRecord(D4Cursor rec) {
-    if (getScheme() != Scheme.SEQUENCE)
-      throw new IllegalStateException("Adding record to non-sequence object");
-    if (this.records == null)
-      this.records = new ArrayList<>();
-    this.records.add(rec);
-    return this;
-  }
-
-  public long getElementSize(DapVariable v) {
-    return v.getBaseType().isFixedSize() ? v.getBaseType().getSize() : 0;
-  }
-
-  static ByteBuffer skip(long n, ByteBuffer b) {
-    if (b.position() + ((int) n) > b.limit())
-      throw new IllegalArgumentException();
-    b.position(b.position() + ((int) n));
-    return b;
-  }
-
-  public static long getLength(ByteBuffer b) {
-    if (b.position() + D4LENSIZE > b.limit())
-      throw new IllegalArgumentException();
-    long n = b.getLong();
-    return n;
+    return scheme;
   }
 
 }

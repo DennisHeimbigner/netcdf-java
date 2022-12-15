@@ -5,7 +5,7 @@
 
 package dap4.dap4lib.cdm;
 
-import dap4.core.data.DataCursor;
+import dap4.dap4lib.D4Cursor;
 import dap4.core.dmr.DapDimension;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.TypeSort;
@@ -294,7 +294,7 @@ public abstract class CDMUtil {
    * @throws ForbiddenConversionException if cannot convert to long
    */
 
-  public static long extractLongValue(TypeSort atomtype, DataCursor dataset, Index index) throws DapException {
+  public static long extractLongValue(TypeSort atomtype, D4Cursor dataset, Index index) throws DapException {
     Object result;
     result = dataset.read(index);
     long lvalue = CDMTypeFcns.extract(atomtype, result);
@@ -313,7 +313,7 @@ public abstract class CDMUtil {
    * @throws ForbiddenConversionException if cannot convert to double
    */
 
-  public static double extractDoubleValue(TypeSort atomtype, DataCursor dataset, Index index) throws DapException {
+  public static double extractDoubleValue(TypeSort atomtype, D4Cursor dataset, Index index) throws DapException {
     Object result;
     result = dataset.read(index);
     double dvalue = 0.0;

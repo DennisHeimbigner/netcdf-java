@@ -5,7 +5,7 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.DSPRegistry;
 import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.util.DapContext;
@@ -81,7 +81,7 @@ public class DapNetcdfFile extends NetcdfFile {
   protected String location = null; // original argument passed to open
   protected String dsplocation = null; // what is passed to DSP
   protected XURI xuri = null;
-  protected AbstractDSP dsp = null;
+  protected D4DSP dsp = null;
 
   protected CancelTask cancel = null;
 
@@ -180,7 +180,7 @@ public class DapNetcdfFile extends NetcdfFile {
     return location;
   }
 
-  public AbstractDSP getDSP() {
+  public D4DSP getDSP() {
     return this.dsp;
   }
 

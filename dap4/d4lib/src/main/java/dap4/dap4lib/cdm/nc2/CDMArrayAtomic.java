@@ -5,8 +5,8 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.core.data.DataCursor;
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4Cursor;
+import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.dmr.DapType;
@@ -22,10 +22,10 @@ import ucar.ma2.IndexIterator;
 import ucar.nc2.Group;
 import java.io.IOException;
 import java.util.List;
-import static dap4.core.data.DataCursor.Scheme;
+import static dap4.dap4lib.D4Cursor.Scheme;
 
 /**
- * CDMArrayAtomic wraps a DataCursor object to present
+ * CDMArrayAtomic wraps a D4Cursor object to present
  * the ucar.ma2.Array interface.
  * CDMArrayAtomic manages a single CDM atomic variable:
  * either top-level or for a member.
@@ -38,12 +38,12 @@ import static dap4.core.data.DataCursor.Scheme;
   /////////////////////////////////////////////////////
   // Instance variables
 
-  protected AbstractDSP dsp = null;
+  protected D4DSP dsp = null;
   protected DapVariable template = null;
   protected DapType basetype = null;
 
   // CDMArray variables
-  protected dap4.core.data.DataCursor data = null;
+  protected dap4.dap4lib.D4Cursor data = null;
   protected Group cdmroot = null;
   protected int elementsize = 0; // of one element
   protected long dimsize = 0; // # of elements in array; scalar uses value 1
@@ -55,12 +55,12 @@ import static dap4.core.data.DataCursor.Scheme;
   /**
    * Constructor
    *
-   * @param data DataCursor object providing the actual data
+   * @param data D4Cursor object providing the actual data
    */
-  CDMArrayAtomic(DataCursor data) throws DapException {
+  CDMArrayAtomic(D4Cursor data) throws DapException {
     super(CDMTypeFcns.daptype2cdmtype(((DapVariable) data.getTemplate()).getBaseType()),
         CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
-    this.dsp = (AbstractDSP)data.getDSP();
+    this.dsp = data.getDSP();
     this.data = data;
     this.template = (DapVariable) this.data.getTemplate();
     this.basetype = this.template.getBaseType();
@@ -71,14 +71,13 @@ import static dap4.core.data.DataCursor.Scheme;
 
   /////////////////////////////////////////////////
   // CDMArray Interface
-
   @Override
   public DapType getBaseType() {
     return this.basetype;
   }
 
   @Override
-  public AbstractDSP getDSP() {
+  public D4DSP getDSP() {
     return this.dsp;
   }
 

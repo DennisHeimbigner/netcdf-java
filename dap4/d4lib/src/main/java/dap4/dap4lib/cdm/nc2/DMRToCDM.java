@@ -5,7 +5,7 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.*;
@@ -28,7 +28,7 @@ public class DMRToCDM {
   // Instance Variables
 
   protected DapNetcdfFile ncfile;
-  protected AbstractDSP dsp;
+  protected D4DSP dsp;
   protected DapDataset dmr;
 
   protected NodeMap<CDMNode, DapNode> nodemap;
@@ -41,7 +41,7 @@ public class DMRToCDM {
    * @param dsp - the DSP being wrapped
    */
 
-  public DMRToCDM(DapNetcdfFile ncfile, AbstractDSP dsp) throws DapException {
+  public DMRToCDM(DapNetcdfFile ncfile, D4DSP dsp) throws DapException {
     this.ncfile = ncfile;
     this.dsp = dsp;
     this.dmr = dsp.getDMR();

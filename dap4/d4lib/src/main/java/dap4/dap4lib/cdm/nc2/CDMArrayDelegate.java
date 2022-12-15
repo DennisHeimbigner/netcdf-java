@@ -6,7 +6,7 @@
 package dap4.dap4lib.cdm.nc2;
 
 import dap4.core.dmr.*;
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4DSP;
 
 /**
  * Since we can't use AbstractCDMArray,
@@ -19,7 +19,7 @@ import dap4.dap4lib.AbstractDSP;
  */
 
 /* package */ class CDMArrayDelegate implements CDMArray {
-  protected AbstractDSP dsp = null;
+  protected D4DSP dsp = null;
   protected DapVariable template = null;
   protected long bytesize = 0;
   protected DapType basetype = null;
@@ -38,7 +38,7 @@ import dap4.dap4lib.AbstractDSP;
    */
 
   @Override
-  public AbstractDSP getDSP() {
+  public D4DSP getDSP() {
     return this.dsp;
   }
 

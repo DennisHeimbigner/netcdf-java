@@ -5,7 +5,7 @@
 package dap4.dap4lib;
 
 import dap4.core.ce.CEConstraint;
-import dap4.core.data.DataCursor;
+import dap4.dap4lib.D4Cursor;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
 import java.io.PrintWriter;
@@ -55,7 +55,7 @@ public class DSPPrinter {
   protected PrintWriter writer = null;
   protected IndentWriter printer = null;
 
-  protected AbstractDSP dsp = null;
+  protected D4DSP dsp = null;
   protected CEConstraint ce = null;
 
   protected EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);
@@ -65,11 +65,11 @@ public class DSPPrinter {
 
   protected DSPPrinter() {}
 
-  public DSPPrinter(AbstractDSP dsp, Writer writer) {
+  public DSPPrinter(D4DSP dsp, Writer writer) {
     this(dsp, null, writer);
   }
 
-  public DSPPrinter(AbstractDSP dsp, CEConstraint ce, Writer writer) {
+  public DSPPrinter(D4DSP dsp, CEConstraint ce, Writer writer) {
     this.dsp = dsp;
     this.ce = ce;
     this.writer = new PrintWriter(writer);
@@ -111,7 +111,7 @@ public class DSPPrinter {
       DapVariable top = topvars.get(i);
       List<Slice> slices = this.ce.getConstrainedSlices(top);
       if (this.ce.references(top)) {
-        DataCursor data = dsp.getVariableData(top);
+        D4Cursor data = dsp.getVariableData(top);
         printVariable(data, slices);
       }
     }
@@ -134,7 +134,7 @@ public class DSPPrinter {
    * @throws DapException Note that the PrintWriter and CEConstraint are global.
    */
 
-  protected void printVariable(DataCursor data, List<Slice> slices) throws DapException {
+  protected void printVariable(D4Cursor data, List<Slice> slices) throws DapException {
     DapVariable dapv = (DapVariable) data.getTemplate();
     if (data.isScalar()) {
       assert slices == Slice.SCALARSLICES;
@@ -144,7 +144,7 @@ public class DSPPrinter {
     }
   }
 
-  protected void printScalar(DataCursor data) throws DapException {
+  protected void printScalar(D4Cursor data) throws DapException {
     DapVariable dapv = (DapVariable) data.getTemplate();
     printer.marginPrint(dapv.getFQN() + " = ");
     switch (data.getScheme()) {
@@ -153,7 +153,7 @@ public class DSPPrinter {
         break;
       case STRUCTARRAY:
       case SEQARRAY: // remember that scalars are treated as 1-element arrays
-        DataCursor[] scalar = (DataCursor[]) data.read(Index.SCALAR);
+        D4Cursor[] scalar = (D4Cursor[]) data.read(Index.SCALAR);
         assert scalar.length == 1;
         data = scalar[0]; // fall thru
       case STRUCTURE:
@@ -172,7 +172,7 @@ public class DSPPrinter {
     }
   }
 
-  protected void printArray(DataCursor data, List<Slice> slices) throws DapException {
+  protected void printArray(D4Cursor data, List<Slice> slices) throws DapException {
     DapVariable dapv = (DapVariable) data.getTemplate();
     Odometer odom = Odometer.factory(slices);
     switch (data.getScheme()) {
@@ -191,7 +191,7 @@ public class DSPPrinter {
       case STRUCTARRAY:
       case SEQARRAY:
         DapStructure ds = (DapStructure) ((DapVariable) data.getTemplate()).getBaseType();
-        DataCursor[] instances = (DataCursor[]) data.read(slices);
+        D4Cursor[] instances = (D4Cursor[]) data.read(slices);
         while (odom.hasNext()) {
           Index pos = odom.next();
           String s = indicesToString(pos);
@@ -209,8 +209,8 @@ public class DSPPrinter {
     }
   }
 
-  protected void printAtomicVector(DataCursor data, List<Slice> slices, Odometer odom) throws DapException {
-    assert data.getScheme() == DataCursor.Scheme.ATOMIC;
+  protected void printAtomicVector(D4Cursor data, List<Slice> slices, Odometer odom) throws DapException {
+    assert data.getScheme() == D4Cursor.Scheme.ATOMIC;
     Object values = data.read(slices);
     DapVariable atom = (DapVariable) data.getTemplate();
     String name = atom.getFQN();
@@ -227,8 +227,8 @@ public class DSPPrinter {
       }
   }
 
-  protected void printAtomicInstance(DataCursor datav, Index pos) throws DapException {
-    assert datav.getScheme() == DataCursor.Scheme.ATOMIC;
+  protected void printAtomicInstance(D4Cursor datav, Index pos) throws DapException {
+    assert datav.getScheme() == D4Cursor.Scheme.ATOMIC;
     Object value = datav.read(pos);
     DapVariable av = (DapVariable) datav.getTemplate();
     printer.print(valueString(value, 0, av.getBaseType()));
@@ -241,7 +241,7 @@ public class DSPPrinter {
    * @param datav
    * @throws DapException
    */
-  protected void printCompoundInstance(DataCursor datav) throws DapException {
+  protected void printCompoundInstance(D4Cursor datav) throws DapException {
     // Index index = datav.getIndex();
     DapStructure dstruct = (DapStructure) ((DapVariable) datav.getTemplate()).getBaseType();
     switch (datav.getScheme()) {
@@ -251,7 +251,7 @@ public class DSPPrinter {
         for (int f = 0; f < dfields.size(); f++) {
           DapVariable field = dfields.get(f);
           List<Slice> fieldslices = this.ce.getConstrainedSlices(field);
-          DataCursor fdata = datav.readField(f);
+          D4Cursor fdata = datav.readField(f);
           printVariable(fdata, fieldslices);
         }
         break;
@@ -260,7 +260,7 @@ public class DSPPrinter {
         DapSequence dseq = (DapSequence) dstruct;
         long count = datav.getRecordCount();
         for (long r = 0; r < count; r++) {
-          DataCursor dr = datav.readRecord(r);
+          D4Cursor dr = datav.readRecord(r);
           printer.marginPrint("[");
           printer.eol();
           printer.indent();

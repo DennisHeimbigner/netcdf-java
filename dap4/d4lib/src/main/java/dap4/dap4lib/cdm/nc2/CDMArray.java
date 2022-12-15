@@ -6,7 +6,7 @@
 package dap4.dap4lib.cdm.nc2;
 
 import dap4.core.dmr.*;
-import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.D4DSP;
 
 /**
  * It is convenient to be able to create
@@ -15,7 +15,7 @@ import dap4.dap4lib.AbstractDSP;
  */
 
 /* package */ interface CDMArray {
-  public AbstractDSP getDSP();
+  public D4DSP getDSP();
 
   public DapVariable getTemplate();
 

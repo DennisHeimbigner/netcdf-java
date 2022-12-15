@@ -77,7 +77,7 @@ public class RawDSP extends D4DSP {
   protected void loadDAP() throws DapException {
     assert (getRequestMode() == RequestMode.DAP);
     try {
-      assert(getDMR() != null);
+      assert (getDMR() != null);
       // "Compile" the databuffer section of the server response
       D4DataCompiler d4compiler = new D4DataCompiler(this, getChecksumMode(), getRemoteOrder(), this.data);
       d4compiler.compile();
