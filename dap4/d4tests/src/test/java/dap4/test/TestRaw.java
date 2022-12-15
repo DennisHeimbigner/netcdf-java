@@ -14,7 +14,6 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.unidata.util.test.StringComparisonUtil;
 
 import java.io.File;
 import java.io.IOException;
