@@ -114,7 +114,7 @@ public class TestParserCE extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(triple[0], triple[1], triple[2]);
       testcases.add(tc);
     }
-    //singleTest(0, testcases); // choose single test for debugging
+    // singleTest(0, testcases); // choose single test for debugging
     return testcases;
   }
 
