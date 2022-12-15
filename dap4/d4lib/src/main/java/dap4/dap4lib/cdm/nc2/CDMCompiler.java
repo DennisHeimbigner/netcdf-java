@@ -4,10 +4,10 @@
  */
 
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.NodeMap;
-import dap4.core.data.DSP;
+import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.DapDataset;
 import dap4.core.dmr.DapNode;
 import dap4.core.util.DapException;
@@ -34,14 +34,15 @@ import java.util.Map;
 public class CDMCompiler {
   public static boolean DEBUG = false;
 
-  //////////////////////////////////////////////////
-  // Constants
-
-  //////////////////////////////////////////////////
-  // Instance variables
+  /*
+   * ////////////////////////////////////////////////
+   * Constants
+   * ////////////////////////////////////////////////
+   * Instance variables
+   */
 
   protected DapNetcdfFile ncfile = null;
-  protected DSP dsp = null;
+  protected AbstractDSP dsp = null;
   protected DapDataset dmr = null;
   protected Group cdmroot = null;
   protected NodeMap<CDMNode, DapNode> nodemap = null;
@@ -57,7 +58,7 @@ public class CDMCompiler {
    * @param dsp the DSP to be wrapped
    */
 
-  public CDMCompiler(DapNetcdfFile ncfile, DSP dsp) throws DapException {
+  public CDMCompiler(DapNetcdfFile ncfile, AbstractDSP dsp) throws DapException {
     this.ncfile = ncfile;
     this.dsp = dsp;
     this.dmr = dsp.getDMR();
@@ -79,15 +80,6 @@ public class CDMCompiler {
   }
 
   //////////////////////////////////////////////////
-  // Compile DMR and Data into a NetcdfDataset
-
-  /* Package access */
-  void compile() throws DapException {
-    compileDMR();
-    compileData();
-  }
-
-  //////////////////////////////////////////////////
   // Compile DMR->set of CDM nodes
 
   /**
@@ -97,7 +89,7 @@ public class CDMCompiler {
    * @throws DapException
    */
 
-  protected void compileDMR() throws DapException {
+  public void compileDMR() throws DapException {
     // Convert the DMR to CDM metadata
     // and return a mapping from DapNode -> CDMNode
     this.nodemap = new DMRToCDM(this.ncfile, this.dsp).create();
@@ -113,7 +105,7 @@ public class CDMCompiler {
    * @throws DapException
    */
 
-  protected void compileData() throws DapException {
+  public void compileData() throws DapException {
     // Convert the DMR to CDM metadata
     // and return a mapping from Variable -> Array
     this.arraymap = new DataToCDM(this.ncfile, this.dsp, this.nodemap).create();

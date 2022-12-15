@@ -5,6 +5,7 @@
 
 package dap4.test;
 
+import dap4.core.util.DapConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +41,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   // Define the input set location(s)
   static protected final String INPUTDIR = "/rawtestfiles";
   static protected final String INPUTEXT = ".nc.dap";
+  static protected final String INPUTFRAG = "#" + DapConstants.CHECKSUMTAG + "=false";
 
   static protected final String BASELINEDIR = "/baselineraw";
   static protected final String BASELINEEXT = ".nc.ncdump";
@@ -69,14 +71,13 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase {
-    public String name;
-    public String input;
+  static class TestCase extends TestCaseCommon {
+    public String url;
     public String baseline;
 
-    public TestCase(String name, String input, String baseline) {
-      this.name = name;
-      this.input = input;
+    public TestCase(String name, String url, String baseline) {
+      super(name);
+      this.url = url;
       this.baseline = baseline;
     }
 
@@ -90,17 +91,17 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   // Test Generator
 
   @Parameterized.Parameters(name = "{index}: {0}")
-  static public List<Object> defineTestCases() {
-    List<Object> testcases = new ArrayList<>();
+  static public List<TestCaseCommon> defineTestCases() {
+    List<TestCaseCommon> testcases = new ArrayList<>();
     String[][] manifest = excludeNames(dap4_manifest, EXCLUSIONS);
     for (String[] tuple : manifest) {
       String name = tuple[0];
-      String path = resourceroot + INPUTDIR + "/" + name + INPUTEXT;
+      String url = buildURL(name);
       String baseline = resourceroot + BASELINEDIR + "/" + name + BASELINEEXT;
-      TestCase tc = new TestCase(name, path, baseline);
+      TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    // testcases = testcases.subList(0,0+1); // choose single test for debugging
+    //singleTest("test_one_var",testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -112,9 +113,9 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public TestRaw(Object otc) {
+  public TestRaw(TestCaseCommon tc) {
     super();
-    this.tc = (TestCase) otc;
+    this.tc = (TestCase) tc;
   }
 
   //////////////////////////////////////////////////
@@ -130,7 +131,8 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   public void test() throws Exception {
     int i, c;
     StringBuilder sb = new StringBuilder();
-    String url = buildURL(resourceroot + INPUTDIR, tc.name + INPUTEXT);
+    // String url = buildURL(resourceroot + INPUTDIR, tc.name + INPUTEXT);
+    String url = tc.url;
     NetcdfDataset ncfile;
     try {
       ncfile = openDataset(url);
@@ -140,8 +142,8 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
     }
     assert ncfile != null;
 
-    String datasetname = tc.name;
-    String testresult = dumpdata(ncfile, datasetname);
+    String datasetname = tc.url;
+    String testresult = dumpdata(ncfile, tc.name); // print data section
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;
@@ -197,13 +199,15 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   //////////////////////////////////////////////////
   // Support Methods
 
-  String buildURL(String prefix, String file) {
+  static protected String buildURL(String name) {
     StringBuilder url = new StringBuilder();
     url.append("file://");
-    url.append(prefix);
+    url.append(resourceroot);
+    url.append(INPUTDIR);
     url.append("/");
-    url.append(file);
-    url.append("#dap4.checksum=false");
+    url.append(name);
+    url.append(INPUTEXT);
+    url.append(INPUTFRAG);
     return url.toString();
   }
 

@@ -3,10 +3,10 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
 import dap4.core.dmr.*;
-import dap4.core.data.DSP;
+import dap4.dap4lib.AbstractDSP;
 
 /**
  * It is convenient to be able to create
@@ -15,7 +15,7 @@ import dap4.core.data.DSP;
  */
 
 /* package */ interface CDMArray {
-  public DSP getDSP();
+  public AbstractDSP getDSP();
 
   public DapVariable getTemplate();
 

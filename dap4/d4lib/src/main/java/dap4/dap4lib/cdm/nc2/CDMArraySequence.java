@@ -3,11 +3,11 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.CDMTypeFcns;
-import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
+import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.core.dmr.DapSequence;
 import dap4.core.dmr.DapStructure;
 import dap4.core.dmr.DapType;
@@ -90,7 +90,7 @@ import java.util.List;
   // Instance variables
 
   protected Group cdmroot = null;
-  protected DSP dsp;
+  protected AbstractDSP dsp;
   protected DapVariable template;
   protected DapType basetype;
   protected long bytesize = 0;
@@ -173,7 +173,7 @@ import java.util.List;
   }
 
   @Override
-  public DSP getDSP() {
+  public AbstractDSP getDSP() {
     return this.dsp;
   }
 

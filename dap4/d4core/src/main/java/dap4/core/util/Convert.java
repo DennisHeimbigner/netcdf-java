@@ -304,6 +304,7 @@ public abstract class Convert {
         for (int i = 0; i < count; i++) {
           fresult[i] = (float) dvalues[i];
         }
+        result = fresult;
         break;
       case Float64:
         if (svalues != null)

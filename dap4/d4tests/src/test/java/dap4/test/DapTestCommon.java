@@ -106,6 +106,18 @@ abstract public class DapTestCommon extends UnitTestCommon {
     }
   }
 
+  static public class TestCaseCommon {
+    public String name;
+
+    public TestCaseCommon() {
+      this(null);
+    }
+
+    public TestCaseCommon(String name) {
+      this.name = name;
+    }
+  }
+
   //////////////////////////////////////////////////
   // Static variables
 
@@ -250,13 +262,13 @@ abstract public class DapTestCommon extends UnitTestCommon {
   /**
    * Given a List of file names, return a list of those names except
    * for any in the array of filenames to be excluded.
-   * 
+   *
    * @param manifest The list of file names
    * @param exclusions The array of excluded names
    * @return manifest with excluded names removed
    */
   static public String[][] excludeNames(String[][] manifest, String[] exclusions) {
-    String[][] xlist = new String[manifest.length][];
+    List<String[]> xlist = new ArrayList<>(manifest.length);
     for (int i = 0; i < manifest.length; i++) {
       String name = manifest[i][0]; // Assume tuple element 0 is always the name
       boolean matched = false;
@@ -265,9 +277,9 @@ abstract public class DapTestCommon extends UnitTestCommon {
           matched = true;
       }
       if (!matched)
-        xlist[i] = manifest[i];
+        xlist.add(manifest[i]);
     }
-    return xlist;
+    return xlist.toArray(new String[0][]);
   }
 
   // Filter a document with respect to a set of regular expressions
@@ -318,4 +330,36 @@ abstract public class DapTestCommon extends UnitTestCommon {
     }
     return changed;
   }
+
+
+  /**
+   * Choose a test case based on its name and return its index
+   *
+   * @param name to search for
+   * @param testcases set of testcases to search
+   */
+  static void singleTest(String name, List<TestCaseCommon> testcases) {
+    for (int i = 0; i < testcases.size(); i++) {
+      TestCaseCommon tc = testcases.get(i);
+      if (tc.name.equalsIgnoreCase(name)) {
+        testcases.clear();
+        testcases.add(tc);
+      }
+    }
+    return;
+  }
+
+  /**
+   * Choose a test case based on its name and return its index
+   *
+   * @param index to search for
+   * @param testcases set of testcases to search
+   */
+  static void singleTest(int index, List<TestCaseCommon> testcases) {
+    TestCaseCommon tc = testcases.get(index);
+    testcases.clear();
+    testcases.add(tc);
+    return;
+  }
+
 }

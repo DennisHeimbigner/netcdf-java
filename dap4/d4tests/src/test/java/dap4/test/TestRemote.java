@@ -5,6 +5,7 @@
 
 package dap4.test;
 
+import dap4.core.util.DapConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
 
   // Define the input set location(s)
   static protected final String INPUTEXT = ".nc"; // note that the .dap is deliberately left off
-  static protected final String INPUTQUERY = "?dap4.checksum=false";
+  static protected final String INPUTQUERY = "?" + DapConstants.CHECKSUMTAG + "=false";
   static protected final String INPUTFRAG = "#dap4";
 
   static protected final String BASELINEDIR = "/baselineremote";
@@ -74,13 +75,12 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase {
-    public String name;
+  static class TestCase extends TestCaseCommon {
     public String url;
     public String baseline;
 
     public TestCase(String name, String url, String baseline) {
-      this.name = name;
+      super(name);
       this.url = url;
       this.baseline = baseline;
     }
@@ -95,9 +95,9 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   // Test Generator
 
   @Parameterized.Parameters(name = "{index}: {0}")
-  static public List<Object> defineTestCases() {
+  static public List<TestCaseCommon> defineTestCases() {
     assert (server != null);
-    List<Object> testcases = new ArrayList<>();
+    List<TestCaseCommon> testcases = new ArrayList<>();
     String[][] manifest = excludeNames(dap4_manifest, EXCLUSIONS);
     for (String[] tuple : manifest) {
       String name = tuple[0];
@@ -106,7 +106,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    // int only = 14; testcases = testcases.subList(only, only + 1); // choose single test for debugging
+    //singleTest(1, testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -118,9 +118,9 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public TestRemote(Object otc) {
+  public TestRemote(TestCaseCommon tc) {
     super();
-    this.tc = (TestCase) otc;
+    this.tc = (TestCase) tc;
   }
 
   //////////////////////////////////////////////////
@@ -129,6 +129,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
+    props.prop_visual = true;
   }
 
   @Test
@@ -146,7 +147,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
     assert ncfile != null;
 
     String datasetname = tc.name;
-    String testresult = dumpdata(ncfile, datasetname);
+    String testresult = dumpdata(ncfile, tc.name); // print data section
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;
@@ -159,6 +160,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
     }
 
     if (props.prop_visual) {
+      visual("Baseline", baselinecontent);
       visual("Output", testresult);
     }
     if (props.prop_baseline)

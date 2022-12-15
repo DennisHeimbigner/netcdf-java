@@ -3,16 +3,15 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.CDMUtil;
-import dap4.core.data.DSP;
-import dap4.core.data.DSPRegistry;
+import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.DSPRegistry;
+import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.util.DapContext;
-import dap4.core.util.DapUtil;
+import dap4.core.util.XURI;
 import dap4.dap4lib.HttpDSP;
 import dap4.dap4lib.RawDSP;
-import dap4.dap4lib.XURI;
 import ucar.ma2.*;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
@@ -82,7 +81,7 @@ public class DapNetcdfFile extends NetcdfFile {
   protected String location = null; // original argument passed to open
   protected String dsplocation = null; // what is passed to DSP
   protected XURI xuri = null;
-  protected DSP dsp = null;
+  protected AbstractDSP dsp = null;
 
   protected CancelTask cancel = null;
 
@@ -120,29 +119,23 @@ public class DapNetcdfFile extends NetcdfFile {
     } catch (URISyntaxException use) {
       throw new IOException(use);
     }
-    boolean isfile = xuri.isFile();
-    if (isfile) {
-      this.dsplocation = DapUtil.absolutize(xuri.getPath());
-    } else { // Not a file url
-      this.dsplocation = xuri.assemble(XURI.URLQUERY);
-    }
+    this.dsplocation = xuri.assemble(XURI.URLQUERY);
     DapContext cxt = new DapContext();
+    // Query takes precedence over fragment
+    cxt.insert(xuri.getFragFields(), true);
+    cxt.insert(xuri.getQueryFields(), true);
     cancel = (cancelTask == null ? nullcancel : cancelTask);
-    // 1. Get and parse the constrained DMR and Data v-a-v URL
-    this.dsp = dspregistry.findMatchingDSP(location, cxt); // will set dsp context
+    // Get and parse the constrained DMR v-a-v URL
+    this.dsp = dspregistry.findMatchingDSP(this.location, cxt); // will set dsp context
     if (this.dsp == null)
       throw new IOException("No matching DSP: " + this.location);
     this.dsp.setContext(cxt);
-    this.dsp.open(this.dsplocation);
+    this.dsp.setNetcdfFile(this); // cross-link
+    this.dsp.open(this.dsplocation); // side effect: compile DMR
 
-    // 2. Construct an equivalent CDM tree and populate
-    // this NetcdfFile object.
-    CDMCompiler compiler = new CDMCompiler(this, this.dsp);
-    compiler.compile();
     // set the pseudo-location, otherwise we get a name that is full path.
     setLocation(this.dsp.getDMR().getDataset().getShortName());
     finish();
-    this.arraymap = compiler.getArrayMap();
   }
 
   /**
@@ -187,8 +180,12 @@ public class DapNetcdfFile extends NetcdfFile {
     return location;
   }
 
-  public DSP getDSP() {
+  public AbstractDSP getDSP() {
     return this.dsp;
+  }
+
+  public void setArrayMap(Map<Variable, Array> map) {
+    this.arraymap = map;
   }
 
   //////////////////////////////////////////////////
@@ -243,7 +240,7 @@ public class DapNetcdfFile extends NetcdfFile {
   }
 
   /**
-   * Primary read entry point.
+   * b * Primary read entry point.
    * This is the primary implementor of Variable.read.
    *
    * @param cdmvar A top-level variable
@@ -260,8 +257,9 @@ public class DapNetcdfFile extends NetcdfFile {
     // The section is applied wrt to the DataDMR, so it
     // takes into account any constraint used in forming the dataDMR.
     // We use the Section to produce a view of the underlying variable array.
-
     assert this.dsp != null;
+    // Ensure that the DSP has data
+    this.dsp.ensuredata(this);
     Array result = arraymap.get(cdmvar);
     if (result == null)
       throw new IOException("No data for variable: " + cdmvar.getFullName());
@@ -278,4 +276,5 @@ public class DapNetcdfFile extends NetcdfFile {
     }
     return result;
   }
+
 }

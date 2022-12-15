@@ -60,7 +60,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
 
   // Following files cannot be tested
   static final String[][] hyrax_manifest = new String[][] {
-      {"AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", "AIRS/AIRH3STM.003/2002.12.01",  "/TotalCounts_A"},};
+      {"AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", "AIRS/AIRH3STM.003/2002.12.01", "/TotalCounts_A"},};
 
   static final String[] HYRAX_EXCLUSIONS = {};
 
@@ -82,14 +82,13 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase {
-    public String name;
+  static class TestCase extends TestCaseCommon {
     public String url;
     public String baseline;
     public String ce; // optional
 
     public TestCase(String name, String url, String baseline, String ce) {
-      this.name = name;
+      super(name);
       this.url = url;
       this.baseline = baseline;
       this.ce = ce;
@@ -105,9 +104,9 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   // Test Generator
 
   @Parameterized.Parameters(name = "{index}: {0}")
-  static public List<Object> defineTestCases() {
+  static public List<TestCaseCommon> defineTestCases() {
     assert (server != null);
-    List<Object> testcases = new ArrayList<>();
+    List<TestCaseCommon> testcases = new ArrayList<>();
     String[][] manifest = excludeNames(hyrax_manifest, HYRAX_EXCLUSIONS);
     // Separate the manifest string into pieces
     for (String[] tuple : manifest) {
@@ -123,7 +122,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(file, url, baseline, query);
       testcases.add(tc);
     }
-    // int only = 1; testcases = testcases.subList(only, only + 1); // choose single test for debugging
+    // singleTest(1,testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -135,9 +134,9 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public TestHyrax(Object otc) {
+  public TestHyrax(TestCaseCommon tc) {
     super();
-    this.tc = (TestCase) otc;
+    this.tc = (TestCase) tc;
   }
 
   //////////////////////////////////////////////////
@@ -146,7 +145,6 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    props.prop_baseline = true;
     super.setup();
   }
 

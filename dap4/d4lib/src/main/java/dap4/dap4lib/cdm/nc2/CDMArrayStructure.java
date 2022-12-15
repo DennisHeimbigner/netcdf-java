@@ -3,12 +3,12 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.CDMTypeFcns;
-import dap4.cdm.CDMUtil;
-import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
+import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.cdm.CDMTypeFcns;
+import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.dmr.DapStructure;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
@@ -61,13 +61,13 @@ import static dap4.core.data.DataCursor.Scheme;
 
   // CDMArry variables
   protected Group cdmroot = null;
-  protected DSP dsp = null;
+  protected AbstractDSP dsp = null;
   protected DapVariable template = null;
   protected DapType basetype = null;
   protected long dimsize = 0;
   protected int nmembers = 0;
 
-  protected DataCursor data = null;
+  protected dap4.core.data.DataCursor data = null;
 
   /**
    * Since we are using StructureDataA,
@@ -99,7 +99,7 @@ import static dap4.core.data.DataCursor.Scheme;
         CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
     this.template = (DapVariable) data.getTemplate();
     assert data.getScheme() == Scheme.STRUCTARRAY;
-    this.dsp = data.getDSP();
+    this.dsp = (AbstractDSP)data.getDSP();
     this.cdmroot = cdmroot;
     this.basetype = this.template.getBaseType();
     this.dimsize = DapUtil.dimProduct(template.getDimensions());
@@ -133,7 +133,7 @@ import static dap4.core.data.DataCursor.Scheme;
   // CDMArray Interface
 
   @Override
-  public DSP getDSP() {
+  public AbstractDSP getDSP() {
     return this.dsp;
   }
 

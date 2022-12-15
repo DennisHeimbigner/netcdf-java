@@ -5,18 +5,16 @@
 
 package dap4.dap4lib;
 
-import dap4.core.util.DapContext;
-import dap4.core.util.DapException;
-import dap4.core.util.DapUtil;
-import dap4.dap4lib.serial.D4DSP;
-import dap4.dap4lib.XURI;
+import dap4.core.dmr.DapDataset;
+import dap4.core.dmr.ErrorResponse;
+import dap4.core.util.*;
+import dap4.dap4lib.D4DSP;
+import dap4.dap4lib.D4DataCompiler;
+import dap4.dap4lib.cdm.nc2.CDMCompiler;
+import ucar.nc2.NetcdfFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
-import java.nio.ByteOrder;
 
 /**
  * Provide a DSP interface to raw data
@@ -67,44 +65,47 @@ public class RawDSP extends D4DSP {
   @Override
   public void close() {}
 
+  //////////////////////////////////////////////////
+
+  protected void loadDMR() throws DapException {
+    assert (getRequestMode() == RequestMode.DMR || getRequestMode() == RequestMode.DAP);
+    String document = readDMR();
+    DapDataset dmr = parseDMR(document);
+    setDMR(dmr);
+  }
+
+  protected void loadDAP() throws DapException {
+    assert (getRequestMode() == RequestMode.DAP);
+    try {
+      assert(getDMR() != null);
+      // "Compile" the databuffer section of the server response
+      D4DataCompiler d4compiler = new D4DataCompiler(this, getChecksumMode(), getRemoteOrder(), this.data);
+      d4compiler.compile();
+    } catch (IOException ioe) {
+      throw new DapException(ioe);
+    }
+  }
+
+
+  //////////////////////////////////////////////////
+
+  // Note that there is no point in delaying the compilation of the
+  // DMR and DAP since we are reading the whole DAP anyway
   @Override
-  public RawDSP open(String filepath) throws DapException {
-    try {
-      if (filepath.startsWith("file:"))
-        try {
-          XURI xuri = new XURI(filepath);
-          filepath = xuri.getPath();
-        } catch (URISyntaxException use) {
-          throw new DapException("Malformed filepath: " + filepath).setCode(DapCodes.SC_NOT_FOUND);
-        }
-      try (FileInputStream stream = new FileInputStream(filepath)) { // == rewind
-        return open(stream);
-      }
+  public RawDSP open(String fileurl) throws DapException {
+    setLocation(fileurl);
+    parseURL(fileurl);
+    contextualize(getContext()); // e.g. set Checksummode
+    String methodurl = getMethodUrl(RequestMode.DAP, getChecksumMode());
+    parseURL(methodurl); // reparse
+    String realpath = xuri.getRealPath();
+    try (FileInputStream stream = new FileInputStream(realpath)) {
+      setData(stream, RequestMode.DAP);
+      ensuredmr(this.ncfile);
+      ensuredata(this.ncfile);
     } catch (IOException ioe) {
       throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
     }
-  }
-
-  //////////////////////////////////////////////////
-  // Extension to access a raw byte stream
-
-  public RawDSP open(byte[] rawdata) throws DapException {
-    try {
-      ByteArrayInputStream stream = new ByteArrayInputStream(rawdata);
-      return open(stream);
-    } catch (IOException ioe) {
-      throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  //////////////////////////////////////////////////
-  // Common open of InputStream
-
-  public RawDSP open(InputStream stream) throws IOException {
-    ChunkInputStream rdr = new ChunkInputStream(stream, RequestMode.DAP);
-    String document = rdr.readDMR();
-    byte[] serialdata = DapUtil.readbinaryfile(rdr);
-    super.build(document, serialdata, rdr.getRemoteByteOrder());
     return this;
   }
 

@@ -5,17 +5,22 @@
 
 package dap4.dap4lib;
 
+import dap4.core.util.ChecksumMode;
 import dap4.core.dmr.DapDataset;
 import dap4.core.util.*;
-import dap4.dap4lib.serial.D4DSP;
+import dap4.dap4lib.D4DSP;
+import dap4.dap4lib.D4DataCompiler;
 import org.apache.http.HttpStatus;
 import ucar.httpservices.*;
+import ucar.nc2.NetcdfFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * Make a request to a server and convert the reply
@@ -42,12 +47,7 @@ public class HttpDSP extends D4DSP {
   // Instance variables
 
   protected boolean allowCompression = true;
-  protected String basece = null; // the constraint(s) from the original url
-
   protected int status = HttpStatus.SC_OK; // response
-  protected XURI xuri = null;
-
-  protected Object context = null;
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -72,7 +72,15 @@ public class HttpDSP extends D4DSP {
   public HttpDSP open(String url) throws DapException {
     setLocation(url);
     parseURL(url);
-    makerequest();
+    contextualize(getContext());
+    String methodurl = getMethodUrl(RequestMode.DMR, getChecksumMode());
+    try (InputStream stream = makeRequest(RequestMode.DMR, methodurl)) {
+      // Extract and "compile" the server response
+      setData(stream, RequestMode.DMR);
+      ensuredmr(this.ncfile);
+    } catch (IOException e) {
+      throw new DapException(e);
+    }
     return this;
   }
 
@@ -91,100 +99,83 @@ public class HttpDSP extends D4DSP {
    */
 
   //////////////////////////////////////////////////
-  // Request/Response methods
+  // Load methods
 
-  /**
-   * Open a connection and make a request for the (possibly constrained) DMR.
-   *
-   * @throws DapException
-   */
+  //////////////////////////////////////////////////
 
-  protected void makeRequest() throws DapException {
-    String methodurl = xuri.assemble(XURI.URLQUERY);
-
-    InputStream stream;
-    // Make the request and return an input stream for accessing the databuffer
-    // Should fill in bigendian and stream fields
-    stream = callServer(methodurl);
-
-    try {
-      ChunkInputStream reader;
-      if (DEBUG) {
-        byte[] raw = DapUtil.readbinaryfile(stream);
-        ByteArrayInputStream bis = new ByteArrayInputStream(raw);
-        DapDump.dumpbytestream(raw, getOrder(), "httpdsp.build");
-        reader = new ChunkInputStream(bis, RequestMode.DAP, getOrder());
-      } else {
-        // Wrap the input stream as a ChunkInputStream
-        reader = new ChunkInputStream(stream, RequestMode.DAP, getOrder());
-      }
-
+  protected void loadDMR() throws DapException {
+    setRequestMode(RequestMode.DMR);
+    String methodurl = getMethodUrl(RequestMode.DMR, getChecksumMode());
+    try (InputStream stream = makeRequest(RequestMode.DMR, methodurl)) {
       // Extract and "compile" the server response
-      String document = reader.readDMR();
-      // Extract all the remaining bytes
-      byte[] bytes = DapUtil.readbinaryfile(reader);
-      // use super.build to compile
-      super.buildData(document, bytes, getOrder());
-    } catch (Throwable t) {
-      t.printStackTrace();
-      throw new DapException(t);
-    } finally {
-      try {
-        stream.close();
-      } catch (IOException ioe) {
-        /* ignore */
-      }
+      String document = readDMR();
+      DapDataset dmr = parseDMR(document);
+      setDMR(dmr);
+    } catch (IOException e) {
+      throw new DapException(e);
     }
   }
 
-  protected InputStream callServer(String methodurl) throws DapException {
-    URI uri;
+  /**
+   * This will be called lazily when trying to read data.
+   *
+   * @throws DapException
+   */
+  protected void loadDAP() throws DapException {
+    setRequestMode(RequestMode.DAP);
+    String methodurl = getMethodUrl(RequestMode.DAP, getChecksumMode());
+    try (InputStream stream = makeRequest(RequestMode.DAP, methodurl)) {
+      assert(getDMR() != null);
+      // Extract and "compile" the server response
+      setData(stream, RequestMode.DAP);
+      // "Compile" the databuffer section of the server response
+      D4DataCompiler d4compiler = new D4DataCompiler(this, getChecksumMode(), getRemoteOrder(), this.data);
+      d4compiler.compile();
+    } catch (IOException ioe) {
+      throw new DapException(ioe);
+    }
+  }
 
+  //////////////////////////////////////////////////
+  // Request/Response methods
+
+  /**
+   * Open a connection and make a request for the (possibly constrained) DMR|DAP
+   * (choice is made by url extension)
+   * 
+   * @throws DapException
+   */
+
+  protected InputStream makeRequest(RequestMode mode, String methodurl) throws DapException {
+    // Assume mode is consistent with the url.
+    InputStream stream;
+    // Make the request and return the input stream for accessing the databuffer
+    URI uri;
     try {
       uri = HTTPUtil.parseToURI(methodurl);
     } catch (URISyntaxException mue) {
       throw new DapException("Malformed url: " + methodurl);
     }
-
     long start = System.currentTimeMillis();
     long stop = 0;
     this.status = 0;
-    if (false) {
-      HTTPMethod method = null; // Implicitly passed out to caller via stream
-      try { // Note that we cannot use try with resources because we export the method stream, so method
-        // must not be closed.
-
-        method = HTTPFactory.Get(methodurl);
-        if (allowCompression)
-          method.setCompression("deflate,gzip");
-        this.status = method.execute();
-        if (this.status != HttpStatus.SC_OK) {
-          String msg = method.getResponseAsString();
-          throw new DapException("Request failure: " + status + ": " + methodurl).setCode(status);
-        }
-        // Get the response body stream => do not close the method
-        return method.getResponseAsStream();
-      } catch (HTTPException e) {
-        if (method != null)
-          method.close();
-        throw new DapException(e);
+    HTTPMethod method = null; // Implicitly passed out to caller via stream
+    try { // Note that we cannot use try with resources because we export the method stream, so method
+      // must not be closed.
+      method = HTTPFactory.Get(methodurl);
+      if (allowCompression)
+        method.setCompression("deflate,gzip");
+      this.status = method.execute();
+      if (this.status != HttpStatus.SC_OK) {
+        String msg = method.getResponseAsString();
+        throw new DapException("Request failure: " + status + ": " + methodurl).setCode(status);
       }
-    } else {// read whole input
-      try {
-        try (HTTPMethod method = HTTPFactory.Get(methodurl)) {
-          if (allowCompression)
-            method.setCompression("deflate,gzip");
-          this.status = method.execute();
-          if (this.status != HttpStatus.SC_OK) {
-            String msg = method.getResponseAsString();
-            throw new DapException("Request failure: " + status + ": " + methodurl).setCode(status);
-          }
-          byte[] body = method.getResponseAsBytes();
-          return new ByteArrayInputStream(body);
-        }
-      } catch (HTTPException e) {
-        throw new DapException(e);
-      }
+      // Get the response body stream => do not close the method
+      return method.getResponseAsStream();
+    } catch (HTTPException e) {
+      if (method != null)
+        method.close();
+      throw new DapException(e);
     }
   }
 
@@ -205,14 +196,6 @@ public class HttpDSP extends D4DSP {
       methodurl.append(ce);
     }
     return methodurl.toString();
-  }
-
-  protected void parseURL(String url) throws DapException {
-    try {
-      this.xuri = new XURI(url);
-    } catch (URISyntaxException use) {
-      throw new DapException(use);
-    }
   }
 
 }

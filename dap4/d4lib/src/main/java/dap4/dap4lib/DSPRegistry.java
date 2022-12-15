@@ -3,7 +3,7 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.core.data;
+package dap4.dap4lib;
 
 import dap4.core.util.DapContext;
 import dap4.core.util.DapException;
@@ -25,10 +25,10 @@ public class DSPRegistry {
   // Type Decls
 
   protected static class Registration {
-    Class<? extends DSP> dspclass;
-    DSP matcher;
+    Class<? extends AbstractDSP> dspclass;
+    AbstractDSP matcher;
 
-    public Registration(Class<? extends DSP> cl) {
+    public Registration(Class<? extends AbstractDSP> cl) {
       this.dspclass = cl;
       try {
         this.matcher = dspclass.newInstance();
@@ -83,7 +83,7 @@ public class DSPRegistry {
    */
   public synchronized void register(String className, boolean last) throws DapException {
     try {
-      Class<? extends DSP> klass = (Class<? extends DSP>) loader.loadClass(className);
+      Class<? extends AbstractDSP> klass = (Class<? extends AbstractDSP>) loader.loadClass(className);
       register(klass, last);
     } catch (ClassNotFoundException e) {
       throw new DapException(e);
@@ -99,7 +99,7 @@ public class DSPRegistry {
    * @throws InstantiationException if class doesnt have a no-arg constructor.
    * @throws ClassCastException if class doesnt implement DSP interface.
    */
-  public synchronized void register(Class<? extends DSP> klass, boolean last) {
+  public synchronized void register(Class<? extends AbstractDSP> klass, boolean last) {
     // is this already defined?
     if (registered(klass))
       return;
@@ -115,7 +115,7 @@ public class DSPRegistry {
    * @param klass Class for which to search
    */
 
-  public synchronized boolean registered(Class<? extends DSP> klass) {
+  public synchronized boolean registered(Class<? extends AbstractDSP> klass) {
     for (Registration r : registry) {
       if (r.dspclass == klass)
         return true;
@@ -128,7 +128,7 @@ public class DSPRegistry {
    *
    * @param klass Class for which to search
    */
-  public synchronized void unregister(Class<? extends DSP> klass) {
+  public synchronized void unregister(Class<? extends AbstractDSP> klass) {
     for (int i = 0; i < registry.size(); i++) {
       if (registry.get(i).dspclass == klass) {
         registry.remove(i);
@@ -143,13 +143,13 @@ public class DSPRegistry {
    * @throws DapException
    */
 
-  public synchronized DSP findMatchingDSP(String path, DapContext cxt) throws DapException {
+  public synchronized AbstractDSP findMatchingDSP(String path, DapContext cxt) throws DapException {
     for (int i = 0; i < registry.size(); i++) {
       try {
         Registration tester = registry.get(i);
         boolean ismatch = (Boolean) tester.matcher.dspMatch(path, cxt);
         if (ismatch) {
-          DSP dsp = (DSP) tester.dspclass.newInstance();
+          AbstractDSP dsp = (AbstractDSP) tester.dspclass.newInstance();
           return dsp;
         }
       } catch (Exception e) {

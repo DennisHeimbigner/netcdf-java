@@ -68,12 +68,12 @@ public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase {
+  static class TestCase extends TestCaseCommon {
     public String name; // Name from manifest
     public String input; // Full path or URL for the input file
 
     public TestCase(String filename, String input) {
-      this.name = filename;
+      super(filename);
       this.input = input;
     }
 
@@ -87,8 +87,8 @@ public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
   // Test Generator
 
   @Parameterized.Parameters(name = "{index}: {0}")
-  static public List<Object> defineTestCases() {
-    List<Object> testcases = new ArrayList<>();
+  static public List<TestCaseCommon> defineTestCases() {
+    List<TestCaseCommon> testcases = new ArrayList<>();
     for (String[] tuple : dap4_manifest) {
       String name = tuple[0];
       String path = resourceroot + INPUTDIR + "/" + name + INPUTEXT;
@@ -104,7 +104,7 @@ public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(file + "." + index, path);
       testcases.add(tc);
     }
-    // testcases = testcases.sublist(0,0+1); // choose single test for debugging
+    singleTest(0, testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -116,9 +116,9 @@ public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public TestParserDMR(Object otc) {
+  public TestParserDMR(TestCaseCommon tc) {
     super();
-    this.tc = (TestCase) otc;
+    this.tc = (TestCase) tc;
   }
 
   //////////////////////////////////////////////////

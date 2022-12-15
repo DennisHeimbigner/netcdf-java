@@ -5,7 +5,6 @@
 package dap4.dap4lib;
 
 import dap4.core.ce.CEConstraint;
-import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
@@ -56,7 +55,7 @@ public class DSPPrinter {
   protected PrintWriter writer = null;
   protected IndentWriter printer = null;
 
-  protected DSP dsp = null;
+  protected AbstractDSP dsp = null;
   protected CEConstraint ce = null;
 
   protected EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);
@@ -66,11 +65,11 @@ public class DSPPrinter {
 
   protected DSPPrinter() {}
 
-  public DSPPrinter(DSP dsp, Writer writer) {
+  public DSPPrinter(AbstractDSP dsp, Writer writer) {
     this(dsp, null, writer);
   }
 
-  public DSPPrinter(DSP dsp, CEConstraint ce, Writer writer) {
+  public DSPPrinter(AbstractDSP dsp, CEConstraint ce, Writer writer) {
     this.dsp = dsp;
     this.ce = ce;
     this.writer = new PrintWriter(writer);

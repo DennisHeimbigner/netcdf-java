@@ -1,4 +1,4 @@
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
 import java.io.IOException;
 import org.slf4j.Logger;

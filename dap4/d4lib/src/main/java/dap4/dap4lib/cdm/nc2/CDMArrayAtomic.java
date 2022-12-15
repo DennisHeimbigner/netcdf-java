@@ -3,12 +3,12 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.CDMTypeFcns;
-import dap4.cdm.CDMUtil;
-import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
+import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.cdm.CDMTypeFcns;
+import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
 import dap4.core.util.Convert;
@@ -38,12 +38,12 @@ import static dap4.core.data.DataCursor.Scheme;
   /////////////////////////////////////////////////////
   // Instance variables
 
-  protected DSP dsp = null;
+  protected AbstractDSP dsp = null;
   protected DapVariable template = null;
   protected DapType basetype = null;
 
   // CDMArray variables
-  protected DataCursor data = null;
+  protected dap4.core.data.DataCursor data = null;
   protected Group cdmroot = null;
   protected int elementsize = 0; // of one element
   protected long dimsize = 0; // # of elements in array; scalar uses value 1
@@ -60,7 +60,7 @@ import static dap4.core.data.DataCursor.Scheme;
   CDMArrayAtomic(DataCursor data) throws DapException {
     super(CDMTypeFcns.daptype2cdmtype(((DapVariable) data.getTemplate()).getBaseType()),
         CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
-    this.dsp = data.getDSP();
+    this.dsp = (AbstractDSP)data.getDSP();
     this.data = data;
     this.template = (DapVariable) this.data.getTemplate();
     this.basetype = this.template.getBaseType();
@@ -78,7 +78,7 @@ import static dap4.core.data.DataCursor.Scheme;
   }
 
   @Override
-  public DSP getDSP() {
+  public AbstractDSP getDSP() {
     return this.dsp;
   }
 

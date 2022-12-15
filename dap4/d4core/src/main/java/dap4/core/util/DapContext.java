@@ -5,6 +5,7 @@
 
 package dap4.core.util;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +18,14 @@ import java.util.Map;
 public class DapContext extends java.util.HashMap<Object, Object> {
   public DapContext() {
     super();
+  }
+
+  public DapContext insert(Map<String, String> map, boolean override) {
+    for (Map.Entry entry : map.entrySet()) {
+      if (!super.containsKey(entry.getKey()) || override)
+        super.put(entry.getKey(), entry.getValue());
+    }
+    return this;
   }
 
   public String toString() {

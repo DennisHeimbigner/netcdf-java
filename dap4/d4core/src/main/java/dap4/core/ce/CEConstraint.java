@@ -6,10 +6,10 @@
 package dap4.core.ce;
 
 import dap4.core.ce.parser.CEParserImpl;
-import dap4.core.data.Constraint;
-import dap4.core.data.DataCursor;
 import dap4.core.dmr.*;
 import dap4.core.dmr.parser.ParseException;
+import dap4.core.data.Constraint;
+import dap4.core.data.DataCursor;
 import dap4.core.util.*;
 import java.util.*;
 

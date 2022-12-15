@@ -663,6 +663,14 @@ public class HTTPSession implements Closeable {
     return this.interceptors;
   }
 
+  public HTTPIntercepts.DebugInterceptRequest getDebugRequestInterceptor() {
+    return this.interceptors.debugRequestInterceptor();
+  }
+
+  public synchronized void resetInterceptors() {
+    this.interceptors.resetInterceptors();
+  }
+
   public AuthScope getAuthScope() {
     return this.scope;
   }

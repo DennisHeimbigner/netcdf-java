@@ -3,18 +3,20 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.dap4lib.serial;
+package dap4.dap4lib;
 
+import dap4.core.data.AbstractCursor;
 import dap4.core.dmr.*;
+import dap4.core.data.DataCursor;
 import dap4.core.util.*;
-import dap4.dap4lib.AbstractCursor;
-import dap4.dap4lib.LibTypeFcns;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class D4Cursor extends AbstractCursor {
+public class D4Cursor extends AbstractCursor
+{
   //////////////////////////////////////////////////
   // Mnemonics
   static final long NULLOFFSET = -1;
@@ -40,11 +42,14 @@ public class D4Cursor extends AbstractCursor {
   // Track the records of a sequence instance
   protected List<D4Cursor> records = null; // scheme == SEQUENCE
 
+  protected AbstractDSP dsp = null;
+
   //////////////////////////////////////////////////
   // Constructor(s)
 
   public D4Cursor(Scheme scheme, D4DSP dsp, DapNode template, D4Cursor container) {
-    super(scheme, dsp, template, container);
+    super(scheme, template, container);
+    setDSP(dsp);
   }
 
   /**
@@ -76,6 +81,13 @@ public class D4Cursor extends AbstractCursor {
       this.records.get(i).setContainer(this); // Change the parent in the clone
     }
   }
+
+  //////////////////////////////////////////////////
+  // simple set/get
+
+  public AbstractDSP getDSP() {return this.dsp;}
+
+  public void setDSP(AbstractDSP dsp) {this.dsp = dsp;}
 
   //////////////////////////////////////////////////
   // DataCursor API (Except as Implemented in AbstractCursor)
@@ -180,47 +192,47 @@ public class D4Cursor extends AbstractCursor {
 
   protected void readContig(List<Slice> slices, DapType basetype, long count, Odometer odom, Object result)
       throws DapException {
-    ByteBuffer alldata = ((D4DSP) this.dsp).getBuffer();
+    ByteBuffer stream = ((D4DSP) this.dsp).getData();
     long off = this.offset;
     long ix = odom.indices().index();
     int elemsize = basetype.getSize();
-    alldata.position((int) (off + (ix * elemsize)));
+    stream.position((int) (off + (ix * elemsize)));
     int icount = (int) count;
     long totalsize = count * basetype.getSize();
     switch (basetype.getTypeSort()) {
       case Int8:
       case UInt8:
-        alldata.get((byte[]) result);
+        stream.get((byte[]) result);
         break;
       case Char: // remember, we are reading 7-bit ascii, not utf-8 or utf-16
         byte[] ascii = new byte[icount];
-        alldata.get(ascii);
+        stream.get(ascii);
         for (int i = 0; i < icount; i++) {
           ((char[]) result)[i] = (char) (ascii[i] & 0x7f);
         }
         break;
       case Int16:
       case UInt16:
-        alldata.asShortBuffer().get((short[]) result);
-        skip(totalsize, alldata);
+        stream.asShortBuffer().get((short[]) result);
+        skip(totalsize, stream);
         break;
       case Int32:
       case UInt32:
-        alldata.asIntBuffer().get((int[]) result);
-        skip(totalsize, alldata);
+        stream.asIntBuffer().get((int[]) result);
+        skip(totalsize, stream);
         break;
       case Int64:
       case UInt64:
-        alldata.asLongBuffer().get((long[]) result);
-        skip(totalsize, alldata);
+        stream.asLongBuffer().get((long[]) result);
+        skip(totalsize, stream);
         break;
       case Float32:
-        alldata.asFloatBuffer().get((float[]) result);
-        skip(totalsize, alldata);
+        stream.asFloatBuffer().get((float[]) result);
+        skip(totalsize, stream);
         break;
       case Float64:
-        alldata.asDoubleBuffer().get((double[]) result);
-        skip(totalsize, alldata);
+        stream.asDoubleBuffer().get((double[]) result);
+        skip(totalsize, stream);
         break;
       default:
         throw new DapException("Contiguous read not supported for type: " + basetype.getTypeSort());
@@ -228,10 +240,10 @@ public class D4Cursor extends AbstractCursor {
   }
 
   protected Object readOdom(List<Slice> slices, DapType basetype, Odometer odom, Object result) throws DapException {
-    ByteBuffer alldata = ((D4DSP) this.dsp).getBuffer();
-    alldata.position((int) this.offset);
-    ByteBuffer slice = alldata.slice();
-    slice.order(alldata.order());
+    ByteBuffer stream = ((D4DSP) this.dsp).getData();
+    stream.position((int) this.offset);
+    ByteBuffer slice = stream.slice();
+    slice.order(stream.order());
     for (int i = 0; odom.hasNext(); i++) {
       Index index = odom.next();
       int ipos = (int) index.index();
@@ -264,25 +276,25 @@ public class D4Cursor extends AbstractCursor {
           break;
         case String:
         case URL:
-          int savepos = alldata.position();
+          int savepos = stream.position();
           long pos = bytestrings[i];
-          alldata.position((int) pos); // bytestring offsets are absolute
-          long n = getLength(alldata);
+          stream.position((int) pos); // bytestring offsets are absolute
+          long n = getLength(stream);
           byte[] data = new byte[(int) n];
-          alldata.get(data);
+          stream.get(data);
           ((String[]) result)[i] = new String(data, DapUtil.UTF8);
-          alldata.position(savepos);
+          stream.position(savepos);
           break;
         case Opaque:
-          savepos = alldata.position();
+          savepos = stream.position();
           pos = bytestrings[i];
-          alldata.position((int) pos); // bytestring offsets are absolute
-          n = getLength(alldata);
+          stream.position((int) pos); // bytestring offsets are absolute
+          n = getLength(stream);
           data = new byte[(int) n];
-          alldata.get(data);
+          stream.get(data);
           ByteBuffer buf = ByteBuffer.wrap(data);
           ((ByteBuffer[]) result)[i] = buf;
-          alldata.position(savepos);
+          stream.position(savepos);
           break;
         default:
           throw new DapException("Attempt to read non-atomic value of type: " + basetype.getTypeSort());

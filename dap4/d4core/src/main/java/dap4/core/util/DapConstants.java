@@ -33,7 +33,7 @@ public abstract class DapConstants {
 
   // Known dap4 specific query tags
   public static final String CONSTRAINTTAG = "dap4.ce";
-  public static final String CHECKSUMTAG = "dap4.ce";
+  public static final String CHECKSUMTAG = "dap4.checksum"; // May also be in fragment
 
   // Define the Serialization Constants common to servlet and client
 
@@ -42,11 +42,10 @@ public abstract class DapConstants {
   public static final int CHUNK_END = 1; // bit 0 : value 1
   public static final int CHUNK_ERROR = 2; // bit 1 : value 1
   public static final int CHUNK_LITTLE_ENDIAN = 4; // bit 2: value 1
-  public static final int CHUNK_NOCHECKSUM = 8; // bit 2: value 1
 
   // Construct the union of all flags
   public static final int CHUNK_ALL = CHUNK_DATA | CHUNK_ERROR | CHUNK_END | CHUNK_LITTLE_ENDIAN;
-
+  public static final int COUNTSIZE = 8; // databuffer as specified by the DAP4 spec
   public static final int CHECKSUMSIZE = 4; // bytes if CRC32
   public static final String DIGESTER = "CRC32";
   public static final String CHECKSUMATTRNAME = "_DAP4_Checksum_CRC32";

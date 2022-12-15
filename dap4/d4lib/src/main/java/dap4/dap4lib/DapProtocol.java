@@ -6,6 +6,7 @@
 package dap4.dap4lib;
 
 import dap4.core.util.ResponseFormat;
+import dap4.core.util.XURI;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;

@@ -48,7 +48,7 @@ public class HTTPIntercepts {
   };
 
   //////////////////////////////////////////////////
-  // Subclasses
+  // Inner classes
 
   abstract static class InterceptCommon {
     private static final Logger logger = LoggerFactory.getLogger(InterceptCommon.class);
@@ -112,7 +112,7 @@ public class HTTPIntercepts {
 
     public void printHeaders() {
       if (this.request != null) {
-        InterceptRequest thisreq = (InterceptRequest) this;
+        DebugInterceptRequest thisreq = (DebugInterceptRequest) this;
         printer.println("Request: method=" + thisreq.getMethod() + "; uri=" + thisreq.getUri());
         Header[] hdrs = this.request.getAllHeaders();
         if (hdrs == null)
@@ -123,7 +123,7 @@ public class HTTPIntercepts {
         }
       }
       if (this.response != null) {
-        InterceptResponse thisresp = (InterceptResponse) this;
+        DebugInterceptResponse thisresp = (DebugInterceptResponse) this;
         printer.println("Response: code=" + thisresp.getStatusCode());
         Header[] hdrs = this.response.getAllHeaders();
         if (hdrs == null)
@@ -148,7 +148,7 @@ public class HTTPIntercepts {
   //////////////////////////////////////////////////
   // Specific Interceptors
 
-  static public class InterceptResponse extends InterceptCommon implements HttpResponseInterceptor {
+  static public class DebugInterceptResponse extends HTTPIntercepts.InterceptCommon implements HttpResponseInterceptor {
     protected StatusLine statusline = null; // Status Line
 
     public int getStatusCode() {
@@ -170,7 +170,7 @@ public class HTTPIntercepts {
     }
   }
 
-  static public class InterceptRequest extends InterceptCommon implements HttpRequestInterceptor {
+  static public class DebugInterceptRequest extends InterceptCommon implements HttpRequestInterceptor {
     protected RequestLine requestline = null; // request Line
 
     public String getMethod() {
@@ -266,19 +266,19 @@ public class HTTPIntercepts {
     }
   }
 
-  public InterceptRequest debugRequestInterceptor() {
+  public DebugInterceptRequest debugRequestInterceptor() {
     for (HttpRequestInterceptor hri : reqintercepts) {
-      if (hri instanceof InterceptRequest) {
-        return ((InterceptRequest) hri);
+      if (hri instanceof DebugInterceptRequest) {
+        return ((DebugInterceptRequest) hri);
       }
     }
     return null;
   }
 
-  public InterceptResponse debugResponseInterceptor() {
+  public DebugInterceptResponse debugResponseInterceptor() {
     for (HttpResponseInterceptor hri : rspintercepts) {
-      if (hri instanceof InterceptResponse) {
-        return ((InterceptResponse) hri);
+      if (hri instanceof DebugInterceptResponse) {
+        return ((DebugInterceptResponse) hri);
       }
     }
     return null;
@@ -341,8 +341,8 @@ public class HTTPIntercepts {
   }
 
   protected synchronized void addDebugInterceptors(boolean print) {
-    InterceptRequest rq = new InterceptRequest();
-    InterceptResponse rs = new InterceptResponse();
+    DebugInterceptRequest rq = new DebugInterceptRequest();
+    DebugInterceptResponse rs = new DebugInterceptResponse();
     rq.setPrint(printer);
     rs.setPrint(printer);
     /* remove any previous */
@@ -393,12 +393,12 @@ public class HTTPIntercepts {
   public synchronized void removeDebugIntercepts() {
     for (int i = rspintercepts.size() - 1; i >= 0; i--) { // walk backwards
       HttpResponseInterceptor hrsi = rspintercepts.get(i);
-      if (hrsi instanceof HTTPIntercepts.InterceptResponse)
+      if (hrsi instanceof DebugInterceptResponse)
         rspintercepts.remove(i);
     }
     for (int i = reqintercepts.size() - 1; i >= 0; i--) { // walk backwards
       HttpRequestInterceptor hrsi = reqintercepts.get(i);
-      if (hrsi instanceof HTTPIntercepts.InterceptRequest)
+      if (hrsi instanceof DebugInterceptRequest)
         reqintercepts.remove(i);
     }
   }

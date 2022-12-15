@@ -4,12 +4,11 @@
  */
 
 
-package dap4.cdm.nc2;
+package dap4.dap4lib.cdm.nc2;
 
-import dap4.cdm.NodeMap;
-import dap4.core.data.ChecksumMode;
-import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
+import dap4.dap4lib.AbstractDSP;
+import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
 import ucar.ma2.Array;
@@ -39,7 +38,7 @@ public class DataToCDM {
   // Instance variables
 
   protected DapNetcdfFile ncfile = null;
-  protected DSP dsp = null;
+  protected AbstractDSP dsp = null;
   protected DapDataset dmr = null;
   protected Group cdmroot = null;
   protected Map<Variable, Array> arraymap = null;
@@ -55,13 +54,13 @@ public class DataToCDM {
    * @param dsp the compiled D4 databuffer
    */
 
-  public DataToCDM(DapNetcdfFile ncfile, DSP dsp, NodeMap nodemap) throws DapException {
+  public DataToCDM(DapNetcdfFile ncfile, AbstractDSP dsp, NodeMap nodemap) throws DapException {
     this.ncfile = ncfile;
     this.dsp = dsp;
     this.dmr = dsp.getDMR();
     this.nodemap = nodemap;
     this.cdmroot = ncfile.getRootGroup();
-    arraymap = new HashMap<Variable, Array>();
+    this.arraymap = new HashMap<Variable, Array>();
     // Add endianness attribute to the group
     /*
      * ByteOrder remoteorder = ncfile.getDSP().getOrder();
@@ -91,7 +90,7 @@ public class DataToCDM {
       DataCursor cursor = this.dsp.getVariableData(var);
       Array array = createVar(cursor);
       Variable cdmvar = (Variable) nodemap.get(var);
-      arraymap.put(cdmvar, array);
+      this.arraymap.put(cdmvar, array);
     }
     return this.arraymap;
   }
@@ -110,7 +109,7 @@ public class DataToCDM {
         array = createStructure(data);
         break;
     }
-    if (d4var.isTopLevel() && this.dsp.getChecksumMode() != ChecksumMode.NONE) {
+    if (d4var.isTopLevel() && this.dsp.getChecksumMode() == ChecksumMode.TRUE) {
       // transfer the checksum attribute
       int csum = d4var.getChecksum();
       String scsum = String.format("0x%08x", csum);
@@ -150,8 +149,8 @@ public class DataToCDM {
     while (odom.hasNext()) {
       Index index = odom.next();
       long offset = index.index();
-      DataCursor[] cursors = (DataCursor[]) data.read(index);
-      DataCursor ithelement = cursors[0];
+      dap4.core.interfaces.DataCursor[] cursors = (dap4.core.interfaces.DataCursor[]) data.read(index);
+      dap4.core.interfaces.DataCursor ithelement = cursors[0];
       for (int f = 0; f < nmembers; f++) {
         DataCursor dc = (DataCursor) ithelement.readField(f);
         Array afield = createVar(dc);
@@ -171,7 +170,7 @@ public class DataToCDM {
    * @throws DapException
    */
 
-  protected CDMArraySequence createSequence(DataCursor data) throws DapException {
+  protected CDMArraySequence createSequence(dap4.core.data.DataCursor data) throws DapException {
     CDMArraySequence arrayseq = new CDMArraySequence(this.cdmroot, data);
     DapVariable var = (DapVariable) data.getTemplate();
     DapSequence template = (DapSequence) var.getBaseType();
@@ -181,10 +180,10 @@ public class DataToCDM {
     Odometer odom = Odometer.factory(DapUtil.dimsetToSlices(dimset));
     while (odom.hasNext()) {
       odom.next();
-      DataCursor seq = ((DataCursor[]) data.read(odom.indices()))[0];
+      dap4.core.interfaces.DataCursor seq = ((dap4.core.interfaces.DataCursor[]) data.read(odom.indices()))[0];
       long nrecords = seq.getRecordCount();
       for (int r = 0; r < nrecords; r++) {
-        DataCursor rec = seq.readRecord(r);
+        dap4.core.interfaces.DataCursor rec = seq.readRecord(r);
         for (int f = 0; f < nfields; f++) {
           DataCursor dc = rec.readField(f);
           Array afield = createVar(dc);

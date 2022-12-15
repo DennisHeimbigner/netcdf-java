@@ -5,14 +5,19 @@
 
 package dap4.dap4lib;
 
-import dap4.core.data.ChecksumMode;
-import dap4.core.data.DSP;
 import dap4.core.data.DataCursor;
+import dap4.core.data.DSP;
+import dap4.core.util.ChecksumMode;
 import dap4.core.dmr.*;
 import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.util.*;
+
+import dap4.dap4lib.cdm.nc2.CDMCompiler;
+import dap4.dap4lib.cdm.nc2.DapNetcdfFile;
 import org.xml.sax.SAXException;
+import ucar.nc2.NetcdfFile;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -33,7 +38,7 @@ public abstract class AbstractDSP implements DSP {
   // constants
 
   protected static final boolean DEBUG = false;
-  protected static final boolean PARSEDEBUG = false;
+  protected static final boolean PARSEDEBUG = true;
 
   public static final boolean USEDOM = false;
 
@@ -41,14 +46,18 @@ public abstract class AbstractDSP implements DSP {
   protected static final String DMRVERSION = "1.0";
   protected static final String DMRNS = "http://xml.opendap.org/ns/DAP/4.0#";
 
+  protected DapNetcdfFile ncfile = null;
   protected DapContext context = null;
   protected DapDataset dmr = null;
   protected String location = null;
-  private ByteOrder order = null;
-  private ChecksumMode checksummode = ChecksumMode.NONE;
+  private ByteOrder localorder = ByteOrder.nativeOrder();
+  private ByteOrder remoteorder = null;
+  private ChecksumMode checksummode = null;
+  protected RequestMode mode = null;
+
+  protected CDMCompiler cdmCompiler = null;
 
   protected Map<DapVariable, DataCursor> variables = new HashMap<>();
-  protected DataCursor rootcursor = null;
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -57,18 +66,14 @@ public abstract class AbstractDSP implements DSP {
   {}
 
   //////////////////////////////////////////////////
-  // DSP Interface
-
   // Subclass defined
 
   /**
    * "open" a reference to a data source and return the DSP wrapper.
-   *
    * @param location - Object that defines the data source
    * @return = wrapping dsp
    * @throws DapException
    */
-  @Override
   public abstract AbstractDSP open(String location) throws DapException;
 
   /**
@@ -76,47 +81,60 @@ public abstract class AbstractDSP implements DSP {
    */
   public abstract void close() throws IOException;
 
-  //////////////////////////////////////////////////
+  /**
+   * Determine if a path refers to an object processable by this DSP
+   *
+   * @param path
+   * @param context
+   * @return true if this path can be processed by an instance of this DSP
+   */
+  abstract public boolean dspMatch(String path, DapContext context);
+
+  abstract public void ensuredmr(DapNetcdfFile ncfile) throws DapException;
+
+  abstract public void ensuredata(DapNetcdfFile ncfile) throws DapException;
+
+    //////////////////////////////////////////////////
   // Implemented
 
-  @Override
   public DataCursor getVariableData(DapVariable var) throws DapException {
     return this.variables.get(var);
   }
 
-  @Override
+  public void addVariableData(DapVariable var, DataCursor cursor) {
+    this.variables.put(var, cursor);
+  }
+
   public DapContext getContext() {
     return this.context;
   }
 
-  @Override
+  public void setContext(DapContext context) {
+    this.context = context;
+    // Extract some things from the context
+    /*
+    Object o = this.context.get(DapConstants.DAP4ENDIANTAG);
+    if (o != null)
+      setRemoteOrder((ByteOrder) o);
+    o = this.context.get(DapConstants.CHECKSUMTAG);
+     */
+    // Do not override if already set
+    Object o = this.context.get(DapConstants.CHECKSUMTAG);
+    if (o != null && (getChecksumMode() == ChecksumMode.NONE || getChecksumMode() == null))
+      setChecksumMode(ChecksumMode.modeFor(o.toString()));
+  }
+
   public String getLocation() {
     return this.location;
   }
 
-  @Override
   public AbstractDSP setLocation(String loc) {
     this.location = loc;
     return this;
   }
 
-  @Override
   public DapDataset getDMR() {
     return this.dmr;
-  }
-
-  // DSP Extensions
-
-  @Override
-  public void setContext(DapContext context) {
-    this.context = context;
-    // Extract some things from the context
-    Object o = this.context.get(DapConstants.DAP4ENDIANTAG);
-    if (o != null)
-      setOrder((ByteOrder) o);
-    o = this.context.get(DapConstants.CHECKSUMTAG);
-    if (o != null)
-      setChecksumMode(ChecksumMode.modeFor(o.toString()));
   }
 
   public void setDMR(DapDataset dmr) {
@@ -130,17 +148,39 @@ public abstract class AbstractDSP implements DSP {
     }
   }
 
-  protected void setDataset(DapDataset dataset) throws DapException {
-    this.dmr = dataset;
+  public DapNetcdfFile getNetcdfFile() {
+    return this.ncfile;
   }
 
-  public ByteOrder getOrder() {
-    return this.order;
-  }
-
-  public AbstractDSP setOrder(ByteOrder order) {
-    this.order = order;
+  public AbstractDSP setNetcdfFile(DapNetcdfFile file) {
+    this.ncfile = file;
     return this;
+  }
+
+  public static String printDMR(DapDataset dmr) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    DMRPrinter printer = new DMRPrinter(dmr, pw);
+    try {
+      printer.print();
+      pw.close();
+      sw.close();
+    } catch (IOException e) {
+    }
+    return sw.toString();
+  }
+
+  public ByteOrder getLocalOrder() {
+    return this.localorder;
+  }
+
+  public ByteOrder getRemoteOrder() {
+    assert (this.remoteorder != null);
+    return this.remoteorder;
+  }
+
+  public void setRemoteOrder(ByteOrder order) {
+    this.remoteorder = order;
   }
 
   public ChecksumMode getChecksumMode() {
@@ -153,8 +193,12 @@ public abstract class AbstractDSP implements DSP {
     return this;
   }
 
-  public void addVariableData(DapVariable var, DataCursor cursor) {
-    this.variables.put(var, cursor);
+  public RequestMode getRequestMode() {
+    return this.mode;
+  }
+
+  public void setRequestMode(RequestMode mode) {
+    this.mode = mode;
   }
 
   //////////////////////////////////////////////////
@@ -193,6 +237,45 @@ public abstract class AbstractDSP implements DSP {
   }
 
   /**
+   * Some attributes that are added by the NetcdfDataset
+   * need to be kept out of the DMR. This function
+   * defines that set.
+   *
+   * @param attrname
+   * @return true if the attribute should be suppressed, false otherwise.
+   */
+  protected boolean suppressAttributes(String attrname) {
+    if (attrname.startsWith("_Coord"))
+      return true;
+    if (attrname.equals("_Unsigned"))
+      return true;
+    return false;
+  }
+
+  void getEndianAttribute(DapDataset dataset) {
+    DapAttribute a = dataset.findAttribute(DapConstants.LITTLEENDIANATTRNAME);
+    if (a == null)
+      return;
+    Object v = a.getValues();
+    int len = java.lang.reflect.Array.getLength(v);
+    if (len == 0)
+      setRemoteOrder(ByteOrder.LITTLE_ENDIAN);
+    else {
+      String onezero = java.lang.reflect.Array.get(v, 0).toString();
+      int islittle = 1;
+      try {
+        islittle = Integer.parseInt(onezero);
+      } catch (NumberFormatException e) {
+        islittle = 1;
+      }
+      if (islittle == 0)
+        setRemoteOrder(ByteOrder.BIG_ENDIAN);
+      else
+        setRemoteOrder(ByteOrder.LITTLE_ENDIAN);
+    }
+  }
+
+  /**
    * Walk the dataset tree and remove selected attributes
    * such as _Unsigned
    *
@@ -209,7 +292,7 @@ public abstract class AbstractDSP implements DSP {
           if (attrs.size() > 0) {
             List<DapAttribute> suppressed = new ArrayList<>();
             for (DapAttribute dattr : attrs.values()) {
-              if (suppress(dattr.getShortName()))
+              if (suppressAttributes(dattr.getShortName()))
                 suppressed.add(dattr);
             }
             for (DapAttribute dattr : suppressed) {
@@ -223,61 +306,6 @@ public abstract class AbstractDSP implements DSP {
     }
     // Try to extract the byte order
     getEndianAttribute(dataset);
-  }
-
-  /**
-   * Some attributes that are added by the NetcdfDataset
-   * need to be kept out of the DMR. This function
-   * defines that set.
-   *
-   * @param attrname A non-escaped attribute name to be tested for suppression
-   * @return true if the attribute should be suppressed, false otherwise.
-   */
-
-  protected boolean suppress(String attrname) {
-    if (attrname.startsWith("_Coord"))
-      return true;
-    if (attrname.equals("_Unsigned"))
-      return true;
-    return false;
-  }
-
-  void getEndianAttribute(DapDataset dataset) {
-    DapAttribute a = dataset.findAttribute(DapConstants.LITTLEENDIANATTRNAME);
-    if (a == null)
-      this.order = (ByteOrder.LITTLE_ENDIAN);
-    else {
-      Object v = a.getValues();
-      int len = java.lang.reflect.Array.getLength(v);
-      if (len == 0)
-        this.order = (ByteOrder.nativeOrder());
-      else {
-        String onezero = java.lang.reflect.Array.get(v, 0).toString();
-        int islittle = 1;
-        try {
-          islittle = Integer.parseInt(onezero);
-        } catch (NumberFormatException e) {
-          islittle = 1;
-        }
-        if (islittle == 0)
-          this.order = (ByteOrder.BIG_ENDIAN);
-        else
-          this.order = (ByteOrder.LITTLE_ENDIAN);
-      }
-    }
-  }
-
-  public static String printDMR(DapDataset dmr) {
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-    DMRPrinter printer = new DMRPrinter(dmr, pw);
-    try {
-      printer.print();
-      pw.close();
-      sw.close();
-    } catch (IOException e) {
-    }
-    return sw.toString();
   }
 
   /**

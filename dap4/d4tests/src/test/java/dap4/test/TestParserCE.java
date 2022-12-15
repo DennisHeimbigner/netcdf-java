@@ -53,22 +53,21 @@ public class TestParserCE extends DapTestCommon implements Dap4ManifestIF {
   static final boolean CEPARSEDEBUG = false;
 
   // DMR Constants
-  static final String CE1_DMR = "<Dataset\n" + "    name=\"ce1\"\n" + "    dapVersion=\"4.0\"\n" + "    dmrVersion=\"1.0\"\n"
-        + "    ns=\"http://xml.opendap.org/ns/DAP/4.0#\">\n" + "  <Dimension name=\"d10\" size=\"10\"/>\n"
-        + "  <Dimension name=\"d17\" size=\"17\"/>\n" + "  <Int32 name=\"a\">\n" + "    <Dim name=\"/d17\"/>\n"
-        + "  </Int32>\n" + "  <Int32 name=\"b\">\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n"
-        + "  <Int32 name=\"c\">\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"d\">\n"
-        + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"e\">\n"
-        + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"f\">\n"
-        + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Structure name=\"s\">\n"
-        + "    <Int32 name=\"x\"/>\n" + "    <Int32 name=\"y\"/>\n" + "    <Dim name=\"/d10\"/>\n"
-        + "    <Dim name=\"/d10\"/>\n" + "  </Structure>\n" + "  <Sequence name=\"seq\">\n"
-        + "    <Int32 name=\"i1\"/>\n" + "    <Int16 name=\"sh1\"/>\n" + "  </Sequence>\n" + "</Dataset>";
+  static final String CE1_DMR = "<Dataset\n" + "    name=\"ce1\"\n" + "    dapVersion=\"4.0\"\n"
+      + "    dmrVersion=\"1.0\"\n" + "    ns=\"http://xml.opendap.org/ns/DAP/4.0#\">\n"
+      + "  <Dimension name=\"d10\" size=\"10\"/>\n" + "  <Dimension name=\"d17\" size=\"17\"/>\n"
+      + "  <Int32 name=\"a\">\n" + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"b\">\n"
+      + "    <Dim name=\"/d17\"/>\n" + "  </Int32>\n" + "  <Int32 name=\"c\">\n" + "    <Dim name=\"/d17\"/>\n"
+      + "  </Int32>\n" + "  <Int32 name=\"d\">\n" + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n"
+      + "  </Int32>\n" + "  <Int32 name=\"e\">\n" + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n"
+      + "  </Int32>\n" + "  <Int32 name=\"f\">\n" + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d17\"/>\n"
+      + "  </Int32>\n" + "  <Structure name=\"s\">\n" + "    <Int32 name=\"x\"/>\n" + "    <Int32 name=\"y\"/>\n"
+      + "    <Dim name=\"/d10\"/>\n" + "    <Dim name=\"/d10\"/>\n" + "  </Structure>\n" + "  <Sequence name=\"seq\">\n"
+      + "    <Int32 name=\"i1\"/>\n" + "    <Int16 name=\"sh1\"/>\n" + "  </Sequence>\n" + "</Dataset>";
 
-    static final String CE2_DMR = "<Dataset" + "    name=\"ce2\"" + "    dapVersion=\"4.0\"" + "    dmrVersion=\"1.0\""
-        + "    ns=\"http://xml.opendap.org/ns/DAP/4.0#\">" + "  <Dimension name=\"d2\" size=\"2\"/>"
-        + "  <Opaque name=\"vo\">" + "    <Dim name=\"/d2\"/>" + "    <Dim name=\"/d2\"/>" + "  </Opaque>"
-        + "</Dataset>";
+  static final String CE2_DMR = "<Dataset" + "    name=\"ce2\"" + "    dapVersion=\"4.0\"" + "    dmrVersion=\"1.0\""
+      + "    ns=\"http://xml.opendap.org/ns/DAP/4.0#\">" + "  <Dimension name=\"d2\" size=\"2\"/>"
+      + "  <Opaque name=\"vo\">" + "    <Dim name=\"/d2\"/>" + "    <Dim name=\"/d2\"/>" + "  </Opaque>" + "</Dataset>";
 
   static final String[][] testinputs =
       {{"/a[1]", null, CE1_DMR}, {"/b[10:16]", null, CE1_DMR}, {"/c[8:2:15]", null, CE1_DMR},
@@ -85,12 +84,13 @@ public class TestParserCE extends DapTestCommon implements Dap4ManifestIF {
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase {
+  static class TestCase extends TestCaseCommon {
     public String ce;
     public String expected; // null => same as ce
     public String dmr; // DMR against which the CE is defined
 
     public TestCase(String ce, String expected, String dmr) {
+      super();
       this.ce = ce;
       this.expected = expected;
       this.dmr = dmr;
@@ -108,8 +108,8 @@ public class TestParserCE extends DapTestCommon implements Dap4ManifestIF {
   // Test Generator
 
   @Parameterized.Parameters(name = "{index}: {0}")
-  static public List<Object> defineTestCases() {
-    List<Object> testcases = new ArrayList<>();
+  static public List<TestCaseCommon> defineTestCases() {
+    List<TestCaseCommon> testcases = new ArrayList<>();
     for (String[] triple : testinputs) {
       TestCase tc = new TestCase(triple[0], triple[1], triple[2]);
       testcases.add(tc);
@@ -126,9 +126,9 @@ public class TestParserCE extends DapTestCommon implements Dap4ManifestIF {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public TestParserCE(Object otc) {
+  public TestParserCE(TestCaseCommon tc) {
     super();
-    this.tc = (TestCase) otc;
+    this.tc = (TestCase) tc;
   }
 
   //////////////////////////////////////////////////

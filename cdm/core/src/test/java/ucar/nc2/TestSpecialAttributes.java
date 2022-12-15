@@ -24,7 +24,7 @@ public class TestSpecialAttributes {
     NetcdfFile ncfile = TestDir.openFileLocal("testSpecialAttributes.nc4");
     // Iterate over all top-level attributes and see if it is special
     for (Attribute a : ncfile.getRootGroup().getAttributes()) {
-      Assert.assertFalse("Attribute iteration found special attribute: " + a.getShortName(), Nc4.isspecial(a));
+      Assert.assertFalse("Attribute iteration found special attribute: " + a.getShortName(), CDM.isspecial(a));
     }
     ncfile.close();
   }
@@ -33,9 +33,9 @@ public class TestSpecialAttributes {
   public void testReadByName() throws IOException {
     NetcdfFile ncfile = TestDir.openFileLocal("testSpecialAttributes.nc4");
     // Attempt to read special attributes by name
-    for (String name : new String[] {Nc4.NCPROPERTIES}) {
+    for (String name : new String[] {CDM.NCPROPERTIES}) {
       Attribute special = ncfile.getRootGroup().findAttribute(name);
-      Assert.assertTrue("Could not access special attribute: " + name, special != null && Nc4.isspecial(special));
+      Assert.assertTrue("Could not access special attribute: " + name, special != null && CDM.isspecial(special));
     }
     ncfile.close();
   }

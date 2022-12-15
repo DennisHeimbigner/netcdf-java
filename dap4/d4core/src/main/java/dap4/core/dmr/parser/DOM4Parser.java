@@ -280,6 +280,12 @@ public class DOM4Parser implements Dap4Parser {
     return attr.getNodeValue();
   }
 
+  protected boolean notexists(Node n, String name) {
+    NamedNodeMap map = n.getAttributes();
+    Node attr = map.getNamedItem(name);
+    return (attr == null);
+  }
+
   //////////////////////////////////////////////////
   // Attribute construction
 
@@ -405,6 +411,11 @@ public class DOM4Parser implements Dap4Parser {
     } catch (DapException e) {
       throw new ParseException(e);
     }
+  }
+
+  protected boolean isattributeset(Node node) {
+    String type = pull(node, "type");
+    return (nodesort(node) == DapSort.ATTRIBUTE && (isempty(type) || "container".equalsIgnoreCase(type)));
   }
 
   //////////////////////////////////////////////////
@@ -545,11 +556,8 @@ public class DOM4Parser implements Dap4Parser {
             recorddecl(v.getBaseType(), group);
             recorddecl(v, group);
             break;
-          case ATTRIBUTESET:
-            recordattr(parseattrset(n), group);
-            break;
           case ATTRIBUTE:
-            recordattr(parseattr(n), group);
+            parseattr(n, group, null);
             break;
           case OTHERXML:
             recordattr(parseotherxml(n), group);
@@ -855,10 +863,7 @@ public class DOM4Parser implements Dap4Parser {
             var.addMap(parsemap(n));
             break;
           case ATTRIBUTE:
-            recordattr(parseattr(n), var);
-            break;
-          case ATTRIBUTESET:
-            recordattr(parseattrset(n), var);
+            parseattr(n, var, null);
             break;
           case OTHERXML:
             recordattr(parseotherxml(n), var);
@@ -922,17 +927,21 @@ public class DOM4Parser implements Dap4Parser {
     return map;
   }
 
-  protected DapAttribute parseattr(Node node) throws ParseException {
+  protected void parseattr(Node node, DapNode parent, String prefix) throws ParseException {
     try {
       if (trace)
         trace("attribute.enter");
+      if (isattributeset(node)) {
+        parseattrset(node, parent);
+        return;
+      }
       String name = pull(node, "name");
       if (isempty(name))
         throw new ParseException("Attribute: Empty attribute name");
+      if (prefix != null)
+        name = prefix + "." + name;
       String type = pull(node, "type");
-      if (isempty(type))
-        type = DEFAULTATTRTYPE;
-      else if ("Byte".equalsIgnoreCase(type))
+      if ("Byte".equalsIgnoreCase(type))
         type = "UInt8";
       // Convert type to basetype
       DapType basetype = (DapType) this.root.lookup(type, DapSort.ENUMERATION, DapSort.ATOMICTYPE);
@@ -978,44 +987,47 @@ public class DOM4Parser implements Dap4Parser {
         values.set(i, ds);
       }
       attr.setValues(values.toArray(new String[values.size()]));
+      recordattr(attr, parent);
       scopestack.pop();
       if (trace)
         trace("attribute.exit");
-      return attr;
+      return;
     } catch (DapException e) {
       throw new ParseException(e);
     }
   }
 
-  protected DapAttributeSet parseattrset(Node node) throws ParseException {
+  // Attributes in an attributeset are flattened
+  protected void parseattrset(Node node, DapNode parent) throws ParseException {
+    parseattrset(node, parent, null);
+  }
+
+  protected void parseattrset(Node node, DapNode parent, String prefix) throws ParseException {
     try {
       if (trace)
         trace("attrset.enter");
-      String name = pull(node, "name");
-      if (isempty(name))
-        throw new ParseException("AttributeSet: Empty attribute name");
       List<String> nslist = parsenamespaces(node);
-      DapAttributeSet attrset = (DapAttributeSet) makeAttribute(DapSort.ATTRIBUTESET, name, null, nslist);
-      scopestack.push(attrset);
+      String setname = pull(node, "name");
+      if (isempty(setname))
+        throw new ParseException("Attribute: Empty attribute set name");
+      String nextprefix = (prefix == null ? setname : prefix + "." + setname);
       List<Node> nodes = getSubnodes(node);
       for (int i = 0; i < nodes.size(); i++) {
         Node n = nodes.get(i);
         DapSort sort = nodesort(n);
         switch (sort) {
           case ATTRIBUTE:
-            recordattr(parseattr(n), attrset);
-            break;
-          case ATTRIBUTESET:
-            recordattr(parseattrset(n), attrset);
+            if (isattributeset(n))
+              parseattrset(node, parent, nextprefix);
+            else
+              parseattr(n, parent, nextprefix);
             break;
           default:
             throw new ParseException("Unexpected attribute set element: " + n);
         }
       }
-      scopestack.pop();
       if (trace)
         trace("attributeset.exit");
-      return attrset;
     } catch (DapException e) {
       throw new ParseException(e);
     }

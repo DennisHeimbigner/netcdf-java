@@ -3,7 +3,7 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.cdm;
+package dap4.dap4lib.cdm;
 
 import dap4.core.dmr.DapEnumeration;
 import dap4.core.dmr.DapType;
