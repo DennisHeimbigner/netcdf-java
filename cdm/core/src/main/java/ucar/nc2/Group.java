@@ -298,7 +298,7 @@ public class Group extends CDMNode implements AttributeContainer {
 
   /** The attributes contained by this Group. */
   public AttributeContainer attributes() {
-    return attributes;
+    return AttributeContainer.filter(attributes, Attribute.SPECIALS);
   }
 
   /** Find the attribute by name, return null if not exist */
