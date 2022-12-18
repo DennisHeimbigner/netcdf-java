@@ -90,7 +90,7 @@ public class TestHTTPSession extends UnitTestCommon {
 
     HTTPSession.setGlobalUserAgent(GLOBALAGENT);
     try (HTTPSession session = HTTPFactory.newSession(TESTURL1)) {
-      session.setDebugInterceptors(false);
+      session.setDebugInterceptors(); // indicate we want debug intercepts
       List<Header> agents = null;
       HTTPMethod method = HTTPFactory.Get(session, TESTURL1);
       method.execute();

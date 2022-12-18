@@ -342,8 +342,8 @@ public class DMRPrinter {
         printXMLAttribute("dapVersion", dataset.getDapVersion(), flags);
         printXMLAttribute("dmrVersion", dataset.getDMRVersion(), flags);
         // boilerplate
-        printXMLAttribute("xmlns", "http://xml.opendap.org/ns/DAP/4.0#", flags);
-        printXMLAttribute("xmlns:dap", "http://xml.opendap.org/ns/DAP/4.0#", flags);
+        printXMLAttribute("xmlns", DapConstants.X_DAP_NS, flags);
+        printXMLAttribute("xmlns:dap", DapConstants.X_DAP_NS, flags);
         break;
 
       case DIMENSION:

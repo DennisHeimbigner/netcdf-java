@@ -970,10 +970,10 @@ public class HTTPSession implements Closeable {
     return builder.build();
   }
 
-  public synchronized void setDebugInterceptors(boolean print) {
+  public synchronized void setDebugInterceptors() {
     if (this.interceptors == null)
       this.interceptors = new HTTPIntercepts();
-    this.interceptors.setDebugInterceptors(print);
+    this.interceptors.addDebugInterceptors();
   }
 
   public void activateInterceptors(HttpClientBuilder cb) {

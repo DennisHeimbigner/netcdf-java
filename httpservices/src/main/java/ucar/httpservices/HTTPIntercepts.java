@@ -37,7 +37,7 @@ public class HTTPIntercepts {
   }
 
   // Default printer
-  static protected Printer logprinter = new Printer() {
+  static public Printer logprinter = new Printer() {
     public void print(String s) {
       logger.debug(s);
     }
@@ -139,10 +139,20 @@ public class HTTPIntercepts {
   //////////////////////////////////////////////////
   // Static Variables
 
+  // Use this flag to indicate that all instances should set debug.
   static protected boolean defaultinterception = false;
 
-  static public void setDebugInterceptors(boolean tf) {
+  // Global set debug interceptors
+  static public void setGlobalDebugInterceptors(boolean tf) {
     defaultinterception = true;
+  }
+
+  // Use this flag to have debug interceptors print their info
+  // in addition to whatever else it does
+  static protected Printer defaultprinter = null;
+
+  static public void setGlobalPrinter(Printer printer) {
+    defaultprinter = printer;
   }
 
   //////////////////////////////////////////////////
@@ -161,7 +171,7 @@ public class HTTPIntercepts {
       this.statusline = response.getStatusLine();
       if (this.printer != null)
         printHeaders();
-      else if (this.response != null) {
+      if (this.response != null) {
         Header[] hdrs = this.response.getAllHeaders();
         for (int i = 0; i < hdrs.length; i++) {
           headers.add(hdrs[i]);
@@ -187,7 +197,7 @@ public class HTTPIntercepts {
       this.requestline = request.getRequestLine();
       if (this.printer != null)
         printHeaders();
-      else if (this.request != null) {
+      if (this.request != null) {
         Header[] hdrs = this.request.getAllHeaders();
         for (int i = 0; i < hdrs.length; i++) {
           headers.add(hdrs[i]);
@@ -307,9 +317,10 @@ public class HTTPIntercepts {
 
   public HTTPIntercepts() {
     if (defaultinterception)
-      this.addDebugInterceptors(true);
+      this.addDebugInterceptors();
     else
       this.removeDebugIntercepts();
+    this.printer = defaultprinter;
   }
 
   //////////////////////////////////////////////////
@@ -340,11 +351,11 @@ public class HTTPIntercepts {
     cb.addInterceptorFirst(CEKILL);
   }
 
-  protected synchronized void addDebugInterceptors(boolean print) {
+  protected synchronized void addDebugInterceptors() {
     DebugInterceptRequest rq = new DebugInterceptRequest();
     DebugInterceptResponse rs = new DebugInterceptResponse();
-    rq.setPrint(printer);
-    rs.setPrint(printer);
+    rq.setPrint(this.printer);
+    rs.setPrint(this.printer);
     /* remove any previous */
     for (int i = reqintercepts.size() - 1; i >= 0; i--) {
       HttpRequestInterceptor hr = reqintercepts.get(i);

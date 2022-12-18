@@ -45,10 +45,6 @@ public abstract class D4DSP {
   public static boolean DEBUG = false;
   protected static final boolean PARSEDEBUG = true;
 
-  protected static final String DAPVERSION = "4.0";
-  protected static final String DMRVERSION = "1.0";
-  protected static final String DMRNS = "http://xml.opendap.org/ns/DAP/4.0#";
-
   //////////////////////////////////////////////////
   // Instance variables
 
@@ -135,9 +131,9 @@ public abstract class D4DSP {
     if (getDMR() != null) {
       // Add some canonical attributes to the <Dataset>
       getDMR().setDataset(getDMR());
-      getDMR().setDapVersion(DAPVERSION);
-      getDMR().setDMRVersion(DMRVERSION);
-      getDMR().setNS(DMRNS);
+      getDMR().setDapVersion(DapConstants.X_DAP_VERSION);
+      getDMR().setDMRVersion(DapConstants.X_DMR_VERSION);
+      getDMR().setNS(DapConstants.X_DAP_NS);
     }
   }
 

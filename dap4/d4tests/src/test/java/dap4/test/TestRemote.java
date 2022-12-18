@@ -105,7 +105,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    // singleTest(1, testcases); // choose single test for debugging
+    //singleTest(0, testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -128,7 +128,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    // props.prop_visual = true;
+    props.prop_visual = true;
     super.setup();
   }
 

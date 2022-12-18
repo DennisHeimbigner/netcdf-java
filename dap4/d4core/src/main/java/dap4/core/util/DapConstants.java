@@ -25,11 +25,14 @@ public abstract class DapConstants {
   // Constants
 
   // Default http protocol
+  // Default http protocol
   public static final String HTTPSCHEME = "https:";
 
   // XML Tags for DAP4
   public static final String X_DAP_SERVER = "TDS-5";
   public static final String X_DAP_VERSION = "4.0";
+  public static final String X_DMR_VERSION = "1.0";
+  public static final String X_DAP_NS = "http://xml.opendap.org/ns/DAP/4.0#";
 
   // Known dap4 specific query tags
   public static final String CONSTRAINTTAG = "dap4.ce";
