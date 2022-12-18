@@ -55,7 +55,7 @@ dependencies {
   netcdfAll project(':grib')
   netcdfAll project(':netcdf4')
   netcdfAll project(':opendap')
-  netcdfAll project(':dap4')
+  netcdfAll project(':dap4:d4lib')
   netcdfAll project(':httpservices')
   netcdfAll project(':visad:cdm-mcidas')
 
