@@ -5,6 +5,7 @@
 
 package dap4.test;
 
+import dap4.core.util.DapConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,7 +116,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       // Unfortunately, The OPeNDAP test server does not appear to support https:
       String url = server.getURL("http:") + "/" + prefix + "/" + file + INPUTEXT + INPUTQUERY;
       if (query != null)
-        url += ("?" + "dap4.ce=" + query);
+        url += ("?" + DapConstants.CONSTRAINTTAG + "=" + query);
       url += INPUTFRAG;
       String baseline = resourceroot + BASELINEDIR + "/" + file + BASELINEEXT;
       TestCase tc = new TestCase(file, url, baseline, query);

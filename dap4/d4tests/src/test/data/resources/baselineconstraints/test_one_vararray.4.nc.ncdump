@@ -1,13 +1,14 @@
 netcdf test_one_vararray.4 {
+  dimensions:
+    d2 = 2;
   variables:
-    int t(1);
+    int t(d2);
 
   // global attributes:
-  string :_dap4.ce = "/t[1]";
   :_DAP4_Little_Endian = 1B;
   string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
 
   data:
     t = 
-      {37}
+      {17, 37}
 }

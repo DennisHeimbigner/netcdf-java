@@ -64,7 +64,6 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   static public Dap4Server server;
 
   static {
-    // This test uses remotetest
     server = new Dap4Server("remotetest", SERVER, SERVERPORT, SERVERPATH);
     Dap4Server.register(true, server);
     resourceroot = getResourceRoot();
@@ -136,6 +135,8 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   public void test() throws Exception {
     int i, c;
     StringBuilder sb = new StringBuilder();
+
+    System.err.println(">>> Test: " + tc.url);
 
     NetcdfDataset ncfile;
     try {

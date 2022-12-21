@@ -107,12 +107,13 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF {
       String file = tuple[0];
       String index = tuple[1];
       String query = tuple[2]; // excluding leading '?'
-      String url = server.getURL() + "/" + file + INPUTEXT + INPUTQUERY + "dap4.ce=" + query + INPUTFRAG;
+      String url =
+          server.getURL() + "/" + file + INPUTEXT + INPUTQUERY + DapConstants.CONSTRAINTTAG + query + INPUTFRAG;
       String baseline = resourceroot + BASELINEDIR + "/" + file + "." + index + BASELINEEXT;
       TestCase tc = new TestCase(file + "." + index, url, baseline, query);
       testcases.add(tc);
     }
-    // singleTest(1,testcases); // choose single test for debugging
+    // singleTest(0,testcases); // choose single test for debugging
     return testcases;
   }
 

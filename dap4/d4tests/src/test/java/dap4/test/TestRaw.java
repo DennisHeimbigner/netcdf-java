@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static dap4.core.util.DapConstants.CHECKSUMATTRNAME;
+
 /**
  * This Test uses the JUNIT Version 4 parameterized test mechanism.
  * The set of arguments for each test is encapsulated in a class
@@ -51,9 +53,9 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
 
   // Attribute suppression
   static String RE_ENDIAN = "\n[ \t]*<Attribute[ \t]+name=[\"]_DAP4_Little_Endian[\"].*?</Attribute>[ \t]*";
-  static String RE_CHECKSUM = ":_DAP4_Checksum_CRC32";
-  static String RE_DAP4_ENDIAN = ":_DAP4_Little_Endian";
-  static String RE_DAP4_CE = ":_dap4.ce";
+  static String RE_CHECKSUM = ":" + DapConstants.CHECKSUMATTRNAME;
+  static String RE_DAP4_ENDIAN = ":" + DapConstants.LITTLEENDIANATTRNAME;
+  static String RE_DAP4_CE = ":" + DapConstants.CEATTRNAME;
 
   //////////////////////////////////////////////////
   // Static Fields

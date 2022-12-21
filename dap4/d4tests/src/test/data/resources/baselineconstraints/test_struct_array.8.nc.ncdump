@@ -1,4 +1,7 @@
 netcdf test_struct_array.8 {
+  dimensions:
+    dx = 4;
+    dy = 3;
   variables:
 
     Structure {
@@ -6,11 +9,10 @@ netcdf test_struct_array.8 {
         string x:_CoordinateAxisType = "GeoX";
       int y;
         string y:_CoordinateAxisType = "GeoY";
-    } s(2, 2);
+    } s(dx, dy);
 
 
   // global attributes:
-  string :_dap4.ce = "/s[0:2:3][0:1]";
   :_DAP4_Little_Endian = 1B;
   string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
 
@@ -25,11 +27,43 @@ netcdf test_struct_array.8 {
         y = 37
       } s(1)
       {
+        x = -32767
+        y = 32767
+      } s(2)
+      {
+        x = -1
+        y = 3
+      } s(3)
+      {
+        x = -2
+        y = 2
+      } s(4)
+      {
+        x = -3
+        y = 1
+      } s(5)
+      {
         x = -4
         y = 12
-      } s(2)
+      } s(6)
       {
         x = -8
         y = 8
-      } s(3)
+      } s(7)
+      {
+        x = -12
+        y = 4
+      } s(8)
+      {
+        x = -5
+        y = 15
+      } s(9)
+      {
+        x = -10
+        y = 10
+      } s(10)
+      {
+        x = -15
+        y = 5
+      } s(11)
 }

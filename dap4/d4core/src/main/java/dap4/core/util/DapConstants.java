@@ -26,7 +26,7 @@ public abstract class DapConstants {
 
   // Default http protocol
   // Default http protocol
-  public static final String HTTPSCHEME = "https:";
+  public static final String HTTPSCHEME = "http:";
 
   // XML Tags for DAP4
   public static final String X_DAP_SERVER = "TDS-5";
