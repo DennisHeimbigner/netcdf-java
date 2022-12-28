@@ -5,13 +5,15 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.dap4lib.D4DSP;
-import dap4.dap4lib.DSPRegistry;
+import dap4.core.dmr.DapAttribute;
+import dap4.core.dmr.DapType;
+import dap4.core.dmr.DapVariable;
+import dap4.core.util.ChecksumMode;
+import dap4.core.util.DapException;
+import dap4.dap4lib.*;
 import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.util.DapContext;
 import dap4.core.util.XURI;
-import dap4.dap4lib.HttpDSP;
-import dap4.dap4lib.RawDSP;
 import ucar.ma2.*;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
@@ -21,8 +23,10 @@ import ucar.nc2.iosp.IospHelper;
 import ucar.nc2.util.CancelTask;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.*;
+import java.util.zip.Checksum;
 
 public class DapNetcdfFile extends NetcdfFile {
   static final boolean DEBUG = false;
@@ -95,7 +99,7 @@ public class DapNetcdfFile extends NetcdfFile {
    */
   protected Map<Variable, Array> arraymap = new HashMap<>();
 
-  //////////////////////////////////////////////////
+  /////////////////////////////////////////////////
   // Constructor(s)
 
   /**
@@ -132,10 +136,10 @@ public class DapNetcdfFile extends NetcdfFile {
     this.dsp.setContext(cxt);
     this.dsp.setNetcdfFile(this); // cross-link
     this.dsp.open(this.dsplocation); // side effect: compile DMR
-
     // set the pseudo-location, otherwise we get a name that is full path.
     setLocation(this.dsp.getDMR().getDataset().getShortName());
     finish();
+    this.dsp.verifyChecksums();
   }
 
   /**

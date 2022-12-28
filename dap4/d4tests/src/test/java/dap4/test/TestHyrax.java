@@ -52,15 +52,18 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
 
   // Define the input set location(s)
   static protected final String INPUTEXT = "";
-  static protected final String INPUTQUERY = "";
-  static protected final String INPUTFRAG = "#dap4";
+  static protected final String INPUTQUERY = "?dap4.checksum=true";
+  static protected final String INPUTFRAG = "#dap4&hyrax";
 
   static protected final String BASELINEDIR = "/baselinehyrax";
   static protected final String BASELINEEXT = ".ncdump";
 
-  // Following files cannot be tested
-  static final String[][] hyrax_manifest = new String[][] {
-      {"AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", "AIRS/AIRH3STM.003/2002.12.01", "/TotalCounts_A"},};
+  static final String[][] hyrax_manifest = new String[][] {{"nc4_nc_classic_no_comp.nc", "nc4_test_files", null},
+      {"nc4_nc_classic_comp.nc", "nc4_test_files", null}, {"nc4_unsigned_types.nc", "nc4_test_files", null},
+      {"nc4_unsigned_types_comp.nc", "nc4_test_files", null}, {"nc4_strings.nc", "nc4_test_files", null},
+      {"nc4_strings_comp.nc", "nc4_test_files", null}, {"ref_tst_compounds.nc", "nc4_test_files", null},
+      {"amsre_20060131v5.dat", "RSS/amsre/bmaps_v05/y2006/m01", "/time_a[0:2][0:5]"},
+      {"AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", "AIRS/AIRH3STM.003/2002.12.01", "/TotalCounts_A"}};
 
   static final String[] HYRAX_EXCLUSIONS = {};
 
@@ -114,18 +117,17 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       String prefix = tuple[1];
       String query = tuple[2]; // excluding leading '?'
       // Unfortunately, The OPeNDAP test server does not appear to support https:
-      String url = server.getURL("http:") + "/" + prefix + "/" + file + INPUTEXT + INPUTQUERY;
+      String url = server.getURL("http:") + "/" + prefix + "/" + file + INPUTEXT + INPUTQUERY + INPUTFRAG;
       if (query != null)
-        url += ("?" + DapConstants.CONSTRAINTTAG + "=" + query);
+        url += ("&" + DapConstants.CONSTRAINTTAG + "=" + query);
       url += INPUTFRAG;
       String baseline = resourceroot + BASELINEDIR + "/" + file + BASELINEEXT;
       TestCase tc = new TestCase(file, url, baseline, query);
       testcases.add(tc);
     }
-    // singleTest(1,testcases); // choose single test for debugging
+    singleTest(0, testcases); // choose single test for debugging
     return testcases;
   }
-
   //////////////////////////////////////////////////
   // Test Fields
 
@@ -145,6 +147,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
+    //props.prop_baseline = true;
     super.setup();
   }
 
@@ -163,7 +166,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
     assert ncfile != null;
 
     String datasetname = tc.name;
-    String testresult = dumpmetadata(ncfile, datasetname);
+    String testresult = dumpdata(ncfile, datasetname);
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;

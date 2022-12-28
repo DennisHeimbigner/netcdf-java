@@ -110,8 +110,8 @@ public class DataToCDM {
         break;
     }
     if (d4var.isTopLevel() && this.dsp.getChecksumMode() == ChecksumMode.TRUE) {
-      // transfer the checksum attribute
-      int csum = d4var.getChecksum();
+      // verify && transfer the checksum attribute
+      Long csum = this.dsp.getChecksumMap(D4DSP.ChecksumSource.LOCAL).get(d4var);
       String scsum = String.format("0x%08x", csum);
       Variable cdmvar = (Variable) nodemap.get(d4var);
       Attribute acsum = new Attribute(DapConstants.CHECKSUMATTRNAME, scsum);

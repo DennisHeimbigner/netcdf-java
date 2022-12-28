@@ -114,11 +114,17 @@ public class IndentWriter extends PrintWriter {
   // Margin cognizant print functions
 
   public void eol() {
-    super.println("");
+    super.print("\r\n");
+  }
+
+  @Override
+  public void println() {
+    eol();
   }
 
   public void marginPrintln(String text) {
-    marginPrint(text + "\n");
+    marginPrint(text);
+    println();
   }
 
   public void marginPrintln() {

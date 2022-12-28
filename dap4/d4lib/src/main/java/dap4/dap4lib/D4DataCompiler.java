@@ -13,6 +13,8 @@ import dap4.dap4lib.LibTypeFcns;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.zip.Checksum;
+
 import static dap4.dap4lib.D4Cursor.Scheme;
 
 public class D4DataCompiler {
@@ -76,6 +78,10 @@ public class D4DataCompiler {
       D4Cursor data = compileVar(vv, null);
       this.dsp.addVariableData(vv, data);
     }
+    // compute the localchecksums from databuffer src,
+    if (this.checksummode == ChecksumMode.TRUE) {
+      computeLocalChecksums();
+    }
   }
 
   protected D4Cursor compileVar(DapVariable dapvar, D4Cursor container) throws DapException {
@@ -90,10 +96,9 @@ public class D4DataCompiler {
       array = compileSequenceArray(dapvar, container);
     }
     if (dapvar.isTopLevel() && this.checksummode == ChecksumMode.TRUE) {
-      // extract the checksum from databuffer src,
-      // attach to the array, and make into an attribute
-      int checksum = extractChecksum(data);
-      dapvar.setChecksum(checksum);
+      // extract the remotechecksum from databuffer src,
+      long checksum = extractChecksum(data);
+      this.dsp.setChecksum(D4DSP.ChecksumSource.REMOTE,dapvar,checksum);
     }
     return array;
   }
@@ -111,16 +116,18 @@ public class D4DataCompiler {
     cursor.setOffset(this.data.position());
     long total = 0;
     long dimproduct = var.getCount();
+    long[] positions = new long[(int) dimproduct];
     if (!daptype.isEnumType() && !daptype.isFixedSize()) {
       // this is a string, url, or opaque
-      long[] positions = new long[(int) dimproduct];
       int savepos = this.data.position();
       // Walk the bytestring and return the instance count (in databuffer)
       total = walkByteStrings(positions, data);
       this.data.position(savepos);// leave position unchanged
-      cursor.setByteStringOffsets(total, positions);
+      cursor.setByteStringOffsets(dimproduct, total, positions);
     } else {
       total = dimproduct * daptype.getSize();
+      positions[0] = this.data.position();
+      cursor.setByteStringOffsets(dimproduct, total, positions);
     }
     skip(data, (int) total);
     return cursor;
@@ -228,11 +235,11 @@ public class D4DataCompiler {
   //////////////////////////////////////////////////
   // Utilities
 
-  protected int extractChecksum(ByteBuffer data) throws DapException {
+  protected long extractChecksum(ByteBuffer data) throws DapException {
     assert this.checksummode == ChecksumMode.TRUE;
     if (data.remaining() < DapConstants.CHECKSUMSIZE)
       throw new DapException("Short serialization: missing checksum");
-    return data.getInt();
+    return (long)data.getInt();
   }
 
   protected static void skip(ByteBuffer data, int count) {
@@ -271,5 +278,27 @@ public class D4DataCompiler {
     databuffer.position(savepos);// leave position unchanged
     return total;
   }
+
+  public void computeLocalChecksums() throws DapException {
+    Checksum crc32alg = new java.util.zip.CRC32();
+    byte[] bytedata = data.array(); // Will need to change when we switch to RAF
+    for(DapVariable dvar : this.dataset.getTopVariables()) {
+      crc32alg.reset();
+      // Get the extent of this variable vis-a-vis the data buffer
+      D4Cursor cursor = this.dsp.getVariableData(dvar);
+      long offset = cursor.getOffset();
+      long extent = cursor.getExtent();
+      assert (extent <= data.limit());
+      int savepos = data.position();
+      data.position(0);
+      // Slice out the part on which to compute the CRC32 and compute CRC32
+      crc32alg.update(bytedata, (int) offset, (int) extent);
+      long crc32 = crc32alg.getValue(); // get the digest value
+      crc32 = (crc32 & 0x00000000FFFFFFFFL); /* crc is 32 bits */
+      data.position(savepos);
+      this.dsp.setChecksum(D4DSP.ChecksumSource.LOCAL, dvar, crc32);
+    }
+  }
+
 
 }

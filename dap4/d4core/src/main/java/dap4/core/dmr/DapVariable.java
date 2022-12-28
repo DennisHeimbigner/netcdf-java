@@ -22,7 +22,7 @@ public class DapVariable extends DapNode implements DapDecl {
   protected DapType basetype = null;
   protected List<DapDimension> dimensions = new ArrayList<DapDimension>();
   protected List<DapMap> maps = new ArrayList<DapMap>(); // maps are ordered
-  protected int checksum = 0;
+  protected DapAttribute attributechecksum = null;
   protected int fieldindex = -1;
 
   //////////////////////////////////////////////////
@@ -86,12 +86,12 @@ public class DapVariable extends DapNode implements DapDecl {
     maps.add(map);
   }
 
-  public int getChecksum() {
-    return this.checksum;
+  public DapAttribute getChecksumAttribute() {
+    return this.attributechecksum;
   }
 
-  public void setChecksum(int csum) {
-    this.checksum = csum;
+  public void setAttributeChecksum(DapAttribute csum) {
+    this.attributechecksum = csum;
   }
 
   public int getFieldIndex() {

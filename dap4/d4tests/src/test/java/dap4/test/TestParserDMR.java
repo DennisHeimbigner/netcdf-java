@@ -166,7 +166,11 @@ public class TestParserDMR extends DapTestCommon implements Dap4ManifestIF {
     dapprinter.print();
     pw.close();
     sw.close();
-    String testresult = sw.toString();
+
+    sb = new StringBuilder(sw.toString());
+    // Remove irrelevant dependencies
+    regexpFilters(sb, new String[] {RE_ENDIAN}, false);
+    String testresult = sb.toString();
 
     // Use the original DMR as the baseline
     String baselinecontent = document;

@@ -10,8 +10,7 @@ import dap4.core.util.*;
 import java.util.*;
 
 /**
- * This class defines a non-Gridd Grid:
- * i.e. one with an atomic type.
+ * This is the root object of a DMR tree.
  */
 
 public class DapDataset extends DapGroup {
@@ -48,6 +47,8 @@ public class DapDataset extends DapGroup {
   protected List<DapDimension> alldimensions = null;
 
   protected boolean finished = false;
+
+  protected Map<DapVariable, Long> checksummap = null;
 
   //////////////////////////////////////////////////
   // Constructors
@@ -131,9 +132,8 @@ public class DapDataset extends DapGroup {
     return this.ce;
   }
 
-  public DapDataset setConstraint(CEConstraint ce) {
+  public void setConstraint(CEConstraint ce) {
     this.ce = ce;
-    return this;
   }
 
   public String getDapVersion() {

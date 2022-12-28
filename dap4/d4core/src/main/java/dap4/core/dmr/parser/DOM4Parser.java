@@ -70,6 +70,7 @@ public class DOM4Parser implements Dap4Parser {
     sortmap.put("sequence", DapSort.SEQUENCE);
     sortmap.put("structure", DapSort.STRUCTURE);
     sortmap.put("char", DapSort.VARIABLE);
+    sortmap.put("byte", DapSort.VARIABLE);
     sortmap.put("int8", DapSort.VARIABLE);
     sortmap.put("uint8", DapSort.VARIABLE);
     sortmap.put("int16", DapSort.VARIABLE);
@@ -88,6 +89,7 @@ public class DOM4Parser implements Dap4Parser {
     typemap = new HashMap<String, TypeSort>();
     // se lower cas enames
     typemap.put("char", TypeSort.Char);
+    typemap.put("byte", TypeSort.UInt8); // alias
     typemap.put("int8", TypeSort.Int8);
     typemap.put("uint8", TypeSort.UInt8);
     typemap.put("int16", TypeSort.Int16);

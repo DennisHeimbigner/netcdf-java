@@ -84,7 +84,7 @@ public class ChunkedInput {
     if (mode == RequestMode.DMR) {
       // read whole input file
       byte[] dmr = DapUtil.readbinaryfile(stream);
-      this.order = ByteOrder.nativeOrder(); // does not matter except for lead count
+      this.order = ByteOrder.BIG_ENDIAN; // does not matter except for lead count
       this.dmr = new String(dmr, DapUtil.UTF8);
     } else {
       ByteArrayOutputStream alldata = new ByteArrayOutputStream();

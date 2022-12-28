@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.ByteOrder;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,11 @@ public class DMRPrinter {
   protected DapDataset dmr = null;
   protected CEConstraint ce = null;
   protected ResponseFormat format = null;
+  protected DapContext cxt = null;
+  // Following extracted from context
+  protected ByteOrder order = null;
+  protected Map<DapVariable,Long> localchecksummap = null;
+  protected Map<DapVariable,Long> remotechecksummap = null;
 
   protected EnumSet<Controls> controls = EnumSet.noneOf(Controls.class);
 
@@ -102,12 +108,20 @@ public class DMRPrinter {
   }
 
   public DMRPrinter(DapDataset dmr, CEConstraint ce, PrintWriter writer, ResponseFormat format) {
+    this(dmr, ce, writer, format, null);
+  }
+
+  public DMRPrinter(DapDataset dmr, CEConstraint ce, PrintWriter writer, ResponseFormat format, DapContext cxt) {
     this();
     this.dmr = dmr;
-    this.ce = ce;
+    this.ce = (ce == null ? CEConstraint.getUniversal(dmr) : ce);
     this.writer = writer;
     this.printer = new IndentWriter(writer);
     this.format = (format == null ? ResponseFormat.XML : format);
+    this.cxt = (cxt == null ? new DapContext() : cxt);
+    this.order = (ByteOrder) this.cxt.get(DapConstants.DAP4ENDIANTAG);
+    this.localchecksummap = (Map<DapVariable,Long>)this.cxt.get("localchecksummap");
+    this.remotechecksummap = (Map<DapVariable,Long>)this.cxt.get("remotechecksummap");
   }
 
   //////////////////////////////////////////////////
@@ -137,14 +151,9 @@ public class DMRPrinter {
    */
 
   public void print() throws IOException {
-    if (this.ce == null)
-      this.ce = CEConstraint.getUniversal(dmr);
-    assert (this.ce != null);
     this.printer.setIndent(0);
-    if (this.format == ResponseFormat.XML) {
-      // Print XML Document Header
-      this.printer.marginPrintln(XMLDOCUMENTHEADER);
-    }
+    // Print XML Document Header
+    this.printer.marginPrintln(XMLDOCUMENTHEADER);
     if (printNode(dmr)) // start printing at the root
       printer.eol();
   }
@@ -226,13 +235,14 @@ public class DMRPrinter {
               printer.eol();
           }
         printMetadata(node);
-        if (group.getGroups().size() > 0)
+        if (group.getGroups().size() > 0) {
           for (DapNode subnode : group.getGroups()) {
             if (!this.ce.references(subnode))
               continue;
             if (printNode(subnode))
               printer.eol();
           }
+        }
         printer.outdent();
         printer.marginPrint("</" + dmrname + ">");
         break;
@@ -280,7 +290,7 @@ public class DMRPrinter {
         printer.marginPrint("<" + type.getTypeSort().name());
         printXMLAttributes(node, ce, NILFLAGS);
         if (type.isAtomic()) {
-          if ((hasMetadata(node) || hasDimensions(var) || hasMaps(var))) {
+          if ((hasMetadata(node) || hasDimensions(var) || hasMaps(var) || hasRequestData(var))) {
             printer.println(">");
             printer.indent();
             if (hasDimensions(var))
@@ -289,6 +299,8 @@ public class DMRPrinter {
               printMetadata(var);
             if (hasMaps(var))
               printMaps(var);
+            if (hasRequestData(var))
+              printRequestData(var);
             printer.outdent();
             printer.marginPrint("</" + type.getTypeSort().name() + ">");
           } else
@@ -306,6 +318,8 @@ public class DMRPrinter {
           printDimrefs(var);
           printMetadata(var);
           printMaps(var);
+          if (hasRequestData(var))
+            printRequestData(var);
           printer.outdent();
           printer.marginPrint("</" + type.getTypeSort().name() + ">");
         } else
@@ -430,11 +444,10 @@ public class DMRPrinter {
   }
 
   protected void printMetadata(DapNode node) throws IOException {
-
+    boolean isdataset = node.getSort() == DapSort.DATASET;
     Map<String, DapAttribute> attributes = node.getAttributes();
-    if (attributes.size() == 0) {
+    if (!isdataset && attributes.size() == 0)
       return;
-    }
     for (Map.Entry<String, DapAttribute> entry : attributes.entrySet()) {
       DapAttribute attr = entry.getValue();
       assert (attr != null);
@@ -450,6 +463,8 @@ public class DMRPrinter {
           break;
       }
     }
+    if (isdataset)
+      printRequestMetaData(node);
   }
 
   protected void printContainerAttribute(DapAttribute attr) {}
@@ -589,6 +604,55 @@ public class DMRPrinter {
     }
   }
 
+  /**
+   * Add Global Request-specific metadata
+   * This is nasty hack to avoid modifying the DMR.
+   * Which in turn means we can cache the DMR and CDM->DAP
+   * translations.
+   */
+  void printRequestMetaData(DapNode dataset) throws DapException {
+    try {
+      // Add dap4.ce attribute
+      if (!this.ce.isUniversal()) {
+        String sce = this.ce.toConstraintString();
+        DapAttribute a = new DapAttribute(DapConstants.CEATTRNAME, DapType.STRING);
+        a.setValues(new String[] {sce});
+        printAttribute(a);
+      }
+      // Add <Attribute name="_DAP4_Little_Endian" type="UInt8"/>
+      DapAttribute a = new DapAttribute(DapConstants.LITTLEENDIANATTRNAME, DapType.UINT8);
+      String[] value = new String[1];
+      value[0] = (this.order == ByteOrder.LITTLE_ENDIAN ? "1" : "0");
+      a.setValues(value);
+      printAttribute(a);
+    } catch (IOException ioe) {
+      throw new DapException(ioe);
+    }
+  }
+
+  /**
+   * Print request-specific per-variable data
+   * Like printRequestMetaData, this is nasty hack
+   * to avoid modifying the DMR.
+   * 
+   * @param var
+   */
+  protected void printRequestData(DapVariable var) throws DapException {
+    try {// Add per-variable checksum
+      Long csum = localchecksummap.get(var);
+      if(csum == null)
+        return;
+      DapAttribute a = var.getChecksumAttribute();
+      if(a == null) {
+        a = new DapAttribute(DapConstants.CHECKSUMATTRNAME, DapType.INT32);
+        a.setValues(new String[]{csum.toString()});
+      }
+      printAttribute(a);
+    } catch (IOException ioe) {
+      throw new DapException(ioe);
+    }
+  }
+
   //////////////////////////////////////////////////
   // Misc. Static Utilities
 
@@ -645,12 +709,16 @@ public class DMRPrinter {
     return node.getAttributes().size() > 0;
   }
 
-  protected static boolean hasMaps(DapVariable var) {
+  protected boolean hasMaps(DapVariable var) {
     return var.getMaps().size() > 0;
   }
 
-  protected static boolean hasDimensions(DapVariable var) {
+  protected boolean hasDimensions(DapVariable var) {
     return var.getDimensions().size() > 0;
+  }
+
+  protected boolean hasRequestData(DapVariable var) {
+    return localchecksummap != null && localchecksummap.containsKey(var);
   }
 
 } // class DapPrint

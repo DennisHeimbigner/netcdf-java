@@ -42,8 +42,8 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   // Define the input set location(s)
   static protected final String INPUTDIR = "/rawtestfiles";
   static protected final String INPUTEXT = ".nc.dap";
-  static protected final String INPUTFRAG = "#" + DapConstants.CHECKSUMTAG + "=false";
-
+  static protected final String INPUTQUERY = "?" + DapConstants.CHECKSUMTAG + "=false";
+  static protected final String INPUTFRAG = "";
   static protected final String BASELINEDIR = "/baselineraw";
   static protected final String BASELINEEXT = ".nc.ncdump";
 
@@ -209,6 +209,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
     url.append("/");
     url.append(name);
     url.append(INPUTEXT);
+    url.append(INPUTQUERY);
     url.append(INPUTFRAG);
     return url.toString();
   }

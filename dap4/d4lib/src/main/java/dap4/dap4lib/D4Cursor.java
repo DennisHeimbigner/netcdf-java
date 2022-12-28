@@ -39,6 +39,10 @@ public class D4Cursor implements DataCursor {
 
   protected long offset = NULLOFFSET;
 
+  protected long dimproduct = 0;
+
+  protected long extent = 0;
+
   protected long[] bytestrings = null;
 
   // For debugging purposes, we keep these separate,
@@ -224,6 +228,12 @@ public class D4Cursor implements DataCursor {
     return is;
   }
 
+  public long getExtent() {return this.extent;}
+
+  public long getDimProduct() {return this.dimproduct;}
+
+  public long getOffset() {return this.offset;}
+
   //////////////////////////////////////////////////
   // D4Cursor Extensions
 
@@ -240,7 +250,9 @@ public class D4Cursor implements DataCursor {
     return this;
   }
 
-  public D4Cursor setByteStringOffsets(long total, long[] positions) {
+  public D4Cursor setByteStringOffsets(long dimproduct, long total, long[] positions) {
+    this.dimproduct = dimproduct;
+    this.extent = total;
     this.bytestrings = positions;
     return this;
   }

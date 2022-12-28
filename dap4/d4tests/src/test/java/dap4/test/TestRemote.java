@@ -45,7 +45,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
 
   // Define the input set location(s)
   static protected final String INPUTEXT = ".nc"; // note that the .dap is deliberately left off
-  static protected final String INPUTQUERY = "?" + DapConstants.CHECKSUMTAG + "=false";
+  static protected final String INPUTQUERY = "?" + DapConstants.CHECKSUMTAG + "=true";
   static protected final String INPUTFRAG = "#dap4";
 
   static protected final String BASELINEDIR = "/baselineremote";
@@ -104,7 +104,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    // singleTest(0, testcases); // choose single test for debugging
+    singleTest(0, testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -127,7 +127,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    props.prop_visual = true;
+    // props.prop_visual = true;
     super.setup();
   }
 
@@ -193,16 +193,6 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
 
   //////////////////////////////////////////////////
   // Support Methods
-
-  String buildURL(String prefix, String file) {
-    StringBuilder url = new StringBuilder();
-    url.append("file://");
-    url.append(prefix);
-    url.append("/");
-    url.append(file);
-    url.append("#dap4.checksum=false");
-    return url.toString();
-  }
 
   String dumpdata(NetcdfDataset ncfile, String datasetname) throws Exception {
     StringBuilder args = new StringBuilder("-strict -vall");
