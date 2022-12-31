@@ -113,7 +113,7 @@ Example implementation:
 {% endcapture %}
 {{ rmd | markdownify }}
 
-You may find it easier to do the same thing using an [NcML](index.html) file, for example:
+You may find it easier to do the same thing using an [NcML](extent.html) file, for example:
 
 {% capture rmd %}
 {% includecodeblock netcdf-java&docs/src/test/java/examples/coordsystems/coordSystemBuilderTutorial.java&augmentDataset2 %}

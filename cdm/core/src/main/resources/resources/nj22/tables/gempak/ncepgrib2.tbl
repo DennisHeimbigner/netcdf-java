@@ -7,10 +7,10 @@
 129 MSLP (MAPS reduction)             Pa                   MMSL            -2  -9999.00        0         0
 130 MSLP (ETA reduction)              Pa                   EMSL            -2  -9999.00        0         0
 !
-131 Surface lifted index              K                    LIFT             0  -9999.00        0         0
-132 Best (4 layer) lifted index       K                    LFT4             0  -9999.00        0         0
-133 K index                           K                    KINX             0  -9999.00        0         0
-134 Sweat index                       K                    SWET             0  -9999.00        0         0
+131 Surface lifted extent              K                    LIFT             0  -9999.00        0         0
+132 Best (4 layer) lifted extent       K                    LFT4             0  -9999.00        0         0
+133 K extent                           K                    KINX             0  -9999.00        0         0
+134 Sweat extent                       K                    SWET             0  -9999.00        0         0
 135 Horizontal moisture divergence    kg kg**-1 s**-1      MCNV             0  -9999.00        0         0
 136 Vertical speed shear              s**-1                VWSH             0  -9999.00        0         0
 137 3-hr pressure tendency (stdatm)   Pa s**-1             PTND3           -2  -9999.00        0         0
@@ -89,7 +89,7 @@
 203 Volcanic Ash / VAFTAD             -                    VASH             0  -9999.00        0         0
 204 Downward short wave rad flux      W m**-2              SWRD             0  -9999.00        0         0
 205 Downward long wave rad flux       W m**-2              LWRD             0  -9999.00        0         0
-206 Ultraviolet index (UVI)           J/m**2               UVI              0  -9999.00        0         0
+206 Ultraviolet extent (UVI)           J/m**2               UVI              0  -9999.00        0         0
 207 Moisture availability             %                    MSAV             0  -9999.00        0         0
 208 Exchange coefficient              kg m**-3 m s**-1     SEXC             0  -9999.00        0         0
 209 No of mixed layers next to sfc    -                    NMXL             0  -9999.00        0         0
@@ -102,7 +102,7 @@
 215 Temp tendency by all physics      K s**-1              DTAP             0  -9999.00        0         0
 216 Temp tendency by all radiation    K s**-1              DTAR             0  -9999.00        0         0
 217 Temp tendency by non-rad physics  K s**-1              DTNRP            0  -9999.00        0         0
-218 Precip index (0.0-1.0)            -                    PINDX            0  -9999.00        0         0
+218 Precip extent (0.0-1.0)            -                    PINDX            0  -9999.00        0         0
 219 Std dev of IR T over 1x1 area     K                    IRTSD            0  -9999.00        0         0
 220 Natural log of surface press      ln(kPa)              LNPSFC           0  -9999.00        0         0
 !

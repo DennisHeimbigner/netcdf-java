@@ -273,8 +273,8 @@
 0	13	31	0	0	7	kg/m**2	Evapotranspiration
 0	13	32	1	0	8	kg/m**2	Evaporation/evapotranspiration
 0	13	41	0	0	4	Code_Table	Pasquill-Gifford stability category
-0	13	42	0	-20	6	deg_K	Parcel lifted index (to 500 hPa)
-0	13	43	0	-20	6	deg_K	Best lifted index (to 500 hPa)
+0	13	42	0	-20	6	deg_K	Parcel lifted extent (to 500 hPa)
+0	13	43	0	-20	6	deg_K	Best lifted extent (to 500 hPa)
 0	13	51	0	0	4	Code_Table	Frequency group, precipition
 0	13	52	1	-1	14	kg/m**2	Highest daily amount of precipition
 

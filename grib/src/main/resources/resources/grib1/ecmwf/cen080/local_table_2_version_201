@@ -421,19 +421,19 @@ convective layers (00...77)  (BKE)
 ......................
 071
 None
-KO-index
+KO-extent
 (1)
 (1)
 ......................
 072
 BAS_CON
-convection base index
+convection base extent
 (1)
 (1)
 ......................
 073
 TOP_CON
-convection top index
+convection top extent
 (1)
 (1)
 ......................
@@ -493,7 +493,7 @@ m
 ......................
 083
 None
-dry convection top index
+dry convection top extent
 (1)
 (1)
 ......................

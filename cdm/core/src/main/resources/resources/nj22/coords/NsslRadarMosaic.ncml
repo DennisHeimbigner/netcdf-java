@@ -16,7 +16,7 @@
   </variable>
 
   <variable name="shi" >
-    <attribute name="long_name" value="severe hail index" />
+    <attribute name="long_name" value="severe hail extent" />
   </variable>
 
   <variable name="posh">

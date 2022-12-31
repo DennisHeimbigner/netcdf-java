@@ -36,7 +36,7 @@ Point release notes:
 * `5.5.0` was released but not announced.
   It should not be used.
   
-5.5.x is the first release that includes read support for [Zarr](https://zarr.readthedocs.io/en/stable/index.html){:target="_blank"}. 
+5.5.x is the first release that includes read support for [Zarr](https://zarr.readthedocs.io/en/stable/extent.html){:target="_blank"}. 
 There is also a new package for filters, `ucar.ma2.filters`, which allows user-provided compressors and filters to be supplied through a [Service Provider Interface](https://www.baeldung.com/java-spi){:target="_blank"}.
 Read about Zarr support and the `filter` package [here](reading_zarr.html)
 
@@ -156,7 +156,7 @@ Point release notes:
 * In both cases the returned array's `DataType` will be the primitive type.
 * Previously the exact Array class and DataType returned from a read on a vlen was not well-defined.
 * Use `Array.isVlen()` to discover if an Array represents vlen data.
-* `ArrayObject.factory(Class classType, Index index)` is now `ArrayObject.factory(DataType dtype, Class classType, boolean isVlen, Index index)`
+* `ArrayObject.factory(Class classType, Index extent)` is now `ArrayObject.factory(DataType dtype, Class classType, boolean isVlen, Index extent)`
 * Use `Array.makeVlenArray(int[] shape, Array[] data)` to construct _vlen_ data.
 
 ### AutoCloseable

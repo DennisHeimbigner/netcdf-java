@@ -427,7 +427,7 @@
 0; 7; 32; 2; 0; 16; m; Height of sensor above local ground (or deck of marine platform)
 0; 7; 33; 1; 0; 12; m; Height of sensor above water surface
 0; 7; 35; 0; 0; 12; Numeric; Maximum size of Z-dimension
-0; 7; 36; 0; 0; 12; Numeric; Level index of Z
+0; 7; 36; 0; 0; 12; Numeric; Level extent of Z
 0; 7; 40; 1; 62000000; 22; m; Impact parameter
 0; 7; 61; 2; 0; 14; m; Depth below land surface
 0; 7; 62; 1; 0; 17; m; Depth below sea/water surface
@@ -608,7 +608,7 @@
 0; 11; 34; 1; -1024; 11; m s-1; Vertical gust velocity
 0; 11; 35; 2; -8192; 14; m s-2; Vertical gust acceleration
 0; 11; 36; 1; 0; 10; m s-1; Maximum derived equivalent vertical gust speed
-0; 11; 37; 0; 0; 6; Code table; Turbulence index
+0; 11; 37; 0; 0; 6; Code table; Turbulence extent
 0; 11; 38; 0; 0; 5; Code table; Time of occurrence of peak eddy dissipation rate
 0; 11; 39; 0; 0; 6; Code table; Extended time of occurrence of peak eddy dissipation rate
 0; 11; 40; 1; 0; 12; m s-1; Maximum wind speed (mean wind)
@@ -674,11 +674,11 @@
 0; 11; 231; 1; -4096; 13; m s-1; u-component of storm motion
 0; 11; 232; 1; -4096; 13; m s-1; v-component of storm motion
 0; 11; 233; 1; -10000; 15; m2 s-2; Storm relative helicity
-0; 11; 235; 0; 0; 6; Code table; Turbulence index
-0; 11; 236; 0; 0; 6; Code table; Turbulence index for period from 1 minute prior to observation time to observation time
-0; 11; 237; 0; 0; 6; Code table; Turbulence index for period from 2 minutes prior to observation time to 1 minute prior to observation time
-0; 11; 238; 0; 0; 6; Code table; Turbulence index for period from 3 minutes prior to observation time to 2 minutes prior to observation time
-0; 11; 239; 0; 0; 6; Code table; Turbulence index for period from 4 minutes prior to observation time to 3 minutes prior to observation time
+0; 11; 235; 0; 0; 6; Code table; Turbulence extent
+0; 11; 236; 0; 0; 6; Code table; Turbulence extent for period from 1 minute prior to observation time to observation time
+0; 11; 237; 0; 0; 6; Code table; Turbulence extent for period from 2 minutes prior to observation time to 1 minute prior to observation time
+0; 11; 238; 0; 0; 6; Code table; Turbulence extent for period from 3 minutes prior to observation time to 2 minutes prior to observation time
+0; 11; 239; 0; 0; 6; Code table; Turbulence extent for period from 4 minutes prior to observation time to 3 minutes prior to observation time
 0; 11; 240; 0; 0; 5; Code table; PREPBUFR: u-, v-component wind (UOB/VOB) (quality) marker
 0; 11; 241; 0; 0; 5; Code table; PREPBUFR: u-, v-component wind (UOB/VOB) event program code
 0; 11; 242; 0; 0; 10; Code table; PREPBUFR: u-, v-component wind (UOB/VOB) event reason code
@@ -828,12 +828,12 @@
 0; 13; 39; 0; 0; 3; Code table; Terrain type (ice/snow)
 0; 13; 40; 0; 0; 4; Code table; Surface flag
 0; 13; 41; 0; 0; 4; Code table; Pasquell-Gifford stability category
-0; 13; 42; 0; -20; 6; K; Parcel lifted index (to 500 hPa)
-0; 13; 43; 0; -20; 6; K; Best lifted index (to 500 hPa)
-0; 13; 44; 0; -30; 8; K; K index
-0; 13; 45; 0; -30; 8; K; KO index
+0; 13; 42; 0; -20; 6; K; Parcel lifted extent (to 500 hPa)
+0; 13; 43; 0; -20; 6; K; Best lifted extent (to 500 hPa)
+0; 13; 44; 0; -30; 8; K; K extent
+0; 13; 45; 0; -30; 8; K; KO extent
 0; 13; 46; 0; -30; 8; K; Maximum buoyancy
-0; 13; 47; 0; -60; 6; K; Modified Showalter stability index
+0; 13; 47; 0; -60; 6; K; Modified Showalter stability extent
 0; 13; 51; 0; 0; 4; Code table; Frequency group, precipitation
 0; 13; 52; 1; -1; 14; kg m-2; Highest daily amount of precipitation
 0; 13; 55; 4; 0; 8; kg m-2 s-1; Intensity of precipitation
@@ -861,11 +861,11 @@
 0; 13; 192; 2; 0; 12; kg m-2; Cloud water
 0; 13; 193; 1; 0; 11; kg m-2; Total column precipitable water
 0; 13; 194; 0; 0; 3; Code table; Indicator for inclusion/omission of precipitation data
-0; 13; 195; 0; -40; 8; Numeric; Modified Showalter stability index
+0; 13; 195; 0; -40; 8; Numeric; Modified Showalter stability extent
 0; 13; 197; 3; 0; 8; m; Soil moisture
 0; 13; 198; 5; 0; 14; kg kg-1; Specific humidity at 2 m
 0; 13; 199; 1; -1; 14; kg m-2; Total precipitation past 5 minutes
-0; 13; 201; 2; -5000; 14; K; Lifted index
+0; 13; 201; 2; -5000; 14; K; Lifted extent
 0; 13; 202; 1; 0; 11; kg m-2; Precipitable water in layer bounded by 1.0 to 0.9 simga
 0; 13; 203; 1; 0; 11; kg m-2; Precipitable water in layer bounded by 0.9 to 0.7 simga
 0; 13; 204; 1; 0; 11; kg m-2; Precipitable water in layer bounded by 0.7 to 0.3 simga
@@ -896,7 +896,7 @@
 0; 13; 239; 5; 0; 16; kg kg-1; Cloud water mixing ratio
 0; 13; 240; 5; 0; 14; kg kg-1; Specific humidity at 10 m
 0; 13; 242; 0; 0; 16; mg kg-1; PREPBUFR: Global forecast (background) saturation specific humidity value
-0; 13; 243; 1; -50; 10; K; PREPBUFR: Lifted index
+0; 13; 243; 1; -50; 10; K; PREPBUFR: Lifted extent
 0; 13; 244; 5; 0; 16; kg kg-1; Ice mixing ratio
 0; 13; 245; 0; 0; 16; mg kg-1; PREPBUFR: Specific humidity observation
 0; 13; 246; 0; 0; 5; Code table; PREPBUFR: Specific humidity (quality) marker
@@ -945,7 +945,7 @@
 0; 14; 48; 0; 0; 31; W m-2 sr-1 cm-1; Scaled standard deviation of AVHRR radiance
 0; 14; 50; 1; 0; 10; %; Emissivity
 0; 14; 51; -3; 0; 14; J m-2; Direct solar radiation, integrated over last hour
-0; 14; 55; 0; -32768; 16; Numeric; Solar activity index
+0; 14; 55; 0; -32768; 16; Numeric; Solar activity extent
 0; 14; 61; 0; -512; 10; W m-2; Instantaneous long-wave radiation
 0; 14; 62; 0; -2048; 12; W m-2; Instantaneous short-wave radiation
 0; 14; 192; 4; -100000; 22; W m-2 sr-1 cm-1; Extended channel radiance
@@ -981,7 +981,7 @@
 0; 15; 27; 9; 0; 10; kg m-3; Concentration of pollutant
 0; 15; 28; 0; 0; 10; s-1; Photo dissociation rate
 0; 15; 29; 0; 0; 10; m-1; Extinction coefficient
-0; 15; 30; 2; -1000; 12; Numeric; Aerosol contamination index
+0; 15; 30; 2; -1000; 12; Numeric; Aerosol contamination extent
 0; 15; 31; 4; 10000; 15; m; Atmospheric path delay in satellite signal
 0; 15; 32; 4; 0; 10; m; Estimated error in atmospheric path delay
 0; 15; 33; 5; -10000; 15; m; Difference in path delays for limb views at extremes of scan
@@ -1074,7 +1074,7 @@
 0; 20; 44; 4; 0; 7; kg m-3; Average liquid water content
 0; 20; 45; 0; 0; 2; Code table; Supercooled large droplet (SLD) conditions
 0; 20; 48; 0; 0; 4; Code table; Evolution of feature
-0; 20; 50; 0; 0; 8; Code table; Cloud index
+0; 20; 50; 0; 0; 8; Code table; Cloud extent
 0; 20; 51; 0; 0; 7; %; Amount of low clouds
 0; 20; 52; 0; 0; 7; %; Amount of middle clouds
 0; 20; 53; 0; 0; 7; %; Amount of high clouds
@@ -1216,7 +1216,7 @@
 0; 21; 118; 2; -10000; 14; dB; Attenuation correction on sigma-0
 0; 21; 119; 0; 0; 6; Code table; Wind scatterometer geophysical model function
 0; 21; 120; 3; 0; 10; Numeric; Probability of rain
-0; 21; 121; 0; 0; 8; Numeric; SEAWINDS NOF rain index
+0; 21; 121; 0; 0; 8; Numeric; SEAWINDS NOF rain extent
 0; 21; 122; 2; -10000; 14; dB; Attenuation correction on sigma-0 (from tB)
 0; 21; 123; 2; -30000; 15; dB; SEAWINDS normalized radar cross-section
 0; 21; 128; 0; 0; 8; Numeric; Number of valid points per second used to derive previous parameters
@@ -1514,7 +1514,7 @@
 0; 25; 85; 0; 0; 7; Numeric; Fraction of clear pixels in HIRS FOV
 0; 25; 86; 0; 0; 2; Code table; Depth correction indicator
 0; 25; 90; 0; 0; 4; Code table; Orbit state flag
-0; 25; 91; 3; -18192; 13;  dB; Structure constant of the refraction index (Cn2)
+0; 25; 91; 3; -18192; 13;  dB; Structure constant of the refraction extent (Cn2)
 0; 25; 92; 2; 28000; 14; m s-1; Acoustic propagation velocity
 0; 25; 93; 0; 0; 8; Flag table; RASS computation correction
 0; 25; 95; 0; 0; 2; Flag table; Altimeter state flag
@@ -1655,7 +1655,7 @@
 0; 33; 53; 0; 0; 21; Flag table; Ku band ocean retracking quality
 0; 33; 60; 0; 0; 2; Code table; Individual IASI-system quality flag
 0; 33; 61; 0; 0; 7; %; Indicator for instrument noise performance (contributions from spectral and radiometric)
-0; 33; 62; 0; 0; 7; %; Indicator for geometric quality index
+0; 33; 62; 0; 0; 7; %; Indicator for geometric quality extent
 0; 33; 63; 0; 0; 7; %; Indicator for instrument noise performance (contributions from radiometric calibration)
 0; 33; 64; 0; 0; 7; %; Indicator for instrument noise performance (contributions from spectral calibration)
 0; 33; 65; 0; 0; 24; Numeric; Output of a TEC function
@@ -1667,8 +1667,8 @@
 0; 33; 194; 0; 0; 4; Code table; SDMEDIT/QUIPS quality mark for moisture
 0; 33; 195; 0; 0; 4; Code table; SDMEDIT/QUIPS quality mark for wind (does not include NESDIS produced satellite winds)
 0; 33; 196; 0; 0; 8; %; Per cent confidence based on NESDIS recursive filter function (satellite winds)
-0; 33; 197; 0; 0; 8; %; Per cent confidence based on EUMETSAT quality index with forecast consistency test (satellite winds)
-0; 33; 198; 0; 0; 8; %; Per cent confidence based on EUMETSAT quality index without forecast consistency test (satellite winds)
+0; 33; 197; 0; 0; 8; %; Per cent confidence based on EUMETSAT quality extent with forecast consistency test (satellite winds)
+0; 33; 198; 0; 0; 8; %; Per cent confidence based on EUMETSAT quality extent without forecast consistency test (satellite winds)
 0; 33; 199; 2; 0; 17; Numeric; Chi-squared
 0; 33; 200; 0; 0; 31; Flag table; WindSat EDR quality flag-1
 0; 33; 201; 1; 0; 12; Degree true; Estimated error covariance for wind direction retrieval
@@ -1787,12 +1787,12 @@
 0; 49; 35; 2; 0; 7; Numeric; Reflectivity average
 0; 49; 36; 2; 0; 7; (m ATM cm)-1; Ozone C-pair sensitivity
 0; 49; 37; 0; 0; 5; Code table; Ozone error flag for best ozone
-0; 49; 38; 2; -1000; 12; Code table; Table selection index
+0; 49; 38; 2; -1000; 12; Code table; Table selection extent
 0; 49; 39; 1; 0; 24; Code table; Grating differences channels 7-12
 0; 49; 40; 2; -10; 10; Numeric; Reflectivity differences (photo/mono)
 0; 49; 41; 2; 0; 7; ATM; Terrain/surface pressure
 0; 49; 42; 2; 0; 17; m ATM cm; Total D-pair ozone
-0; 49; 43; 2; -100000; 18; Numeric; Sulfur dioxide index (provides a measure of SO2 contamination)
+0; 49; 43; 2; -100000; 18; Numeric; Sulfur dioxide extent (provides a measure of SO2 contamination)
 0; 49; 44; 2; 0; 17; m ATM cm; 0 total B ozone
 0; 49; 45; 2; -9000; 15; Degree; View latitude profile ozone
 0; 49; 46; 2; -18000; 16; Degree; View longitude profile ozone
@@ -1948,7 +1948,7 @@
 0; 49; 196; 0; 0; 7; %; Standard deviation q-vals mult scat and refl 312.5 nm
 0; 49; 197; 0; 0; 7; %; Standard deviation q-vals mult scat and refl 317.5 nm
 0; 49; 198; 0; 0; 7; Numeric; Number of iterations for profile solution
-0; 49; 199; 2; -1000; 12; Numeric; Volcano contamination index
+0; 49; 199; 2; -1000; 12; Numeric; Volcano contamination extent
 0; 49; 200; 2; -18000; 16; Degree; Solar azimuth angle at field-of-view start of scan
 0; 49; 201; 2; 0; 7; (m ATM cm)-1; Ozone sensitivity D-pair
 0; 49; 202; 2; 0; 7; (m ATM cm)-1; Ozone sensitivity B'

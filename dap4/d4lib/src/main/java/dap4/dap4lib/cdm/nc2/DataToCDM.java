@@ -6,11 +6,14 @@
 
 package dap4.dap4lib.cdm.nc2;
 
+import dap4.core.interfaces.DataIndex;
 import dap4.dap4lib.D4Cursor;
 import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
+import dap4.dap4lib.util.Odometer;
+import dap4.dap4lib.util.OdometerFactory;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.Group;
@@ -19,11 +22,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static dap4.core.util.DapConstants.*;
+
 /**
- * Create a set of CDM ucar.ma2.array objects that wrap a DSP.
+ * Create a set of CDM ucar.ma2.array objects that wrap DAP data.
  */
 
 public class DataToCDM {
+
   public static boolean DEBUG = false;
 
   //////////////////////////////////////////////////
@@ -39,7 +45,13 @@ public class DataToCDM {
 
   protected DapNetcdfFile ncfile = null;
   protected D4DSP dsp = null;
+  // Extractions from dsp
   protected DapDataset dmr = null;
+  protected ChecksumMode checksummode = null;
+  protected Map<DapVariable,Long> localchecksummap = null;
+  protected Map<DapVariable,D4Cursor> variablemap = null;
+
+
   protected Group cdmroot = null;
   protected Map<Variable, Array> arraymap = null;
   protected NodeMap nodemap = null;
@@ -51,13 +63,17 @@ public class DataToCDM {
    * Constructor
    *
    * @param ncfile the target NetcdfDataset
-   * @param dsp the compiled D4 databuffer
+   * @param dsp
+   * @param nodemap
    */
 
   public DataToCDM(DapNetcdfFile ncfile, D4DSP dsp, NodeMap nodemap) throws DapException {
     this.ncfile = ncfile;
     this.dsp = dsp;
-    this.dmr = dsp.getDMR();
+    this.dmr = this.dsp.getDMR();
+    this.checksummode = this.dsp.getChecksumMode();
+    this.localchecksummap = this.dsp.getChecksumMap(ChecksumSource.LOCAL);
+    this.variablemap = this.dsp.getVariableDataMap();
     this.nodemap = nodemap;
     this.cdmroot = ncfile.getRootGroup();
     this.arraymap = new HashMap<Variable, Array>();
@@ -87,7 +103,7 @@ public class DataToCDM {
     List<DapVariable> topvars = this.dmr.getTopVariables();
     Map<Variable, Array> map = null;
     for (DapVariable var : topvars) {
-      D4Cursor cursor = this.dsp.getVariableData(var);
+      D4Cursor cursor = this.variablemap.get(var);
       Array array = createVar(cursor);
       Variable cdmvar = (Variable) nodemap.get(var);
       this.arraymap.put(cdmvar, array);
@@ -109,9 +125,9 @@ public class DataToCDM {
         array = createStructure(data);
         break;
     }
-    if (d4var.isTopLevel() && this.dsp.getChecksumMode() == ChecksumMode.TRUE) {
+    if (d4var.isTopLevel() && this.checksummode == ChecksumMode.TRUE) {
       // verify && transfer the checksum attribute
-      Long csum = this.dsp.getChecksumMap(D4DSP.ChecksumSource.LOCAL).get(d4var);
+      Long csum = this.localchecksummap.get(d4var);
       String scsum = String.format("0x%08x", csum);
       Variable cdmvar = (Variable) nodemap.get(d4var);
       Attribute acsum = new Attribute(DapConstants.CHECKSUMATTRNAME, scsum);
@@ -145,9 +161,9 @@ public class DataToCDM {
     DapStructure struct = (DapStructure) var.getBaseType();
     int nmembers = struct.getFields().size();
     List<DapDimension> dimset = var.getDimensions();
-    Odometer odom = Odometer.factory(DapUtil.dimsetToSlices(dimset));
+    Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset));
     while (odom.hasNext()) {
-      Index index = odom.next();
+      DataIndex index = odom.next();
       long offset = index.index();
       D4Cursor[] cursors = (D4Cursor[]) data.read(index);
       D4Cursor ithelement = cursors[0];
@@ -177,7 +193,7 @@ public class DataToCDM {
     List<DapDimension> dimset = var.getDimensions();
     long dimsize = DapUtil.dimProduct(dimset);
     int nfields = template.getFields().size();
-    Odometer odom = Odometer.factory(DapUtil.dimsetToSlices(dimset));
+    Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset));
     while (odom.hasNext()) {
       odom.next();
       D4Cursor seq = ((D4Cursor[]) data.read(odom.indices()))[0];

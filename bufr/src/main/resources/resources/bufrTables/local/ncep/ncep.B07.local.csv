@@ -149,11 +149,11 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 11,11231,"u-component of storm motion",m/s,1,-4096,13
 11,11232,"v-component of storm motion",m/s,1,-4096,13
 11,11233,"Storm relative helicity",m**2/s**2,1,-10000,15
-11,11235,"Turbulence index",Code table,0,0,6
-11,11236,"Turbulence index for period from 1 minute prior to observation time to observation time",Code table,0,0,6
-11,11237,"Turbulence index for period from 2 minutes prior to observation time to 1 minute prior to observation time",Code table,0,0,6
-11,11238,"Turbulence index for period from 3 minutes prior to observation time to 2 minutes prior to observation time",Code table,0,0,6
-11,11239,"Turbulence index for period from 4 minutes prior to observation time to 3 minutes prior to observation time",Code table,0,0,6
+11,11235,"Turbulence extent",Code table,0,0,6
+11,11236,"Turbulence extent for period from 1 minute prior to observation time to observation time",Code table,0,0,6
+11,11237,"Turbulence extent for period from 2 minutes prior to observation time to 1 minute prior to observation time",Code table,0,0,6
+11,11238,"Turbulence extent for period from 3 minutes prior to observation time to 2 minutes prior to observation time",Code table,0,0,6
+11,11239,"Turbulence extent for period from 4 minutes prior to observation time to 3 minutes prior to observation time",Code table,0,0,6
 11,11240,"PREPBUFR: u-, v-component wind (UOB/VOB) (quality) marker",Code table,0,0,5
 11,11241,"PREPBUFR: u-, v-component wind (UOB/VOB) event program code",Code table,0,0,5
 11,11242,"PREPBUFR: u-, v-component wind (UOB/VOB) event reason code",Code table,0,0,10
@@ -208,11 +208,11 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 13,13192,"Cloud water",kg/m**2,2,0,12
 13,13193,"Total column precipitable water",kg/m**2,1,0,11
 13,13194,"Indicator for inclusion/omission of precipitation data",Code table,0,0,3
-13,13195,"Modified Showalter stability index",Numeric,0,-40,8
+13,13195,"Modified Showalter stability extent",Numeric,0,-40,8
 13,13197,"Soil moisture",m,3,0,8
 13,13198,"Specific humidity at 2 m",kg/kg,5,0,14
 13,13199,"Total precipitation past 5 minutes",kg/m**2,1,-1,14
-13,13201,"Lifted index",K,2,-5000,14
+13,13201,"Lifted extent",K,2,-5000,14
 13,13202,"Precipitable water in layer bounded by 1.0 to 0.9 simga",kg/m**2,1,0,11
 13,13203,"Precipitable water in layer bounded by 0.9 to 0.7 simga",kg/m**2,1,0,11
 13,13204,"Precipitable water in layer bounded by 0.7 to 0.3 simga",kg/m**2,1,0,11
@@ -243,7 +243,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 13,13239,"Cloud water mixing ratio",kg/kg,5,0,16
 13,13240,"Specific humidity at 10 m",kg/kg,5,0,14
 13,13242,"PREPBUFR: Global forecast (background) saturation specific humidity value",mg/kg,0,0,16
-13,13243,"PREPBUFR: Lifted index",K,1,-50,10
+13,13243,"PREPBUFR: Lifted extent",K,1,-50,10
 13,13244,"Ice mixing ratio",kg/kg,5,0,16
 13,13245,"PREPBUFR: Specific humidity observation",mg/kg,0,0,16
 13,13246,"PREPBUFR: Specific humidity (quality) marker",Code table,0,0,5
@@ -360,8 +360,8 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 33,33194,"SDMEDIT/QUIPS quality mark for moisture",Code table,0,0,4
 33,33195,"SDMEDIT/QUIPS quality mark for wind (does not include NESDIS produced satellite winds)",Code table,0,0,4
 33,33196,"Per cent confidence based on NESDIS recursive filter function (satellite winds)",%,0,0,8
-33,33197,"Per cent confidence based on EUMETSAT quality index with forecast consistency test (satellite winds)",%,0,0,8
-33,33198,"Per cent confidence based on EUMETSAT quality index without forecast consistency test (satellite winds)",%,0,0,8
+33,33197,"Per cent confidence based on EUMETSAT quality extent with forecast consistency test (satellite winds)",%,0,0,8
+33,33198,"Per cent confidence based on EUMETSAT quality extent without forecast consistency test (satellite winds)",%,0,0,8
 33,33199,"Chi-squared",Numeric,2,0,17
 33,33200,"WindSat EDR quality flag-1",Flag table,0,0,31
 33,33201,"Estimated error covariance for wind direction retrieval",Degree true,1,0,12
@@ -449,12 +449,12 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 49,49035,"Reflectivity average",Numeric,2,0,7
 49,49036,"Ozone C-pair sensitivity",(m ATM cm)**-1,2,0,7
 49,49037,"Ozone error flag for best ozone",Code table,0,0,5
-49,49038,"Table selection index",Code table,2,-1000,12
+49,49038,"Table selection extent",Code table,2,-1000,12
 49,49039,"Grating differences channels 7-12",Code table,1,0,24
 49,49040,"Reflectivity differences (photo/mono)",Numeric,2,-10,10
 49,49041,"Terrain/surface pressure",ATM,2,0,7
 49,49042,"Total D-pair ozone",m ATM cm,2,0,17
-49,49043,"Sulfur dioxide index (provides a measure of SO2 contamination)",Numeric,2,-100000,18
+49,49043,"Sulfur dioxide extent (provides a measure of SO2 contamination)",Numeric,2,-100000,18
 49,49044,"0 total B ozone",m ATM cm,2,0,17
 49,49045,"View latitude profile ozone",Degree,2,-9000,15
 49,49046,"View longitude profile ozone",Degree,2,-18000,16
@@ -610,7 +610,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 49,49196,"Standard deviation q-vals mult scat and refl 312.5 nm",%,0,0,7
 49,49197,"Standard deviation q-vals mult scat and refl 317.5 nm",%,0,0,7
 49,49198,"Number of iterations for profile solution",Numeric,0,0,7
-49,49199,"Volcano contamination index",Numeric,2,-1000,12
+49,49199,"Volcano contamination extent",Numeric,2,-1000,12
 49,49200,"Solar azimuth angle at field-of-view start of scan",Degree,2,-18000,16
 49,49201,"Ozone sensitivity D-pair",(m ATM cm)**-1,2,0,7
 49,49202,"Ozone sensitivity B'",(m ATM cm)**-1,2,0,7

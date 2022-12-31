@@ -102,7 +102,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    // singleTest("test_one_var",testcases); // choose single test for debugging
+    //singleTest(0,testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -125,7 +125,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    // props.prop_baseline = true;
+    props.prop_visual = true;
     super.setup();
   }
 

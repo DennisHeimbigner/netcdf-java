@@ -20,6 +20,9 @@ import java.util.List;
  * Note that first cannot be undefined because it always defaults to zero;
  * similarly stride defaults to one.
  * Slice Supports iteration.
+ *
+ * Note that a slice is quite similar to a scalar DataIndex.
+ *
  * Modifiied 10/15/2016 to support zero sized slices.
  */
 
@@ -32,12 +35,11 @@ public class Slice {
   // its "last" value is the UNDEFINED value).
   // This will primarily be used in the constraint expression parser
 
-  // static public final long UNDEFINED = 0x7FFFFFFFFFFFFFFFL;
-  public static final long UNDEFINED = -1L;
+  public static final int UNDEFINED = -1;
 
   // Define maximum legal dimension based on the spec
 
-  public static final long MAXLENGTH = 0x3FFFFFFFFFFFFFFFL;
+  public static final int MAXLENGTH = 0x3FFFFFFF;
 
   public static enum Sort {
     Single, Multi;
@@ -66,22 +68,22 @@ public class Slice {
   /**
    * First index
    */
-  long first = UNDEFINED;
+  int first = UNDEFINED;
 
   /**
    * Last+1 index; (stop - first) should be size of the slice.
    */
-  long stop = UNDEFINED;
+  int stop = UNDEFINED;
 
   /**
    * Stride
    */
-  long stride = UNDEFINED;
+  int stride = UNDEFINED;
 
   /**
    * Max size (typically the size of the underlying dimension)
    */
-  long maxsize = MAXLENGTH;
+  int maxsize = MAXLENGTH;
 
   /**
    * Indicate if this is known to be a whole slice
@@ -103,11 +105,11 @@ public class Slice {
 
   public Slice() {}
 
-  public Slice(long first, long stop, long stride) throws DapException {
+  public Slice(int first, int stop, int stride) throws DapException {
     this(first, stop, stride, UNDEFINED);
   }
 
-  public Slice(long first, long stop, long stride, long maxsize) throws DapException {
+  public Slice(int first, int stop, int stride, int maxsize) throws DapException {
     this();
     setIndices(first, stop, stride, maxsize);
   }
@@ -121,7 +123,7 @@ public class Slice {
 
   public Slice(DapDimension dim) throws DapException {
     this();
-    setIndices(0, dim.getSize(), 1, dim.getSize());
+    setIndices(0, (int)dim.getSize(), 1, (int)dim.getSize());
     setWhole(true);
     setConstrained(false);
   }
@@ -178,41 +180,41 @@ public class Slice {
     return this.sort;
   }
 
-  public long getFirst() {
+  public int getFirst() {
     return this.first;
   }
 
-  public long getStop() {
+  public int getStop() {
     return this.stop;
   }
 
-  public long getLast() {
+  public int getLast() {
     return ((this.stop - this.first) == 0 ? 0 : this.stop - 1);
   }
 
-  public long getStride() {
+  public int getStride() {
     return this.stride;
   }
 
-  public long getSize() // not same as getcount and not same as maxsize
+  public int getSize() // not same as getcount and not same as maxsize
   {
     return (this.stop - this.first);
   }
 
-  public long getMax() // not same as getcount and not same as maxsize
+  public int getMax() // not same as getcount and not same as maxsize
   {
     return this.maxsize;
   }
 
-  public Slice setMaxSize(long size) throws DapException {
+  public Slice setMaxSize(int size) throws DapException {
     return setIndices(this.first, this.stop, this.stride, size);
   }
 
-  public Slice setIndices(long first, long stop, long stride) throws DapException {
+  public Slice setIndices(int first, int stop, int stride) throws DapException {
     return setIndices(first, stop, stride, UNDEFINED);
   }
 
-  public Slice setIndices(long first, long stop, long stride, long maxsize) throws DapException {
+  public Slice setIndices(int first, int stop, int stride, int maxsize) throws DapException {
     this.first = first;
     this.stop = stop;
     this.stride = stride;
@@ -246,9 +248,9 @@ public class Slice {
    * the slice. Note that this is different from
    * getStop() because stride is taken into account.
    */
-  public long getCount() {
+  public int getCount() {
     assert this.first != UNDEFINED && this.stride != UNDEFINED && this.stop != UNDEFINED;
-    long count = (this.stop) - this.first;
+    int count = (this.stop) - this.first;
     count = (count + this.stride - 1);
     count /= this.stride;
     return count;
@@ -331,10 +333,10 @@ public class Slice {
    * @throws DapException
    */
   public static Slice compose(Slice target, Slice src) throws DapException {
-    long sr_stride = target.getStride() * src.getStride();
-    long sr_first = MAP(target, src.getFirst());
-    long lastx = MAP(target, src.getLast());
-    long sr_last = (target.getLast() < lastx ? target.getLast() : lastx); // min(last(),lastx)
+    int sr_stride = target.getStride() * src.getStride();
+    int sr_first = MAP(target, src.getFirst());
+    int lastx = MAP(target, src.getLast());
+    int sr_last = (target.getLast() < lastx ? target.getLast() : lastx); // min(last(),lastx)
     return new Slice(sr_first, sr_last + 1, sr_stride, sr_last + 1).finish();
   }
 
@@ -346,7 +348,7 @@ public class Slice {
    * @return the i-th element of a range
    * @throws DapException if index is invalid
    */
-  static long MAP(Slice target, long i) throws DapException {
+  static int MAP(Slice target, int i) throws DapException {
     if (i < 0)
       throw new DapException("Slice.compose: i must be >= 0");
     if (i > target.getStop())

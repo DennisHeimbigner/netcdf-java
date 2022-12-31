@@ -10,9 +10,10 @@ import dap4.core.dmr.DapDimension;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.TypeSort;
 import dap4.core.util.DapException;
-import dap4.core.util.Index;
 import dap4.core.util.Slice;
+import dap4.dap4lib.D4Index;
 import ucar.ma2.ForbiddenConversionException;
+import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.nc2.CDMNode;
@@ -294,7 +295,7 @@ public abstract class CDMUtil {
    * @throws ForbiddenConversionException if cannot convert to long
    */
 
-  public static long extractLongValue(TypeSort atomtype, D4Cursor dataset, Index index) throws DapException {
+  public static long extractLongValue(TypeSort atomtype, D4Cursor dataset, D4Index index) throws DapException {
     Object result;
     result = dataset.read(index);
     long lvalue = CDMTypeFcns.extract(atomtype, result);
@@ -313,7 +314,7 @@ public abstract class CDMUtil {
    * @throws ForbiddenConversionException if cannot convert to double
    */
 
-  public static double extractDoubleValue(TypeSort atomtype, D4Cursor dataset, Index index) throws DapException {
+  public static double extractDoubleValue(TypeSort atomtype, D4Cursor dataset, D4Index index) throws DapException {
     Object result;
     result = dataset.read(index);
     double dvalue = 0.0;
@@ -521,27 +522,12 @@ public abstract class CDMUtil {
     return slices;
   }
 
-  public static dap4.core.util.Index cdmIndexToIndex(ucar.ma2.Index cdmidx) {
-    int rank = cdmidx.getRank();
-    int[] shape = cdmidx.getShape();
-    long[] indices = new long[shape.length];
-    for (int i = 0; i < rank; i++) {
-      indices[i] = shape[i];
-    }
-    dap4.core.util.Index dapidx = new dap4.core.util.Index(indices, indices);
+  public static D4Index cdmIndexToIndex(ucar.ma2.Index cdmidx) {
+    D4Index dapidx = new D4Index(cdmidx.getCurrentCounter(), cdmidx.getShape());
     return dapidx;
   }
 
-  public static ucar.ma2.Index indexToCcMIndex(dap4.core.util.Index d4) {
-    int rank = d4.getRank();
-    int[] shape = new int[rank];
-    int[] indices = new int[rank];
-    for (int i = 0; i < rank; i++) {
-      indices[i] = (int) d4.get(i);
-      shape[i] = (int) d4.getSize(i);
-    }
-    ucar.ma2.Index cdm = ucar.ma2.Index.factory(shape);
-    cdm.set(indices);
-    return cdm;
+  public static ucar.ma2.Index indexToCcMIndex(D4Index d4) {
+    return (Index)d4;
   }
 }

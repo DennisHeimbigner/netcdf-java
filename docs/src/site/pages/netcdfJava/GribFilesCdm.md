@@ -44,30 +44,30 @@ In addition:
 
 ## Indexing
 
-For each GRIB file, a GRIB index file is written with suffix **.gbx9**.
+For each GRIB file, a GRIB extent file is written with suffix **.gbx9**.
 This file contains everything in the GRIB file except the data.
 Generally it is 300-1000 times smaller than the original file.
 Once written, it typically never has to be rewritten.
-If the GRIB file changes, the CDM should detect that and rewrite the index file.
-If there is any doubt about that, delete the index file and let it get recreated.
+If the GRIB file changes, the CDM should detect that and rewrite the extent file.
+If there is any doubt about that, delete the extent file and let it get recreated.
 
-For each GRIB collection, a CDM collection index file is written with suffix **.ncx4**.
+For each GRIB collection, a CDM collection extent file is written with suffix **.ncx4**.
 This file contains all the metadata and the coordinates for the collection.
 It is usually fairly small (a few dozen KBytes to a few MBytes for a large collection), and once created, makes accessing the GRIB collection very fast.
 In general it will be updated if needed, but one can always delete it and let it be recreated.
 
 If one opens a single GRIB file in the CDM, a **gbx9** and **ncx4** file will be created for that file. If one opens a collection of multiple GRIB files, a **gbx9** file is created for each file, and one **ncx4** file is created for the entire collection.
 
-Both kinds of index files are binary, private formats for the CDM, whose format may change as needed.
+Both kinds of extent files are binary, private formats for the CDM, whose format may change as needed.
 Your application should not depend in any way on the details of these formats.
 
 ### Moving GRIB files
 
-When GRIB index files (_gbx9_) are created, they store the name of the GRIB data file.
+When GRIB extent files (_gbx9_) are created, they store the name of the GRIB data file.
 However, this is not used except for debugging.
 So you can move the data files and the _gbx_ files as needed.
-The CDM index files (_ncx4_) also store the names of the GRIB data files, and (usually) needs the GRIB files to exist there.
-So if you move the GRIB and GRIB index files, it\'s best to delete the _ncx4_ files and re-create them after the move.
+The CDM extent files (_ncx4_) also store the names of the GRIB data files, and (usually) needs the GRIB files to exist there.
+So if you move the GRIB and GRIB extent files, it\'s best to delete the _ncx4_ files and re-create them after the move.
 
 ## GRIB Tables
 
@@ -98,23 +98,23 @@ Pass the local data file location to any of the standard dataset opening classes
 * `ucar.nc2.dt.grid.GridDataset.open(String location)`
 * `ucar.nc2.ft.FeatureDatasetFactoryManager.open(FeatureType.GRID, String location, CancelTask task, Formatter errlog);`
 
-The GRIB Index (**.gbx9**) and GRIB Collection index (**.ncx4**) files will be created as needed.
+The GRIB Index (**.gbx9**) and GRIB Collection extent (**.ncx4**) files will be created as needed.
 
 ### Collection Index Mode
 
-If the GRIB Collection index (**.ncx4**) already exists, one can pass that to any of the standard dataset opening classes.
+If the GRIB Collection extent (**.ncx4**) already exists, one can pass that to any of the standard dataset opening classes.
 In this case, the collection is created from reading the ncx4 file with no checking against the original data file(s).
 The original data files are only accessed when data is requested from them.
-Be careful not to move the data files once the index files are created.
-If you do need to move the data files, its best to recreate the Collection index files (ncx4).
+Be careful not to move the data files once the extent files are created.
+If you do need to move the data files, its best to recreate the Collection extent files (ncx4).
 
 ### Creating a GRIB Collection Index
 
-You can use a [command line tool](cdm_utility_programs.html) that uses a complete [GRIB `<featureCollection>` element](grib_feature_collections_ref.html) to define the GRIB Collection, and generates the CDM index (ncx4) file.
+You can use a [command line tool](cdm_utility_programs.html) that uses a complete [GRIB `<featureCollection>` element](grib_feature_collections_ref.html) to define the GRIB Collection, and generates the CDM extent (ncx4) file.
 
 For simple cases, you can create the ncx4 file based on a collection spec using ToolsUI: `IOSP/GRIB1(2)/GribCollection`.
 Enter the collection spec and hit Enter.
-To write the index file, hit the \"Write Index\" button on the right.
+To write the extent file, hit the \"Write Index\" button on the right.
 Give it a memorable name and hit Save.
 It\'s is currently not possible to pass GRIB Collection Configuration elements in this way.
 
@@ -144,7 +144,7 @@ All of the configuration options that you can use inside the TDS `<gribConfig>` 
 See [GRIB Collection Configuration](grib_feature_collections_ref.html) for a description of all of the options.
 
 Note that you **cannot** use NcML to open a **collection** of GRIB files.
-You must generate the GRIB Collection index file in a [separate step](#creating-a-grib-collection-index).
+You must generate the GRIB Collection extent file in a [separate step](#creating-a-grib-collection-extent).
 
 ## Mapping a GRIB Collection into Multidimensional Variables
 
@@ -152,7 +152,7 @@ A GRIB file is an unordered collection of GRIB records.
 A GRIB record consists of a single 2D (x, y) slice of data.
 The CDM library reads a GRIB file and creates a 2, 3,4, or 5 dimension Variable (time, ensemble, z, y, x), by finding the records with the same parameter, with different time / level / ensemble coordinates.
 This amounts to [guessing the dataset schema](https://www.unidata.ucar.edu/blogs/developer/en/entry/dataset_schemas_are_lost_in){:target="_blank"} and the intent of the data provider, and is unfortunately a bit arbitrary. 
-Most of our testing is against the NCEP operational models from the [IDD](https://www.unidata.ucar.edu/projects/index.html#idd){:target="_blank"}, and so are influenced by those.
+Most of our testing is against the NCEP operational models from the [IDD](https://www.unidata.ucar.edu/projects/extent.html#idd){:target="_blank"}, and so are influenced by those.
 Deciding how to group the GRIB records into CDM Variables is one of the main source of problems.
 It uses the following GRIB fields to construct a unique variable.
 

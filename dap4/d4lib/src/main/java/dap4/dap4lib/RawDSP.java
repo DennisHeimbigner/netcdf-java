@@ -33,11 +33,27 @@ public class RawDSP extends D4DSP {
   // Constructor(s)
 
   public RawDSP() {
-    super();
   }
 
   //////////////////////////////////////////////////
-  // DSP API
+  // D4DSP API
+
+  // Note that there is no point in delaying the compilation of the
+  // DMR and DAP since we are reading the whole DAP anyway
+  @Override
+  public D4DSP open(String fileurl, ChecksumMode cmode) throws DapException {
+    mode = RequestMode.DAP; // force it
+    super.open(fileurl,cmode);
+    String methodurl = getMethodUrl(mode, this.checksummode);
+    parseURL(methodurl); // reparse
+    String realpath = this.xuri.getRealPath();
+    try (FileInputStream stream = new FileInputStream(realpath)) {
+      setData(stream, RequestMode.DAP);
+    } catch (IOException ioe) {
+      throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
+    }
+    return this;
+  }
 
   /**
    * A path is file if it has no base protocol or is file:
@@ -62,51 +78,33 @@ public class RawDSP extends D4DSP {
     return false;
   }
 
-  @Override
-  public void close() {}
-
   //////////////////////////////////////////////////
+  // Load Operations
 
-  protected void loadDMR() throws DapException {
-    assert (getRequestMode() == RequestMode.DMR || getRequestMode() == RequestMode.DAP);
-    String document = readDMR();
-    DapDataset dmr = parseDMR(document);
-    setDMR(dmr);
-  }
+  /**
+   * LoadDMR actually loads DAP since we know that we will need that eventually.
+   * @throws DapException
+   */
 
-  protected void loadDAP() throws DapException {
-    assert (getRequestMode() == RequestMode.DAP);
-    try {
-      assert (getDMR() != null);
-      // "Compile" the databuffer section of the server response
-      D4DataCompiler d4compiler = new D4DataCompiler(this, getChecksumMode(), getRemoteOrder(), this.data);
-      d4compiler.compile();
-    } catch (IOException ioe) {
-      throw new DapException(ioe);
-    }
-  }
-
-
-  //////////////////////////////////////////////////
-
-  // Note that there is no point in delaying the compilation of the
-  // DMR and DAP since we are reading the whole DAP anyway
-  @Override
-  public RawDSP open(String fileurl) throws DapException {
-    setLocation(fileurl);
-    parseURL(fileurl);
-    contextualize(getContext()); // e.g. set Checksummode
-    String methodurl = getMethodUrl(RequestMode.DAP, getChecksumMode());
+  public void loadDMR() throws DapException {
+    String methodurl = getMethodUrl(mode, this.checksummode);
     parseURL(methodurl); // reparse
-    String realpath = xuri.getRealPath();
+    String realpath = this.xuri.getRealPath();
     try (FileInputStream stream = new FileInputStream(realpath)) {
       setData(stream, RequestMode.DAP);
-      ensuredmr(this.ncfile);
-      ensuredata(this.ncfile);
+      super.loadDMR();
     } catch (IOException ioe) {
       throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
     }
-    return this;
+  }
+
+  /**
+   * loadDMR will have already loaded the DAP stream,
+   * so all that is left is to compile the data stream,
+   * @throws DapException
+   */
+  public void loadDAP() throws DapException {
+    super.loadDAP();
   }
 
 }

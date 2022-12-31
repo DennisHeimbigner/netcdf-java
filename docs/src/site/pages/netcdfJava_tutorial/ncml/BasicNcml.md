@@ -141,8 +141,8 @@ Click the **NCdump** button to show the variable\'s data:
 {% include image.html file="netcdf-java/tutorial/basic_ncml/NCdumpPanel.png" alt="NCDump Panel tab" caption="" %}
 
 The expression **T(0:1:1, 0:2:1, 0:3:1)** shows the limits of the **T** variable\'s data array in Fortran 90 notation.
-For example, **0:3:1** means that the index starts at **0**, ends at **3** (inclusive) with stride **1**. 
-You can use a single value to slice at that index, e.g. **T(1, 0:2:1, 0:3:1)** means to show the T array for index=1 on the first (time) dimension. 
+For example, **0:3:1** means that the extent starts at **0**, ends at **3** (inclusive) with stride **1**. 
+You can use a single value to slice at that extent, e.g. **T(1, 0:2:1, 0:3:1)** means to show the T array for extent=1 on the first (time) dimension. 
 For large data arrays, it is often useful to edit this expression, especially the stride, to examine subsets of the data.
 
 Repeat this for other variables to familiarize yourself with examining data values.

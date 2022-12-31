@@ -6,31 +6,33 @@
 
 package dap4.dap4lib;
 
+import dap4.core.interfaces.DataIndex;
 import dap4.core.util.ChecksumMode;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
-import dap4.dap4lib.LibTypeFcns;
+import dap4.dap4lib.util.Odometer;
+import dap4.dap4lib.util.OdometerFactory;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.Checksum;
 
 import static dap4.dap4lib.D4Cursor.Scheme;
 
 public class D4DataCompiler {
+
   public static boolean DEBUG = false;
 
   //////////////////////////////////////////////////
   // Constants
 
-  static String LBRACE = "{";
-  static String RBRACE = "}";
-
-
   //////////////////////////////////////////////////
   // Instance variables
 
-  protected DapDataset dataset = null;
+  protected DapDataset dmr = null;
 
   // Make compile arguments global
   protected ByteBuffer data = null;
@@ -39,6 +41,15 @@ public class D4DataCompiler {
   protected ByteOrder order = null;
 
   protected D4DSP dsp;
+
+  // The map of DAP variable to a cursor
+  protected Map<DapVariable,D4Cursor> variable_cursors = new HashMap<>();
+
+  // Checksum information
+  // We have two checksum maps: one for the remotely calculated value
+  // and one for the locally calculated value.
+  protected Map<DapVariable, Long> localchecksummap = new HashMap<>();
+  protected Map<DapVariable, Long> remotechecksummap = new HashMap<>();
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -53,11 +64,37 @@ public class D4DataCompiler {
 
   public D4DataCompiler(D4DSP dsp, ChecksumMode checksummode, ByteOrder order, ByteBuffer stream) throws DapException {
     this.dsp = dsp;
-    this.dataset = this.dsp.getDMR();
-    this.checksummode = ChecksumMode.asTrueFalse(checksummode); //
+    this.dmr = this.dsp.getDMR();
+    this.checksummode = ChecksumMode.asTrueFalse(checksummode);
     this.order = order;
     this.data = stream;
     this.data.order(order);
+  }
+
+  //////////////////////////////////////////////////
+  // Accessors
+
+  public Map<DapVariable,D4Cursor> getVariableDataMap() {
+    return this.variable_cursors;
+  }
+
+  public Map<DapVariable,Long> getChecksumMap(DapConstants.ChecksumSource src) {
+    switch (src) {
+      case LOCAL:
+        return this.localchecksummap;
+      case REMOTE:
+        return this.remotechecksummap;
+    }
+    return null;
+  }
+
+  protected void setChecksum(DapConstants.ChecksumSource src, DapVariable dvar, Long csum) {
+    switch (src) {
+      case LOCAL:
+        this.localchecksummap.put(dvar, csum);
+      case REMOTE:
+        this.remotechecksummap.put(dvar, csum);
+    }
   }
 
   //////////////////////////////////////////////////
@@ -72,9 +109,9 @@ public class D4DataCompiler {
    * @throws DapException
    */
   public void compile() throws DapException {
-    assert (this.dataset != null && this.data != null);
+    assert (this.dmr != null && this.data != null);
     // iterate over the variables represented in the databuffer
-    for (DapVariable vv : this.dataset.getTopVariables()) {
+    for (DapVariable vv : this.dmr.getTopVariables()) {
       D4Cursor data = compileVar(vv, null);
       this.dsp.addVariableData(vv, data);
     }
@@ -89,30 +126,32 @@ public class D4DataCompiler {
     D4Cursor array = null;
     DapType type = dapvar.getBaseType();
     if (type.isAtomic())
-      array = compileAtomicVar(dapvar, container);
+      array = compileAtomicVar(dapvar);
     else if (type.isStructType()) {
-      array = compileStructureArray(dapvar, container);
+      array = compileStructureArray(dapvar);
     } else if (type.isSeqType()) {
-      array = compileSequenceArray(dapvar, container);
+      array = compileSequenceArray(dapvar);
     }
-    if (dapvar.isTopLevel() && this.checksummode == ChecksumMode.TRUE) {
-      // extract the remotechecksum from databuffer src,
-      long checksum = extractChecksum(data);
-      this.dsp.setChecksum(D4DSP.ChecksumSource.REMOTE,dapvar,checksum);
+    if (dapvar.isTopLevel()) {
+      this.variable_cursors.put(dapvar,array);
+      if(this.checksummode == ChecksumMode.TRUE) {
+        // extract the remotechecksum from databuffer src,
+        long checksum = extractChecksum(data);
+        setChecksum(DapConstants.ChecksumSource.REMOTE, dapvar, checksum);
+      }
     }
     return array;
   }
 
   /**
    * @param var
-   * @param container
    * @return data
    * @throws DapException
    */
 
-  protected D4Cursor compileAtomicVar(DapVariable var, D4Cursor container) throws DapException {
+  protected D4Cursor compileAtomicVar(DapVariable var) throws DapException {
     DapType daptype = var.getBaseType();
-    D4Cursor cursor = new D4Cursor(Scheme.ATOMIC, (D4DSP) this.dsp, var, container);
+    D4Cursor cursor = new D4Cursor(Scheme.ATOMIC, (D4DSP) this.dsp, var);
     cursor.setOffset(this.data.position());
     long total = 0;
     long dimproduct = var.getCount();
@@ -137,20 +176,19 @@ public class D4DataCompiler {
    * Compile a structure array.
    *
    * @param var the template
-   * @param container if inside a compound object
    * @return A DataCompoundArray for the databuffer for this struct.
    * @throws DapException
    */
-  protected D4Cursor compileStructureArray(DapVariable var, D4Cursor container) throws DapException {
+  protected D4Cursor compileStructureArray(DapVariable var) throws DapException {
     DapStructure dapstruct = (DapStructure) var.getBaseType();
-    D4Cursor structarray = new D4Cursor(Scheme.STRUCTARRAY, this.dsp, var, container).setOffset(this.data.position());
+    D4Cursor structarray = new D4Cursor(Scheme.STRUCTARRAY, this.dsp, var).setOffset(this.data.position());
     List<DapDimension> dimset = var.getDimensions();
     long dimproduct = DapUtil.dimProduct(dimset);
     D4Cursor[] instances = new D4Cursor[(int) dimproduct];
-    Odometer odom = Odometer.factory(DapUtil.dimsetToSlices(dimset), dimset);
+    Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset), dimset);
     while (odom.hasNext()) {
-      Index index = odom.next();
-      D4Cursor instance = compileStructure(var, dapstruct, structarray);
+      DataIndex index = odom.next();
+      D4Cursor instance = compileStructure(var, dapstruct);
       instance.setIndex(index);
       instances[(int) index.index()] = instance;
     }
@@ -162,13 +200,12 @@ public class D4DataCompiler {
    * Compile a structure instance.
    *
    * @param dapstruct The template
-   * @param container
    * @return A DataStructure for the databuffer for this struct.
    * @throws DapException
    */
-  protected D4Cursor compileStructure(DapVariable var, DapStructure dapstruct, D4Cursor container) throws DapException {
+  protected D4Cursor compileStructure(DapVariable var, DapStructure dapstruct) throws DapException {
     int pos = this.data.position();
-    D4Cursor d4ds = new D4Cursor(Scheme.STRUCTURE, (D4DSP) this.dsp, var, container).setOffset(pos);
+    D4Cursor d4ds = new D4Cursor(Scheme.STRUCTURE, (D4DSP) this.dsp, var).setOffset(pos);
     List<DapVariable> dfields = dapstruct.getFields();
     for (int m = 0; m < dfields.size(); m++) {
       DapVariable dfield = dfields.get(m);
@@ -186,16 +223,16 @@ public class D4DataCompiler {
    * @return A DataCompoundArray for the databuffer for this sequence.
    * @throws DapException
    */
-  protected D4Cursor compileSequenceArray(DapVariable var, D4Cursor container) throws DapException {
+  protected D4Cursor compileSequenceArray(DapVariable var) throws DapException {
     DapSequence dapseq = (DapSequence) var.getBaseType();
-    D4Cursor seqarray = new D4Cursor(Scheme.SEQARRAY, this.dsp, var, container).setOffset(this.data.position());
+    D4Cursor seqarray = new D4Cursor(Scheme.SEQARRAY, this.dsp, var).setOffset(this.data.position());
     List<DapDimension> dimset = var.getDimensions();
     long dimproduct = DapUtil.dimProduct(dimset);
     D4Cursor[] instances = new D4Cursor[(int) dimproduct];
-    Odometer odom = Odometer.factory(DapUtil.dimsetToSlices(dimset), dimset);
+    Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset), dimset);
     while (odom.hasNext()) {
-      Index index = odom.next();
-      D4Cursor instance = compileSequence(var, dapseq, seqarray);
+      DataIndex index = odom.next();
+      D4Cursor instance = compileSequence(var, dapseq);
       instance.setIndex(index);
       instances[(int) index.index()] = instance;
     }
@@ -207,20 +244,19 @@ public class D4DataCompiler {
    * Compile a sequence as a set of records.
    *
    * @param dapseq
-   * @param container
    * @return sequence
    * @throws DapException
    */
-  public D4Cursor compileSequence(DapVariable var, DapSequence dapseq, D4Cursor container) throws DapException {
+  public D4Cursor compileSequence(DapVariable var, DapSequence dapseq) throws DapException {
     int pos = this.data.position();
-    D4Cursor seq = new D4Cursor(Scheme.SEQUENCE, this.dsp, var, container).setOffset(pos);
+    D4Cursor seq = new D4Cursor(Scheme.SEQUENCE, this.dsp, var).setOffset(pos);
     List<DapVariable> dfields = dapseq.getFields();
     // Get the count of the number of records
     long nrecs = getCount(this.data);
     for (int r = 0; r < nrecs; r++) {
       pos = this.data.position();
       D4Cursor rec =
-          (D4Cursor) new D4Cursor(D4Cursor.Scheme.RECORD, this.dsp, var, container).setOffset(pos).setRecordIndex(r);
+          (D4Cursor) new D4Cursor(D4Cursor.Scheme.RECORD, this.dsp, var).setOffset(pos).setRecordIndex(r);
       for (int m = 0; m < dfields.size(); m++) {
         DapVariable dfield = dfields.get(m);
         D4Cursor dvfield = compileVar(dfield, rec);
@@ -282,10 +318,10 @@ public class D4DataCompiler {
   public void computeLocalChecksums() throws DapException {
     Checksum crc32alg = new java.util.zip.CRC32();
     byte[] bytedata = data.array(); // Will need to change when we switch to RAF
-    for(DapVariable dvar : this.dataset.getTopVariables()) {
+    for(DapVariable dvar : this.dmr.getTopVariables()) {
       crc32alg.reset();
       // Get the extent of this variable vis-a-vis the data buffer
-      D4Cursor cursor = this.dsp.getVariableData(dvar);
+      D4Cursor cursor = this.dsp.getVariableData().get(dvar);
       long offset = cursor.getOffset();
       long extent = cursor.getExtent();
       assert (extent <= data.limit());
@@ -296,9 +332,8 @@ public class D4DataCompiler {
       long crc32 = crc32alg.getValue(); // get the digest value
       crc32 = (crc32 & 0x00000000FFFFFFFFL); /* crc is 32 bits */
       data.position(savepos);
-      this.dsp.setChecksum(D4DSP.ChecksumSource.LOCAL, dvar, crc32);
+      setChecksum(DapConstants.ChecksumSource.LOCAL, dvar, crc32);
     }
   }
-
 
 }

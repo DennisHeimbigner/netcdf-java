@@ -3,7 +3,7 @@
 1 1 Scaled albedo (Numeric)
 2 2 Scaled brightness temperature (Numeric)
 3 3 Scaled precipitable water (Numeric)
-4 4 Scaled lifted index (Numeric)
+4 4 Scaled lifted extent (Numeric)
 5 5 Scaled cloud top pressure (Numeric)
 6 6 Scaled skin temperature (Numeric)
 7 7 Cloud mask (Code table 4.217)

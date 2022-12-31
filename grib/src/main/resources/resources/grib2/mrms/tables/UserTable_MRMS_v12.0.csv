@@ -21,7 +21,7 @@ Discipline,Category,Parameter,Name,Frequency,Unit,Missing,Range Folded,No Covera
 209,3,17,RotationTrackML240min,30-min,0.001/s,0,n/a,0,Rotation Track 3-6km AGL 240-min,no Alaska product
 209,3,18,RotationTrackML360min,30-min,0.001/s,0,n/a,0,Rotation Track 3-6km AGL 360-min,no Alaska product
 209,3,19,RotationTrackML1440min,30-min,0.001/s,0,n/a,0,Rotation Track 3-6km AGL 1440-min,no Alaska product
-209,3,26,SHI,2-min,index,-1,n/a,-3,Severe Hail Index,
+209,3,26,SHI,2-min,extent,-1,n/a,-3,Severe Hail Index,
 209,3,27,POSH,2-min,%,-1,n/a,-3,Prob of Severe Hail,
 209,3,28,MESH,2-min,mm,-1,n/a,-3,Maximum Estimated Size of Hail (MESH),
 209,3,29,MESHMax30min,2-min,mm,-1,n/a,-3,MESH Hail Swath 30-min,

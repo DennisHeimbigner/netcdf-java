@@ -389,14 +389,14 @@
 	 parameterCategory = 128 ;
 	 parameterNumber = 65 ;
 	}
-#Leaf area index, low vegetation
-'Leaf area index, low vegetation' = {
+#Leaf area extent, low vegetation
+'Leaf area extent, low vegetation' = {
 	 discipline = 192 ;
 	 parameterCategory = 128 ;
 	 parameterNumber = 66 ;
 	}
-#Leaf area index, high vegetation
-'Leaf area index, high vegetation' = {
+#Leaf area extent, high vegetation
+'Leaf area extent, high vegetation' = {
 	 discipline = 192 ;
 	 parameterCategory = 128 ;
 	 parameterNumber = 67 ;
@@ -1589,14 +1589,14 @@
 	 parameterCategory = 200 ;
 	 parameterNumber = 65 ;
 	}
-#Leaf area index, low vegetation
-'Leaf area index, low vegetation' = {
+#Leaf area extent, low vegetation
+'Leaf area extent, low vegetation' = {
 	 discipline = 192 ;
 	 parameterCategory = 200 ;
 	 parameterNumber = 66 ;
 	}
-#Leaf area index, high vegetation
-'Leaf area index, high vegetation' = {
+#Leaf area extent, high vegetation
+'Leaf area extent, high vegetation' = {
 	 discipline = 192 ;
 	 parameterCategory = 200 ;
 	 parameterNumber = 67 ;
@@ -13193,26 +13193,26 @@
 	 parameterCategory = 228 ;
 	 parameterNumber = 28 ;
 	}
-#Soil wetness index in layer 1
-'Soil wetness index in layer 1' = {
+#Soil wetness extent in layer 1
+'Soil wetness extent in layer 1' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
 	 parameterNumber = 40 ;
 	}
-#Soil wetness index in layer 2
-'Soil wetness index in layer 2' = {
+#Soil wetness extent in layer 2
+'Soil wetness extent in layer 2' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
 	 parameterNumber = 41 ;
 	}
-#Soil wetness index in layer 3
-'Soil wetness index in layer 3' = {
+#Soil wetness extent in layer 3
+'Soil wetness extent in layer 3' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
 	 parameterNumber = 42 ;
 	}
-#Soil wetness index in layer 4
-'Soil wetness index in layer 4' = {
+#Soil wetness extent in layer 4
+'Soil wetness extent in layer 4' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
 	 parameterNumber = 43 ;
@@ -13785,14 +13785,14 @@
 	 parameterCategory = 129 ;
 	 parameterNumber = 65 ;
 	}
-#Leaf area index, low vegetation
-'Leaf area index, low vegetation' = {
+#Leaf area extent, low vegetation
+'Leaf area extent, low vegetation' = {
 	 discipline = 192 ;
 	 parameterCategory = 129 ;
 	 parameterNumber = 66 ;
 	}
-#Leaf area index, high vegetation
-'Leaf area index, high vegetation' = {
+#Leaf area extent, high vegetation
+'Leaf area extent, high vegetation' = {
 	 discipline = 192 ;
 	 parameterCategory = 129 ;
 	 parameterNumber = 67 ;
@@ -15081,14 +15081,14 @@
 	 parameterCategory = 131 ;
 	 parameterNumber = 16 ;
 	}
-#Showalter index probability
-'Showalter index probability' = {
+#Showalter extent probability
+'Showalter extent probability' = {
 	 discipline = 192 ;
 	 parameterCategory = 131 ;
 	 parameterNumber = 17 ;
 	}
-#Whiting index probability
-'Whiting index probability' = {
+#Whiting extent probability
+'Whiting extent probability' = {
 	 discipline = 192 ;
 	 parameterCategory = 131 ;
 	 parameterNumber = 18 ;
@@ -16117,8 +16117,8 @@
 	 parameterCategory = 140 ;
 	 parameterNumber = 252 ;
 	}
-#Benjamin-Feir index
-'Benjamin-Feir index' = {
+#Benjamin-Feir extent
+'Benjamin-Feir extent' = {
 	 discipline = 192 ;
 	 parameterCategory = 140 ;
 	 parameterNumber = 253 ;
@@ -19843,20 +19843,20 @@
 	 parameterCategory = 201 ;
 	 parameterNumber = 70 ;
 	}
-#KO-index
-'KO-index' = {
+#KO-extent
+'KO-extent' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
 	 parameterNumber = 71 ;
 	}
-#convection base index
-'convection base index' = {
+#convection base extent
+'convection base extent' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
 	 parameterNumber = 72 ;
 	}
-#convection top index
-'convection top index' = {
+#convection top extent
+'convection top extent' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
 	 parameterNumber = 73 ;
@@ -19915,8 +19915,8 @@
 	 parameterCategory = 201 ;
 	 parameterNumber = 82 ;
 	}
-#dry convection top index
-'dry convection top index' = {
+#dry convection top extent
+'dry convection top extent' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
 	 parameterNumber = 83 ;
@@ -20443,8 +20443,8 @@
 	 parameterCategory = 210 ;
 	 parameterNumber = 93 ;
 	}
-#Wildfire vegetation map index
-'Wildfire vegetation map index' = {
+#Wildfire vegetation map extent
+'Wildfire vegetation map extent' = {
 	 discipline = 192 ;
 	 parameterCategory = 210 ;
 	 parameterNumber = 94 ;
@@ -21211,8 +21211,8 @@
 	 parameterCategory = 211 ;
 	 parameterNumber = 93 ;
 	}
-#Wildfire vegetation map index
-'Wildfire vegetation map index' = {
+#Wildfire vegetation map extent
+'Wildfire vegetation map extent' = {
 	 discipline = 192 ;
 	 parameterCategory = 211 ;
 	 parameterNumber = 94 ;

@@ -133,7 +133,7 @@
 135:var135:Height of Cloud Base [m]
 136:var136:Temperature at Cloud Tops [K]
 137:var137:Speed of Sound [m/s]
-138:var138:Clear Air Turbulence  scaled Elrod index  [%]
+138:var138:Clear Air Turbulence  scaled Elrod extent  [%]
 139:var139:Probability of Contrail Formation [%]
 140:var140:Ice Drift U-Component [m]
 141:var141:Ice Drift V-Component [m]

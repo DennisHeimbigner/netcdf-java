@@ -22,7 +22,7 @@ A `GridCoordSystem` at a minimum has a `Lat` and `Lon` coordinate axis, or a `Ge
 It usually has a time coordinate axis. It may optionally have a vertical coordinate axis, classified as `Height`, `Pressure`, or `GeoZ`.
 If it is a `GeoZ` axis, it may have a vertical transform that maps `GeoZ` to height or pressure. A `Grid` may also optionally have a `Runtime` and/or `Ensemble` coordinate axis.
 
-A `GridDataset` (aka Grid) has a `GridCoordSystem`, whose dimensions are all connected, meaning that neighbors in index space are connected neighbors in coordinate space.
+A `GridDataset` (aka Grid) has a `GridCoordSystem`, whose dimensions are all connected, meaning that neighbors in extent space are connected neighbors in coordinate space.
 This means that data values that are close to each other in the real world (coordinate space) are close to each other in the data array, and are usually stored close to each other on disk, making coordinate subsetting easy and efficient.
 
 A `GridDataset` has `Grids` that can be grouped based on common attributes and `GridCoordSystems`. Below is the UML for the Grid interface classes, found in the ucar.nc2.dt package:
@@ -69,14 +69,14 @@ Most `GridCoordSystems` have a `CoordinateAxis1DTime` time coordinate. If so, yo
 
 A `GridDatatype` is like a specialized `Variable` that explicitly handles X,Y,Z,T dimensions, which are put into canonical order: (t, z, y, x).
 It has various convenience routines that expose methods from the `GridCoordSystem` and `VariableDS` objects.
-The main data access method is `readDataSlice()`, where you can fix an index on any `Dimension`, or use a -1 to get all the data in that `Dimension`.
+The main data access method is `readDataSlice()`, where you can fix an extent on any `Dimension`, or use a -1 to get all the data in that `Dimension`.
 
 {% capture rmd %}
 {% includecodeblock netcdf-java&docs/src/test/java/examples/featuretypes/GridDatasetsTutorial.java&readingData %}
 {% endcapture %}
 {{ rmd | markdownify }}
 
-The subset method allows you to create a logical subset of a `GeoGrid` using index `Ranges`.
+The subset method allows you to create a logical subset of a `GeoGrid` using extent `Ranges`.
 
 {% capture rmd %}
 {% includecodeblock netcdf-java&docs/src/test/java/examples/featuretypes/GridDatasetsTutorial.java&CallMakeSubset %}

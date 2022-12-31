@@ -13289,7 +13289,7 @@ and hydrological elements </catalogueName>
 		</feature>
 		<feature ID="F0X13Y042">
 			<annotation>
-				<documentation>Parcel lifted index (to 500 hPa)<p>
+				<documentation>Parcel lifted extent (to 500 hPa)<p>
 						<a href="#B_class_13_3">Note 3</a>
 					</p>
 					<p>
@@ -13315,7 +13315,7 @@ and hydrological elements </catalogueName>
 		</feature>
 		<feature ID="F0X13Y043">
 			<annotation>
-				<documentation>Best lifted index (to 500 hPa)<p>
+				<documentation>Best lifted extent (to 500 hPa)<p>
 						<a href="#B_class_13_3">Note 3</a>
 					</p>
 					<p>
@@ -13341,7 +13341,7 @@ and hydrological elements </catalogueName>
 		</feature>
 		<feature ID="F0X13Y044">
 			<annotation>
-				<documentation>K index</documentation>
+				<documentation>K extent</documentation>
 			</annotation>
 			<name>BHy_K_Index</name>
 			<F>0</F>
@@ -13361,7 +13361,7 @@ and hydrological elements </catalogueName>
 		</feature>
 		<feature ID="F0X13Y045">
 			<annotation>
-				<documentation>KO index</documentation>
+				<documentation>KO extent</documentation>
 			</annotation>
 			<name>BHy_KO_Index</name>
 			<F>0</F>
@@ -13401,7 +13401,7 @@ and hydrological elements </catalogueName>
 		</feature>
 		<feature ID="F0X13Y047">
 			<annotation>
-				<documentation>Modified Showalter stability index <p>
+				<documentation>Modified Showalter stability extent <p>
 						<a href="#B_class_13_7">Note 7</a>
 					</p>
 				</documentation>
@@ -13923,12 +13923,12 @@ scaling or in CREX) shall indicate "snow cover not continuous".</p>
 		<note ID="B_class_13_3">
 			<note>
 				<p>(3) The
-"parcel lifted index" (as defined in the International Meteorological
-Vocabulary (WMO-No. 182) under the listing "lifted index") is defined as the
+"parcel lifted extent" (as defined in the International Meteorological
+Vocabulary (WMO-No. 182) under the listing "lifted extent") is defined as the
 temperature difference between the ambient 500 hPa temperature (T500) and that
 of a parcel of air lifted from the surface (Tparcel) following the dry and
 moist adiabatic process. Negative values of (T500 - Tparcel) suggest
-instability. The "best lifted index" is defined as the most unstable of a
+instability. The "best lifted extent" is defined as the most unstable of a
 collection of parcel lifted indices, with parcel initial conditions defined for
 a collection of 30 hPa thick layers stacked one upon the other with the lowest
 resting on the ground. Commonly four to six such layers are used in the
@@ -13963,7 +13963,7 @@ is possible that only the processed data would ever be sent.</p>
 		</note>
 		<note ID="B_class_13_7">
 			<note>
-				<p>(7) The "Modified Showalter stability index" is defined as the
+				<p>(7) The "Modified Showalter stability extent" is defined as the
 temperature difference between the ambient 500 hPa temperature and the
 temperature a parcel of air, initially at a selected base level, would have if
 brought from its condensation level to the 500 hPa surface by a moist adiabatic
@@ -14876,7 +14876,7 @@ radiance </catalogueName>
 		</feature>
 		<feature ID="F0X14Y055">
 			<annotation>
-				<documentation>Solar activity index</documentation>
+				<documentation>Solar activity extent</documentation>
 			</annotation>
 			<name>BRR_solarActivityIndex</name>
 			<F>0</F>
@@ -15375,7 +15375,7 @@ the sonde, multiplied by 0 15 004.</p>
 		<note ID="B_class_15_5">
 			<note>
 				<p>(5)
-The refractivity, <i>N</i>, is related to the refractive index, <i>n</i> by the
+The refractivity, <i>N</i>, is related to the refractive extent, <i>n</i> by the
 formula <i>N</i> = 10<sup>6 </sup>(<i>n </i>- 1). <i>N</i> is therefore
 dimensionless but values computed by the formula are by convention described as
 being in N-units.</p>
@@ -17074,7 +17074,7 @@ phenomena </catalogueName>
 		</feature>
 		<feature ID="F0X20Y050">
 			<annotation>
-				<documentation>Cloud index</documentation>
+				<documentation>Cloud extent</documentation>
 			</annotation>
 			<name>BObs_cloudIndex</name>
 			<F>0</F>
@@ -19033,7 +19033,7 @@ meteorological phenomena.</p>
 		</feature>
 		<feature ID="F0X21Y121">
 			<annotation>
-				<documentation>SEAWINDS NOF rain index<p>
+				<documentation>SEAWINDS NOF rain extent<p>
 						<a href="#B_class_21_1">Note 1</a>
 					</p>
 				</documentation>
@@ -23821,7 +23821,7 @@ information </catalogueName>
 		</feature>
 		<feature ID="F0X25Y091">
 			<annotation>
-				<documentation>Structure constant of the refraction index (Cn2)</documentation>
+				<documentation>Structure constant of the refraction extent (Cn2)</documentation>
 			</annotation>
 			<name>BPI_structureConst</name>
 			<F>0</F>
@@ -26359,7 +26359,7 @@ information </catalogueName>
 		</feature>
 		<feature ID="F0X33Y062">
 			<annotation>
-				<documentation>GqisQualIndexLoc - indicator for geometric quality index</documentation>
+				<documentation>GqisQualIndexLoc - indicator for geometric quality extent</documentation>
 			</annotation>
 			<name>BQI_ GqisQualIndexLoc</name>
 			<F>0</F>

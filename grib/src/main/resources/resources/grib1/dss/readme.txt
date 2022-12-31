@@ -19,7 +19,7 @@ DSS GRIB1 table notes
     **No key 200 (GridParameter{number=200, name='MAXSWH', description='Maximum of significant wave height', unit='m'}) in first table
     **No key 217 (GridParameter{number=217, name='TMAX', description='Period corresponding to maximum individual wave height', unit='s'}) in first table
     **No key 218 (GridParameter{number=218, name='HMAX', description='Maximum individual wave height', unit='m'}) in first table
-    **No key 253 (GridParameter{number=253, name='BFI', description='Benjamin-Feir index', unit='-'}) in first table
+    **No key 253 (GridParameter{number=253, name='BFI', description='Benjamin-Feir extent', unit='-'}) in first table
     **No key 254 (GridParameter{number=254, name='WSP', description='Wave spectral peakedness', unit='s**-1'}) in first table
   - use tables from ECMWF GRIBEX, remove DSS tables for center 98
 

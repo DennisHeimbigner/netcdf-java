@@ -14,7 +14,7 @@
       <documentation type="summary">NCEP GFS Model : AWIPS 203 (J) Grid. National - Alaska (polar stereographic). Model runs are made at 0, 6, 12, and 18Z, with analysis and forecasts every 6 hours out 5 days. Horizontal = 45 by 39 points, resolution 190.5 km, Polar Stereographic projection. Vertical = 1000 to 100 hPa mandatory pressure levels (10 levels); surface, height above ground, pressure layers.</documentation>
       <documentation type="summary">NCEP Model output</documentation>
       <documentation type="rights">Freely available</documentation>
-      <documentation xlink:href="http://www.emc.ncep.noaa.gov/modelinfo/index.html" xlink:title="NCEP Model documentation"></documentation>
+      <documentation xlink:href="http://www.emc.ncep.noaa.gov/modelinfo/extent.html" xlink:title="NCEP Model documentation"></documentation>
       <documentation type="processing_level">Transmitted through Unidata Internet Data Distribution.</documentation>
       <documentation>Previously called AVN/MRF (Medium Range Forecast)</documentation>
       <creator>
@@ -58,7 +58,7 @@
         <variable name="Relative_humidity" vocabulary_name="52" units="%">Relative humidity @ isobaric3</variable>
         <variable name="Relative_humidity_layer_between_two_sigmas" vocabulary_name="52" units="%">Relative humidity @ layer_between_two_sigmas</variable>
         <variable name="Relative_humidity_layer_between_two_pressure_difference_from_ground" vocabulary_name="52" units="%">Relative humidity @ layer_between_two_pressure_difference_from_ground</variable>
-        <variable name="Surface_lifted_index" vocabulary_name="131" units="K">Surface lifted index @ surface</variable>
+        <variable name="Surface_lifted_index" vocabulary_name="131" units="K">Surface lifted extent @ surface</variable>
         <variable name="Temperature" vocabulary_name="11" units="K">Temperature @ isobaric1</variable>
         <variable name="Temperature_tropopause" vocabulary_name="11" units="K">Temperature @ tropopause</variable>
         <variable name="Temperature_height_above_ground" vocabulary_name="11" units="K">Temperature @ height_above_ground</variable>

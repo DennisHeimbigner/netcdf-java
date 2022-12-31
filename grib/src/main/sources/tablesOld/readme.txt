@@ -60,10 +60,10 @@ NCEP-2 :[GRIB table for the NCEP operational files as of 10-21-96]
 
 ECMWF (European Centre for Medium-Range Weather Forecasts):
     http://www.ecmwf.int/
-ECMWF Grib tables index:
+ECMWF Grib tables extent:
 
     http://www.ecmwf.int/publications/manuals/libraries/tables/tables_
-    index.html
+    extent.html
     128
     129 (Gradients)
     130 (ASTEX)

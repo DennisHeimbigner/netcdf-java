@@ -60,7 +60,7 @@ There is just enough information in the stream to break the stream into messages
 
 ~~~
 message Data {
-  required string varName = 1; // full escaped name. change to hash or index to save space ??
+  required string varName = 1; // full escaped name. change to hash or extent to save space ??
   required DataType dataType = 2;
   optional Section section = 3; // not required for Sequence
   optional bool bigend = 4 [default = true];
@@ -70,7 +70,7 @@ message Data {
 }
 ~~~
 
-1. full name of variable (should this be index or hash in order to save space ?)
+1. full name of variable (should this be extent or hash in order to save space ?)
 2. data type
 3. section
 4. stored in big or small end. reader makes right.

@@ -661,7 +661,7 @@
 <CodeFigure_DataCategories>12</CodeFigure_DataCategories>
 <Name_DataCategories_en>Surface data (satellite)</Name_DataCategories_en>
 <CodeFigure_InternationalDataSubcategories>9</CodeFigure_InternationalDataSubcategories>
-<Name_InternationalDataSubcategories_en>Normalized differential vegetation index (NDVI)</Name_InternationalDataSubcategories_en>
+<Name_InternationalDataSubcategories_en>Normalized differential vegetation extent (NDVI)</Name_InternationalDataSubcategories_en>
 <Status>Operational</Status>
 </Common_C13_20181107_en>
 <Common_C13_20181107_en>

@@ -2233,7 +2233,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 0: temperature</SubTitle_E>
 <CodeFlag>12</CodeFlag>
-<MeaningParameterDescription_E>Heat index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Heat extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -3866,7 +3866,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 4: short-wave radiation</SubTitle_E>
 <CodeFlag>50</CodeFlag>
-<MeaningParameterDescription_E>UV index (under clear sky)</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>UV extent (under clear sky)</MeaningParameterDescription_E>
 <Note_E>**#GRIB2_6_0_1_codeflag.doc#G2_CF42_04n</Note_E>
 <AsciiUnitComments_E>Numeric</AsciiUnitComments_E>
 <Status>Operational</Status>
@@ -3876,7 +3876,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 4: short-wave radiation</SubTitle_E>
 <CodeFlag>51</CodeFlag>
-<MeaningParameterDescription_E>UV index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>UV extent</MeaningParameterDescription_E>
 <Note_E>**#GRIB2_6_0_1_codeflag.doc#G2_CF42_04n</Note_E>
 <AsciiUnitComments_E>Numeric</AsciiUnitComments_E>
 <Status>Operational</Status>
@@ -3940,7 +3940,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 2 - Land surface products, parameter category 0: vegetation/biomass</SubTitle_E>
 <CodeFlag>28</CodeFlag>
-<MeaningParameterDescription_E>Leaf area index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Leaf area extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>Numeric</AsciiUnitComments_E>
 <Status>Validation</Status>
 </Exp_codeflag_E>
@@ -3967,7 +3967,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 2 - Land surface products, parameter category 0: vegetation/biomass</SubTitle_E>
 <CodeFlag>31</CodeFlag>
-<MeaningParameterDescription_E>Normalized differential vegetation index (NDVI)</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Normalized differential vegetation extent (NDVI)</MeaningParameterDescription_E>
 <AsciiUnitComments_E>Numeric</AsciiUnitComments_E>
 <Status>Validation</Status>
 </Exp_codeflag_E>
@@ -4495,7 +4495,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>0</CodeFlag>
-<MeaningParameterDescription_E>Parcel lifted index (to 500 hPa)</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Parcel lifted extent (to 500 hPa)</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4504,7 +4504,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>1</CodeFlag>
-<MeaningParameterDescription_E>Best lifted index (to 500 hPa)</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Best lifted extent (to 500 hPa)</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4513,7 +4513,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>2</CodeFlag>
-<MeaningParameterDescription_E>K index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>K extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4522,7 +4522,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>3</CodeFlag>
-<MeaningParameterDescription_E>KO index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>KO extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4531,7 +4531,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>4</CodeFlag>
-<MeaningParameterDescription_E>Total totals index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Total totals extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4540,7 +4540,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>5</CodeFlag>
-<MeaningParameterDescription_E>Sweat index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Sweat extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>Numeric</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4576,7 +4576,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>9</CodeFlag>
-<MeaningParameterDescription_E>Energy helicity index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Energy helicity extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>Numeric</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4585,7 +4585,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>10</CodeFlag>
-<MeaningParameterDescription_E>Surface lifted index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Surface lifted extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4594,7 +4594,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>11</CodeFlag>
-<MeaningParameterDescription_E>Best (4-layer) lifted index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Best (4-layer) lifted extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -4612,7 +4612,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 0 - Meteorological products, parameter category 7: thermodynamic stability indices</SubTitle_E>
 <CodeFlag>13</CodeFlag>
-<MeaningParameterDescription_E>Showalter index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Showalter extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>K</AsciiUnitComments_E>
 <Status>Validation</Status>
 </Exp_codeflag_E>
@@ -5601,7 +5601,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 3 - Satellite products, parameter category 0: image format products</SubTitle_E>
 <CodeFlag>4</CodeFlag>
-<MeaningParameterDescription_E>Scaled lifted index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Scaled lifted extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>Numeric</AsciiUnitComments_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>
@@ -6929,7 +6929,7 @@
 <Title_E>Code table 4.2 - Parameter number by product discipline and parameter category</Title_E>
 <SubTitle_E>Product discipline 10 - Oceanographic products, parameter category 0: waves</SubTitle_E>
 <CodeFlag>44</CodeFlag>
-<MeaningParameterDescription_E>Benjamin-Feir index</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Benjamin-Feir extent</MeaningParameterDescription_E>
 <AsciiUnitComments_E>-</AsciiUnitComments_E>
 <Status>Validation</Status>
 </Exp_codeflag_E>
@@ -7953,7 +7953,7 @@
 <No>962</No>
 <Title_E>Code table 4.7 - Derived forecast</Title_E>
 <CodeFlag>5</CodeFlag>
-<MeaningParameterDescription_E>Large anomaly index of all members</MeaningParameterDescription_E>
+<MeaningParameterDescription_E>Large anomaly extent of all members</MeaningParameterDescription_E>
 <Note_E>*#GRIB2_6_0_1_codeflag.doc#G2_CF47n</Note_E>
 <Status>Operational</Status>
 </Exp_codeflag_E>

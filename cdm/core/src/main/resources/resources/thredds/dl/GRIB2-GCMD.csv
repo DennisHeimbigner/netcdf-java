@@ -10,7 +10,7 @@ Meteorological products,Temperature,Temperature,,,,,Atmosphere > Atmospheric Tem
 ,,temperature anomaly,,,,,Atmosphere > Atmospheric Temperature > Temperature Anomalies 
 ,,Latent heat net flux,,,,,Atmosphere > Atmospheric Radiation > Heat Flux
 ,,Sensible heat net flux,,,,,Atmosphere > Atmospheric Radiation > Heat Flux
-,,Heat index,,,,,n/a
+,,Heat extent,,,,,n/a
 ,,Wind chill factor,,,,,Atmosphere > Atmospheric Winds > Wind Chill 
 ,,Minimum dew point depression,,,,,Atmosphere > Atmospheric Temperature > Dew Point Temperature
 ,,Virtual potential temperature,,,,,Atmosphere > Atmospheric Temperature > Virtual Temperature 
@@ -109,16 +109,16 @@ Meteorological products,Temperature,Temperature,,,,,Atmosphere > Atmospheric Tem
 ,,Cloud base,,,,,Atmosphere > Clouds > Cloud Base
 ,,Cloud top,,,,,n/a
 ,,Ceiling,,,,,Atmosphere > Clouds > Cloud Ceiling 
-,Thermodynamic Stability Indices,Parcel lifted index,to 500 hPa,,,,n/a
-,,Best lifted index,to 500 hPa,,,,n/a
-,,K index,,,,,n/a
-,,KO index,,,,,n/a
-,,Total totals index,,,,,n/a
-,,Sweat index,,,,,n/a
+,Thermodynamic Stability Indices,Parcel lifted extent,to 500 hPa,,,,n/a
+,,Best lifted extent,to 500 hPa,,,,n/a
+,,K extent,,,,,n/a
+,,KO extent,,,,,n/a
+,,Total totals extent,,,,,n/a
+,,Sweat extent,,,,,n/a
 ,,Convvective available potential energy,,,,,n/a
 ,,Convective inhibition,,,,,n/a
 ,,Storm relative helicity,,,,,n/a
-,,Energy helocity index,,,,,n/a
+,,Energy helocity extent,,,,,n/a
 ,Aerosols,Aerosol type,,,,,Atmosphere > Aerosols
 ,Trace Gases,Total ozone,,,,,Atmosphere > Atmospheric Chemistry/Oxygen Compounds > Ozone 
 ,Radar,Base spectrum width,,,,,n/a
@@ -178,7 +178,7 @@ Space Products,Image format products,Scaled radiance,,,,,Spectral/Engineering > 
 ,,Scaled albedo,,,,,Atmosphere > Atmospheric Radiation > Albedo
 ,,Scaled brightness temperature,,,,,Spectral/Engineering > Infrared Wavelengths > Brightness Temperature 
 ,,Scaled precipitable water,,,,,Atmosphere > Atmospheric Water Vapor > Precipitable Water
-,,Scaled lifted index,,,,,n/a
+,,Scaled lifted extent,,,,,n/a
 ,,Scaled cloud top presure,,,,,Atmosphere > Clouds > Cloud Top Pressure
 ,,Scaled cloud top pressure,,,,,Atmosphere > Clouds > Cloud Top Pressure
 ,,Scaled skin temperature,,,,,Atmosphere > Atmospheric Temperature > Skin Temperature

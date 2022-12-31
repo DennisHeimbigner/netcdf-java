@@ -13,6 +13,7 @@ import dap4.core.util.*;
 import dap4.dap4lib.cdm.nc2.CDMCompiler;
 import dap4.dap4lib.cdm.nc2.DapNetcdfFile;
 import org.xml.sax.SAXException;
+import ucar.ma2.ArrayInt;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,36 +28,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.Checksum;
 
+import static dap4.core.util.DapConstants.*;
+
 /**
  * This Class wraps a DAP4 serialization (as chunked input)
- * and presents an API providing access to a compiled DMR
- * and a compiled DAP4 data.
+ * and exports access to a compiled DMR, a compiled DAP4 data stream,
+ * and various parameters such as byteorder of the data stream.
  *
- * It cannot be used standalone. Rather it needs to be fed
- * the bytes constituting the raw DAP data.
- * Its goal is to provide an interface to a sequence of bytes
- * representing serialized data, possibly including a leading DMR.
- * It then compiles that into internal structures that can be
- * used by DapNetcdfFile.
+ * Most of the work is done by this class. Its subclasses need
+ * only provide a raw byte stream to DAP4 chunked data taken
+ * from e.g. a raw data file or an HTTP connection.
+ *
+ * It cannot be used standalone.
  */
 
-public abstract class D4DSP {
+public abstract class D4DSP
+{
   //////////////////////////////////////////////////
   // Constants
 
   public static boolean DEBUG = false;
   protected static final boolean PARSEDEBUG = true;
 
- //////////////////////////////////////////////////
-  // Type Declarations
-
-  public enum ChecksumSource { LOCAL, REMOTE };
-
   //////////////////////////////////////////////////
   // Instance variables
 
-  protected DapNetcdfFile ncfile = null; // Container for this DSP
-  protected DapContext context = null;
   protected DapDataset dmr = null;
   protected String location = null;
 
@@ -65,17 +61,13 @@ public abstract class D4DSP {
   protected ByteBuffer data = null;
   protected XURI xuri = null;
 
-  // Context information
-  private ByteOrder localorder = ByteOrder.nativeOrder();
-  private ByteOrder remoteorder = null;
-  private ChecksumMode checksummode = null;
+  // Exported information
+  protected ByteOrder remoteorder = null;
+  protected ChecksumMode checksummode = null;
   protected RequestMode mode = null;
 
-  // Checksum information
-  // We have two checksum maps: one for the remotely calculated value
-  // and one for the locally calculated value.
-  protected Map<DapVariable,Long> localchecksummap = new HashMap<>();
-  protected Map<DapVariable,Long> remotechecksummap = new HashMap<>();
+  // DAP stream compilation
+  D4DataCompiler d4compiler = null;
 
   // CDM Translation
   protected CDMCompiler cdmCompiler = null;
@@ -84,11 +76,42 @@ public abstract class D4DSP {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public D4DSP() { // Must have a parameterless constructor
+  public D4DSP() {
   }
 
   //////////////////////////////////////////////////
+
+  /**
+   * "open" a reference to a data source and return the DSP wrapper.
+   *
+   * @param location - Object that defines the data source
+   * @param cmode
+   * @return = wrapping dsp
+   * @throws DapException
+   */
+  public D4DSP open(String location, ChecksumMode cmode) throws DapException {
+    this.location = location;
+    this.checksummode = cmode;
+    parseURL(location);
+    return this;
+  }
+
+
+  //////////////////////////////////////////////////
   // Accessors
+
+  public ChecksumMode getChecksumMode() {return this.checksummode;}
+
+  public Map<DapVariable, D4Cursor> getVariableDataMap() {
+    return this.variable_cursors;
+  }
+
+  public Map<DapVariable, Long> getChecksumMap(ChecksumSource src) {
+    if (src == ChecksumSource.LOCAL)
+      return this.d4compiler.localchecksummap;
+    else
+      return this.d4compiler.remotechecksummap;
+  }
 
   public ByteBuffer getData() {
     return this.data;
@@ -101,65 +124,37 @@ public abstract class D4DSP {
   protected D4DSP setData(InputStream stream, RequestMode mode) throws IOException {
     this.mode = mode;
     this.dechunkeddata = new ChunkedInput().dechunk(mode, stream);
-    if (mode == RequestMode.DAP)
+    if(mode == RequestMode.DAP)
       this.data = ByteBuffer.wrap(this.dechunkeddata.getData());
-    // This is the definitive byte order
-    setRemoteOrder(this.dechunkeddata.getOrder());
+    // This is the definitive remote byte order
+    this.remoteorder = this.dechunkeddata.getOrder();
     return this;
   }
 
-  public D4Cursor getVariableData(DapVariable var) throws DapException {
-    return this.variable_cursors.get(var);
+  public Map<DapVariable, D4Cursor> getVariableData() throws DapException {
+    return this.variable_cursors;
   }
 
-  public void addVariableData(DapVariable var, D4Cursor cursor) {
+  protected void addVariableData(DapVariable var, D4Cursor cursor) {
     this.variable_cursors.put(var, cursor);
-  }
-
-  public DapContext getContext() {
-    return this.context;
-  }
-
-  public void setContext(DapContext context) {
-    this.context = context;
-    // Extract some things from the context
-    // Do not override if already set
-    Object o = this.context.get(DapConstants.CHECKSUMTAG);
-    if (o != null && (getChecksumMode() == ChecksumMode.NONE || getChecksumMode() == null))
-      setChecksumMode(ChecksumMode.modeFor(o.toString()));
-  }
-
-  public String getLocation() {
-    return this.location;
-  }
-
-  public void setLocation(String loc) {
-    this.location = loc;
   }
 
   public DapDataset getDMR() {
     return this.dmr;
   }
 
-  public void setDMR(DapDataset dmr) {
+  protected void setDMR(DapDataset dmr) {
     this.dmr = dmr;
-    if (getDMR() != null) {
+    if(this.dmr != null) {
       // Add some canonical attributes to the <Dataset>
-      getDMR().setDataset(getDMR());
-      getDMR().setDapVersion(DapConstants.X_DAP_VERSION);
-      getDMR().setDMRVersion(DapConstants.X_DMR_VERSION);
-      getDMR().setNS(DapConstants.X_DAP_NS);
+      this.dmr.setDataset(this.dmr);
+      this.dmr.setDapVersion(DapConstants.X_DAP_VERSION);
+      this.dmr.setDMRVersion(DapConstants.X_DMR_VERSION);
+      this.dmr.setNS(DapConstants.X_DAP_NS);
     }
   }
 
-  public DapNetcdfFile getNetcdfFile() {
-    return this.ncfile;
-  }
-
-  public void setNetcdfFile(DapNetcdfFile file) {
-    this.ncfile = file;
-  }
-
+  /*
   public static String printDMR(DapDataset dmr) {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
@@ -171,129 +166,10 @@ public abstract class D4DSP {
     } catch (IOException e) {
     }
     return sw.toString();
-  }
-
-  public ByteOrder getLocalOrder() {
-    return this.localorder;
-  }
-
-  public ByteOrder getRemoteOrder() {
-    assert (this.remoteorder != null);
-    return this.remoteorder;
-  }
-
-  public void setRemoteOrder(ByteOrder order) {
-    this.remoteorder = order;
-  }
-
-  public ChecksumMode getChecksumMode() {
-    return this.checksummode;
-  }
-
-  public void setChecksumMode(ChecksumMode mode) {
-    if (mode != null)
-      this.checksummode = mode;
-  }
-
-  public RequestMode getRequestMode() {
-    return this.mode;
-  }
-
-  public void setRequestMode(RequestMode mode) {
-    this.mode = mode;
-  }
-
-  //////////////////////////////////////////////////
-  // Checksum support
-
-  public Map<DapVariable,Long> getChecksumMap(ChecksumSource src) {
-    switch (src) {
-      case LOCAL:
-        return this.localchecksummap;
-      case REMOTE:
-        return this.remotechecksummap;
-    }
-    return null;
-  }
-
-  public void setChecksum(ChecksumSource src, DapVariable dvar, Long csum) {
-    switch (src) {
-      case LOCAL:
-        this.localchecksummap.put(dvar,csum);
-      case REMOTE:
-        this.remotechecksummap.put(dvar,csum);
-    }
-  }
-
-  public void verifyChecksums() throws DapException {
-    if(getChecksumMode() != ChecksumMode.TRUE)
-      return;
-    for(DapVariable dvar: getDMR().getTopVariables()) {
-      // Verify the calculated checksums
-      Long remotechecksum = getChecksumMap(ChecksumSource.REMOTE).get(dvar);
-      Long localchecksum = getChecksumMap(ChecksumSource.LOCAL).get(dvar);
-      assert((localchecksum != null) && (remotechecksum != null));
-      if(!getContext().containsKey("hyrax")) {
-        if(localchecksum.longValue() != remotechecksum.longValue())
-          throw new DapException("Checksum mismatch: local=" + localchecksum + " remote=" + remotechecksum);
-      }
-      // Verify the checksum Attribute, if any
-      DapAttribute csumattr = dvar.getChecksumAttribute();
-      if(csumattr != null) {
-        assert (csumattr.getValues().length == 1 && csumattr.getBaseType() == DapType.INT32);
-        Long attrcsum = (long) 0;
-        try {
-          attrcsum = Long.parseLong(csumattr.getValues()[0]);
-        } catch (NumberFormatException nfe) {
-          throw new DapException("Illegal Checksum attribute value", nfe);
-        }
-        if(!getContext().containsKey("hyrax")) {
-          if(localchecksum.longValue() != attrcsum.longValue())
-            throw new DapException("Checksum mismatch: local=" + localchecksum + " attribute=" + attrcsum);
-        }
-      }
-    }
-  }
-
-  public void computeLocalChecksums() throws DapException {
-    Checksum crc32alg = new java.util.zip.CRC32();
-    ByteBuffer data = getData();
-    byte[] bytedata = data.array(); // Will need to change when we switch to RAF
-    for(DapVariable dvar : getDMR().getTopVariables()) {
-      crc32alg.reset();
-      // Get the extent of this variable vis-a-vis the data buffer
-      D4Cursor cursor = getVariableData(dvar);
-      long offset = cursor.getOffset();
-      long extent = cursor.getExtent();
-      assert (extent <= data.limit());
-      int savepos = data.position();
-      data.position(0);
-      // Slice out the part on which to compute the CRC32 and compute CRC32
-      crc32alg.update(bytedata, (int) offset, (int) extent);
-      long crc32 = crc32alg.getValue(); // get the digest value
-      crc32 = (crc32 & 0x00000000FFFFFFFFL); /* crc is 32 bits */
-      data.position(savepos);
-      setChecksum(ChecksumSource.LOCAL, dvar, crc32);
-    }
-    this.context.put("localchecksummap",this.localchecksummap); // contextualize it
-  }
+  }*/
 
   //////////////////////////////////////////////////
   // Subclass defined
-
-  /**
-   * "open" a reference to a data source and return the DSP wrapper.
-   * 
-   * @param location - Object that defines the data source
-   * @return = wrapping dsp
-   * @throws DapException
-   */
-  public abstract D4DSP open(String location) throws DapException;
-
-  /**
-   * @throws IOException
-   */
-  public abstract void close() throws IOException;
 
   /**
    * Determine if a path refers to an object processable by this DSP
@@ -309,12 +185,36 @@ public abstract class D4DSP {
 
   /**
    * Extract the DMR from available dechunked data
-   * 
+   *
    * @throws DapException
    */
-  abstract protected void loadDMR() throws DapException;
+  public void loadDMR() throws DapException {
+    String document = readDMR();
+    DapDataset dmr = parseDMR(document);
+    setDMR(dmr);
+  }
 
-  abstract protected void loadDAP() throws DapException;
+  public void loadDAP() throws DapException {
+    try {
+      // "Compile" the databuffer section of the server response
+      d4compiler = new D4DataCompiler(this, this.checksummode, this.remoteorder, this.data);
+      d4compiler.compile();
+    } catch (IOException ioe) {
+      throw new DapException(ioe);
+    }
+  }
+
+  public void loadContext(DapContext cxt, RequestMode mode) {
+    switch (mode) {
+      case DMR:
+        break;
+      case DAP:
+        cxt.put(ChecksumSource.REMOTE,d4compiler.getChecksumMap(ChecksumSource.REMOTE));
+        cxt.put(ChecksumSource.LOCAL,d4compiler.getChecksumMap(ChecksumSource.LOCAL));
+        cxt.put(D4Cursor.class,d4compiler.getVariableDataMap());
+        break;
+    }
+  }
 
   protected String readDMR() throws DapException {
     // Clean up dmr
@@ -349,36 +249,6 @@ public abstract class D4DSP {
       cdmCompiler.compileDMR();
       ncfile.setArrayMap(cdmCompiler.getArrayMap());
     }
-  }
-
-  public void ensuredata(DapNetcdfFile ncfile) throws DapException {
-    if (this.variable_cursors.size() == 0) { // do not call twice
-      loadDAP();
-      this.context.put("remotechecksummap",this.remotechecksummap);
-      this.context.put("localchecksummap",this.localchecksummap);
-      if (this.cdmCompiler == null)
-        this.cdmCompiler = new CDMCompiler(ncfile, this);
-      cdmCompiler.compileData(); // compile to CDM Arrays
-      ncfile.setArrayMap(cdmCompiler.getArrayMap());
-    }
-  }
-
-  /**
-   * Set various flags based on context and the query
-   *
-   * @param cxt
-   */
-  protected void contextualize(DapContext cxt) throws DapException {
-    ChecksumMode csum = null;
-    csum = getChecksumMode(); // priority 1
-    if (csum == null) { // priority 3
-      String mode = (String) cxt.get(DapConstants.CHECKSUMTAG);
-      csum = ChecksumMode.modeFor(mode);
-    }
-    if (csum == null)
-      csum = ChecksumMode.dfalt; // priority 4
-    if (csum != null)
-      setChecksumMode(ChecksumMode.asTrueFalse(csum));
   }
 
   protected void parseURL(String url) throws DapException {
@@ -461,7 +331,7 @@ public abstract class D4DSP {
     Object v = a.getValues();
     int len = java.lang.reflect.Array.getLength(v);
     if (len == 0)
-      setRemoteOrder(ByteOrder.LITTLE_ENDIAN);
+      this.remoteorder = ByteOrder.LITTLE_ENDIAN;
     else {
       String onezero = java.lang.reflect.Array.get(v, 0).toString();
       int islittle = 1;
@@ -471,9 +341,9 @@ public abstract class D4DSP {
         islittle = 1;
       }
       if (islittle == 0)
-        setRemoteOrder(ByteOrder.BIG_ENDIAN);
+        this.remoteorder = ByteOrder.BIG_ENDIAN;
       else
-        setRemoteOrder(ByteOrder.LITTLE_ENDIAN);
+        this.remoteorder = ByteOrder.LITTLE_ENDIAN;
     }
   }
 

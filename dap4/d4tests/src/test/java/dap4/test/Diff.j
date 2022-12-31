@@ -289,10 +289,10 @@ public class Diff {
 
     static boolean isBlankLine(String s)
     {
-        int index = 0;
+        int extent = 0;
         int len = s.length();
-        for(index=len-1;index>=0;index--) {
-            if(" \t\r".indexOf(s.charAt(index)) < 0) return false;
+        for(extent=len-1;extent>=0;extent--) {
+            if(" \t\r".indexOf(s.charAt(extent)) < 0) return false;
         }
         return true;
     }

@@ -13789,7 +13789,7 @@
 <FXY>008040</FXY>
 <ElementName_en>Flight level significance</ElementName_en>
 <CodeFigure>3</CodeFigure>
-<EntryName_en>Base pressure level for stability index</EntryName_en>
+<EntryName_en>Base pressure level for stability extent</EntryName_en>
 <Status>Operational</Status>
 </BUFRCREX_25_0_0_CodeFlag_en>
 <BUFRCREX_25_0_0_CodeFlag_en>
@@ -16636,7 +16636,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2229</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>0</CodeFigure>
 <EntryName_en>ave &lt; 0.1</EntryName_en>
 <EntryName_sub1_en>peak &lt;0.1</EntryName_sub1_en>
@@ -16645,7 +16645,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2230</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>1</CodeFigure>
 <EntryName_en>ave &lt; 0.1</EntryName_en>
 <EntryName_sub1_en>0.1 &lt;= peak &lt; 0.2</EntryName_sub1_en>
@@ -16654,7 +16654,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2231</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>2</CodeFigure>
 <EntryName_en>0.1 &lt;= ave &lt; 0.2</EntryName_en>
 <EntryName_sub1_en>0.1 &lt;= peak &lt; 0.2</EntryName_sub1_en>
@@ -16663,7 +16663,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2232</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>3</CodeFigure>
 <EntryName_en>ave &lt;0.1</EntryName_en>
 <EntryName_sub1_en>0.2 &lt;= peak &lt; 0.3</EntryName_sub1_en>
@@ -16672,7 +16672,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2233</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>4</CodeFigure>
 <EntryName_en>0.1 &lt;= ave &lt; 0.2</EntryName_en>
 <EntryName_sub1_en>0.2 &lt;= peak &lt; 0.3</EntryName_sub1_en>
@@ -16681,7 +16681,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2234</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>5</CodeFigure>
 <EntryName_en>0.2 &lt;= ave &lt; 0.3</EntryName_en>
 <EntryName_sub1_en>0.2 &lt;= peak &lt; 0.3</EntryName_sub1_en>
@@ -16690,7 +16690,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2235</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>6</CodeFigure>
 <EntryName_en>ave &lt; 0.1</EntryName_en>
 <EntryName_sub1_en>0.3 &lt;= peak &lt; 0.4</EntryName_sub1_en>
@@ -16699,7 +16699,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2236</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>7</CodeFigure>
 <EntryName_en>0.1 &lt;= ave &lt; 0.2</EntryName_en>
 <EntryName_sub1_en>0.3 &lt;= peak &lt; 0.4</EntryName_sub1_en>
@@ -16708,7 +16708,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2237</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>8</CodeFigure>
 <EntryName_en>0.2 &lt;= ave &lt; 0.3</EntryName_en>
 <EntryName_sub1_en>0.3 &lt;= peak &lt; 0.4</EntryName_sub1_en>
@@ -16717,7 +16717,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2238</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>9</CodeFigure>
 <EntryName_en>0.3 &lt;= ave &lt; 0.4</EntryName_en>
 <EntryName_sub1_en>0.3 &lt;= peak &lt; 0.4</EntryName_sub1_en>
@@ -16726,7 +16726,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2239</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>10</CodeFigure>
 <EntryName_en>ave &lt; 0.1</EntryName_en>
 <EntryName_sub1_en>0.4 &lt;= peak &lt; 0.5</EntryName_sub1_en>
@@ -16735,7 +16735,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2240</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>11</CodeFigure>
 <EntryName_en>0.1 &lt;= ave &lt; 0.2</EntryName_en>
 <EntryName_sub1_en>0.4 &lt;= peak &lt; 0.5</EntryName_sub1_en>
@@ -16744,7 +16744,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2241</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>12</CodeFigure>
 <EntryName_en>0.2 &lt;= ave &lt; 0.3</EntryName_en>
 <EntryName_sub1_en>0.4 &lt;= peak &lt; 0.5</EntryName_sub1_en>
@@ -16753,7 +16753,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2242</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>13</CodeFigure>
 <EntryName_en>0.3 &lt;= ave &lt; 0.4</EntryName_en>
 <EntryName_sub1_en>0.4 &lt;= peak &lt; 0.5</EntryName_sub1_en>
@@ -16762,7 +16762,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2243</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>14</CodeFigure>
 <EntryName_en>0.4 &lt;= ave &lt; 0.5</EntryName_en>
 <EntryName_sub1_en>0.4 &lt;= peak &lt; 0.5</EntryName_sub1_en>
@@ -16771,7 +16771,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2244</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>15</CodeFigure>
 <EntryName_en>ave &lt; 0.1</EntryName_en>
 <EntryName_sub1_en>0.5 &lt;= peak &lt; 0.8</EntryName_sub1_en>
@@ -16780,7 +16780,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2245</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>16</CodeFigure>
 <EntryName_en>0.1 &lt;= ave &lt; 0.2</EntryName_en>
 <EntryName_sub1_en>0.5 &lt;= peak &lt; 0.8</EntryName_sub1_en>
@@ -16789,7 +16789,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2246</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>17</CodeFigure>
 <EntryName_en>0.2 &lt;= ave &lt; 0.3</EntryName_en>
 <EntryName_sub1_en>0.5 &lt;= peak &lt; 0.8</EntryName_sub1_en>
@@ -16798,7 +16798,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2247</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>18</CodeFigure>
 <EntryName_en>0.3 &lt;= ave &lt; 0.4</EntryName_en>
 <EntryName_sub1_en>0.5 &lt;= peak &lt; 0.8</EntryName_sub1_en>
@@ -16807,7 +16807,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2248</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>19</CodeFigure>
 <EntryName_en>0.4 &lt;= ave &lt; 0.5</EntryName_en>
 <EntryName_sub1_en>0.5 &lt;= peak &lt; 0.8</EntryName_sub1_en>
@@ -16816,7 +16816,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2249</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>20</CodeFigure>
 <EntryName_en>0.5 &lt;= ave &lt; 0.8</EntryName_en>
 <EntryName_sub1_en>0.5 &lt;= peak &lt; 0.8</EntryName_sub1_en>
@@ -16825,7 +16825,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2250</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>21</CodeFigure>
 <EntryName_en>ave &lt; 0.1</EntryName_en>
 <EntryName_sub1_en>0.8 &lt;= peak</EntryName_sub1_en>
@@ -16834,7 +16834,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2251</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>22</CodeFigure>
 <EntryName_en>0.1 &lt;= ave &lt; 0.2</EntryName_en>
 <EntryName_sub1_en>0.8 &lt;= peak</EntryName_sub1_en>
@@ -16843,7 +16843,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2252</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>23</CodeFigure>
 <EntryName_en>0.2 &lt;= ave &lt; 0.3</EntryName_en>
 <EntryName_sub1_en>0.8 &lt;= peak</EntryName_sub1_en>
@@ -16852,7 +16852,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2253</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>24</CodeFigure>
 <EntryName_en>0.3 &lt;= ave &lt; 0.4</EntryName_en>
 <EntryName_sub1_en>0.8 &lt;= peak</EntryName_sub1_en>
@@ -16861,7 +16861,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2254</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>25</CodeFigure>
 <EntryName_en>0.4 &lt;= ave &lt; 0.5</EntryName_en>
 <EntryName_sub1_en>0.8 &lt;= peak</EntryName_sub1_en>
@@ -16870,7 +16870,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2255</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>26</CodeFigure>
 <EntryName_en>0.5 &lt;= ave &lt; 0.8</EntryName_en>
 <EntryName_sub1_en>0.8 &lt;= peak</EntryName_sub1_en>
@@ -16879,7 +16879,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2256</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>27</CodeFigure>
 <EntryName_en>0.8 &lt;= ave</EntryName_en>
 <EntryName_sub1_en>0.8 &lt;= peak</EntryName_sub1_en>
@@ -16888,7 +16888,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2257</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>28</CodeFigure>
 <EntryName_en>Nil</EntryName_en>
 <EntryName_sub1_en>Nil</EntryName_sub1_en>
@@ -16897,7 +16897,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2258</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>29-62</CodeFigure>
 <EntryName_en>Reserved</EntryName_en>
 <EntryName_sub1_en>Reserved</EntryName_sub1_en>
@@ -16906,7 +16906,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>2259</No>
 <FXY>011037</FXY>
-<ElementName_en>Turbulence index</ElementName_en>
+<ElementName_en>Turbulence extent</ElementName_en>
 <CodeFigure>63</CodeFigure>
 <EntryName_en>Missing value</EntryName_en>
 <EntryName_sub1_en>Missing value</EntryName_sub1_en>
@@ -24374,7 +24374,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3186</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>0</CodeFigure>
 <EntryName_en>Reserved</EntryName_en>
 <Status>Operational</Status>
@@ -24382,7 +24382,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3187</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>1</CodeFigure>
 <EntryName_en>1st low cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24390,7 +24390,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3188</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>2</CodeFigure>
 <EntryName_en>2nd low cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24398,7 +24398,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3189</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>3</CodeFigure>
 <EntryName_en>3rd low cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24406,7 +24406,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3190</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>4</CodeFigure>
 <EntryName_en>1st medium cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24414,7 +24414,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3191</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>5</CodeFigure>
 <EntryName_en>2nd medium cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24422,7 +24422,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3192</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>6</CodeFigure>
 <EntryName_en>3rd medium cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24430,7 +24430,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3193</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>7</CodeFigure>
 <EntryName_en>1st high cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24438,7 +24438,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3194</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>8</CodeFigure>
 <EntryName_en>2nd high cloud</EntryName_en>
 <Status>Operational</Status>
@@ -24446,7 +24446,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3195</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>9-254</CodeFigure>
 <EntryName_en>Reserved</EntryName_en>
 <Status>Operational</Status>
@@ -24454,7 +24454,7 @@
 <BUFRCREX_25_0_0_CodeFlag_en>
 <No>3196</No>
 <FXY>020050</FXY>
-<ElementName_en>Cloud index</ElementName_en>
+<ElementName_en>Cloud extent</ElementName_en>
 <CodeFigure>255</CodeFigure>
 <EntryName_en>Missing value</EntryName_en>
 <Status>Operational</Status>
@@ -37222,7 +37222,7 @@
 <FXY>033088</FXY>
 <ElementName_en>Ozone total column quality flag</ElementName_en>
 <CodeFigure>8</CodeFigure>
-<EntryName_en>Aerosol index limit exceeded</EntryName_en>
+<EntryName_en>Aerosol extent limit exceeded</EntryName_en>
 <Status>Operational</Status>
 </BUFRCREX_25_0_0_CodeFlag_en>
 <BUFRCREX_25_0_0_CodeFlag_en>
@@ -37270,7 +37270,7 @@
 <FXY>033088</FXY>
 <ElementName_en>Ozone total column quality flag</ElementName_en>
 <CodeFigure>14</CodeFigure>
-<EntryName_en>SO2 index &gt; 6 DU (degraded condition)</EntryName_en>
+<EntryName_en>SO2 extent &gt; 6 DU (degraded condition)</EntryName_en>
 <Status>Operational</Status>
 </BUFRCREX_25_0_0_CodeFlag_en>
 <BUFRCREX_25_0_0_CodeFlag_en>

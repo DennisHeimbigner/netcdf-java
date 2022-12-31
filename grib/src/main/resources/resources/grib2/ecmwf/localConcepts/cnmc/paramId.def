@@ -924,14 +924,14 @@
 	 parameterNumber = 27 ;
 	 typeOfFirstFixedSurface = 3 ;
 	}
-#base index (vertical level) of main convective cloud (i)
+#base extent (vertical level) of main convective cloud (i)
 '500120' = {
 	 discipline = 0 ;
 	 parameterCategory = 6 ;
 	 parameterNumber = 194 ;
 	 typeOfFirstFixedSurface = 1 ;
 	}
-#top index (vertical level) of main convective cloud (i)
+#top extent (vertical level) of main convective cloud (i)
 '500121' = {
 	 discipline = 0 ;
 	 parameterCategory = 6 ;
@@ -1142,14 +1142,14 @@
 	 typeOfFirstFixedSurface = 105 ;
 	 scaleFactorOfFirstFixedSurface = 0 ;
 	}
-#supercell detection index 1 (rot. up+down drafts)
+#supercell detection extent 1 (rot. up+down drafts)
 '500149' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
 	 parameterNumber = 192 ;
 	 typeOfFirstFixedSurface = 1 ;
 	}
-#supercell detection index 2 (only rot. up drafts)
+#supercell detection extent 2 (only rot. up drafts)
 '500150' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -1546,7 +1546,7 @@
 	 parameterNumber = 0 ;
 	 typeOfFirstFixedSurface = 1 ;
 	}
-#Leaf area index
+#Leaf area extent
 '500206' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1590,7 +1590,7 @@
 	 typeOfFirstFixedSurface = 1 ;
 	 typeOfStatisticalProcessing = 3 ;
 	}
-#Max Leaf area index
+#Max Leaf area extent
 '500212' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1598,7 +1598,7 @@
 	 typeOfStatisticalProcessing = 2 ;
 	 typeOfFirstFixedSurface = 1 ;
 	}
-#Min Leaf area index
+#Min Leaf area extent
 '500213' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1652,20 +1652,20 @@
 	 parameterNumber = 30 ;
 	 typeOfFirstFixedSurface = 1 ;
 	}
-#normalized differential vegetation index
+#normalized differential vegetation extent
 '500219' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
 	 parameterNumber = 31 ;
 	}
-#normalized differential vegetation index (NDVI)
+#normalized differential vegetation extent (NDVI)
 '500220' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
 	 parameterNumber = 31 ;
 	 typeOfStatisticalProcessing = 2 ;
 	}
-#ratio of monthly mean NDVI (normalized differential vegetation index) to annual maximum
+#ratio of monthly mean NDVI (normalized differential vegetation extent) to annual maximum
 '500221' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1673,7 +1673,7 @@
 	 typeOfFirstFixedSurface = 1 ;
 	 typeOfStatisticalProcessing = 0 ;
 	}
-#ratio of monthly mean NDVI (normalized differential vegetation index) to annual maximum
+#ratio of monthly mean NDVI (normalized differential vegetation extent) to annual maximum
 '500222' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -2134,7 +2134,7 @@
 	 typeOfFirstFixedSurface = 107 ;
 	 scaleFactorOfFirstFixedSurface = -2 ;
 	}
-#KO index
+#KO extent
 '500302' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;

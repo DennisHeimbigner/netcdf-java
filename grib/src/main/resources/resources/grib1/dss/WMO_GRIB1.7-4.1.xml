@@ -185,7 +185,7 @@
   </parameter>
   <parameter code="24">
     <shortName>PLI</shortName>
-    <description>Parcel lifted index (to 500hPa)</description>
+    <description>Parcel lifted extent (to 500hPa)</description>
     <units>K</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
@@ -588,7 +588,7 @@
   </parameter>
   <parameter code="77">
     <shortName>BLI</shortName>
-    <description>Best lifted index (to 500 hPa)</description>
+    <description>Best lifted extent (to 500 hPa)</description>
     <units>K</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
@@ -996,25 +996,25 @@
   </parameter>
   <parameter code="131">
     <shortName>LFTX</shortName>
-    <description>Surface lifted index</description>
+    <description>Surface lifted extent</description>
     <units>K</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
   <parameter code="132">
     <shortName>4LFTX</shortName>
-    <description>Best (4 layer) lifted index</description>
+    <description>Best (4 layer) lifted extent</description>
     <units>K</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
   <parameter code="133">
     <shortName>K X</shortName>
-    <description>K index</description>
+    <description>K extent</description>
     <units>K</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
   <parameter code="134">
     <shortName>S X</shortName>
-    <description>Sweat index</description>
+    <description>Sweat extent</description>
     <units>K</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
@@ -1331,7 +1331,7 @@
   </parameter>
   <parameter code="185">
     <shortName>TPFI</shortName>
-    <description>Turbulence potential forecast index</description>
+    <description>Turbulence potential forecast extent</description>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
   <parameter code="186">
@@ -1444,7 +1444,7 @@
   </parameter>
   <parameter code="206">
     <shortName>UVI</shortName>
-    <description>Ultra violet index (1 hour integration centered at solar noon)</description>
+    <description>Ultra violet extent (1 hour integration centered at solar noon)</description>
     <units>J m^-2</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>
@@ -1525,7 +1525,7 @@
   </parameter>
   <parameter code="218">
     <shortName>PREIX</shortName>
-    <description>precip.index(0.0-1.00)</description>
+    <description>precip.extent(0.0-1.00)</description>
     <units>fraction</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>

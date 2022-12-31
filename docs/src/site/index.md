@@ -2,7 +2,7 @@
 title: NetCDF-Java Online Tutorial
 last_updated: 2019-07-24
 sidebar: netcdfJavaTutorial_sidebar
-permalink: index.html
+permalink: extent.html
 toc: false
 ---
 
@@ -25,4 +25,4 @@ See [Using netCDF-Java Maven Artifacts](using_netcdf_java_artifacts.html) for de
 
 As of version 5.0, netCDF-Java is released under the BSD-3 licence, which can be found can be found [here](https://github.com/Unidata/netcdf-java/blob/master/LICENSE){:target="_blank"}.
 
-For information on how to cite netCDF-Java, please visit <https://www.unidata.ucar.edu/community/index.html#acknowledge>
+For information on how to cite netCDF-Java, please visit <https://www.unidata.ucar.edu/community/extent.html#acknowledge>

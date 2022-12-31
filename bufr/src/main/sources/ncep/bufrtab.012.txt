@@ -447,13 +447,13 @@
 *            ^^^^^^^^^^^^outer-beam sigma-0 (aft of satellite)^^^^^^^^^^^^^    *
 |          |                                                                   |
 * A note about the ISWV and wind values in WindSat data:                       |
-*     There are two replications of ISWV, the selected wind vector index       |
+*     There are two replications of ISWV, the selected wind vector extent       |
 *     (generated in different ways) which point to which one of the four sets  |
 *     of wind information should be chosen.  The values can be either 0, 1, 2  |
 *     or 3 corresponding to wind set 1, 2, 3 or 4, respectively.  The value in |
-*     the first replication is equal to the array index of the selected        |
+*     the first replication is equal to the array extent of the selected        |
 *     ambiguity as specified in the original WindSat dataset from the Navy.    |
-*     The value in the second replication is equal to the array index of the   |
+*     The value in the second replication is equal to the array extent of the   |
 *     selected ambiguity value based on the smallest calculated wind vector    |
 *     error (here vs. the GFS model prior to 2006 and vs. the Navy NOGAPS      |
 *     model in 2006).  The model values used to calculate the wind vector      |

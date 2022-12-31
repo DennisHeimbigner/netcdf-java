@@ -5,7 +5,7 @@ Converts [CDM DSGs](https://www.unidata.ucar.edu/software/thredds/current/netcdf
 
 ## Inclusion of third-party software
 
-This project contains source code from [ERDDAP](https://coastwatch.pfeg.noaa.gov/erddap/index.html).
+This project contains source code from [ERDDAP](https://coastwatch.pfeg.noaa.gov/erddap/extent.html).
 The license for ERDDAP is available in `docs/src/private/licenses/third-party/errdap/`.
 
 ### Details of use:

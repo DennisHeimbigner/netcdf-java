@@ -6,6 +6,7 @@
 
 package dap4.dap4lib.cdm.nc2;
 
+import dap4.core.util.DapContext;
 import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.DapDataset;
@@ -32,11 +33,13 @@ import java.util.Map;
  */
 
 public class CDMCompiler {
+
   public static boolean DEBUG = false;
 
   /*
    * ////////////////////////////////////////////////
    * Constants
+   *
    * ////////////////////////////////////////////////
    * Instance variables
    */
@@ -44,7 +47,6 @@ public class CDMCompiler {
   protected DapNetcdfFile ncfile = null;
   protected D4DSP dsp = null;
   protected DapDataset dmr = null;
-  protected Group cdmroot = null;
   protected NodeMap<CDMNode, DapNode> nodemap = null;
   protected Map<Variable, Array> arraymap = null;
 
@@ -55,13 +57,13 @@ public class CDMCompiler {
    * Constructor
    *
    * @param ncfile the target NetcdfDataset (as yet empty)
-   * @param dsp the DSP to be wrapped
+   * @param dsp
    */
 
   public CDMCompiler(DapNetcdfFile ncfile, D4DSP dsp) throws DapException {
     this.ncfile = ncfile;
     this.dsp = dsp;
-    this.dmr = dsp.getDMR();
+    this.dmr = this.dsp.getDMR();
   }
 
   //////////////////////////////////////////////////

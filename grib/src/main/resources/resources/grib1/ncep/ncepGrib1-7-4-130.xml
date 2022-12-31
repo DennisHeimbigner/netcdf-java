@@ -159,7 +159,7 @@
     </parameter>
     <parameter code="182">
         <shortName>LAI</shortName>
-        <description>Leaf area index (0-9)</description>
+        <description>Leaf area extent (0-9)</description>
         <units>unitless</units>
     </parameter>
     <parameter code="198">

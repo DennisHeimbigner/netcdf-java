@@ -786,7 +786,7 @@
  015043 NUMBER OF AVERAGING KERNEL LAYERS                                NUMERIC                    0            0  10 NUMERIC                   0         4
  015044 AVERAGING KERNEL VALUE                                           NUMERIC                    6     -5000000  24 NUMERIC                   6         8
  015045 Sulfur dioxide                                                   DU                         0            0  10 DU                        0         4
- 015046 Volcano contamination index                                      NUMERIC                    0            0  10 NUMERIC                   0         4
+ 015046 Volcano contamination extent                                      NUMERIC                    0            0  10 NUMERIC                   0         4
  015049 Aerosol Angstrom wavelength exponent                             NUMERIC                    4            0  16 NUMERIC                   4         5
  015051 METEOROLOGICAL OPTICAL RANGE                                     M                          0            0  18 M                         0         6
  019001 TYPE OF SYNOPTIC FEATURE                                         CODETABLE                  0            0   6 CODE TABLE                0         2

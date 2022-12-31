@@ -108,7 +108,7 @@
     <description>Radar spectra (3)</description>
   </parameter>
   <parameter code="24">
-    <description>Parcel lifted index (to 500hPa)</description>
+    <description>Parcel lifted extent (to 500hPa)</description>
   </parameter>
   <parameter code="25">
     <description>Temperature anomaly</description>
@@ -355,7 +355,7 @@
     <GCMD>EARTH SCIENCE > Atmosphere > Clouds > Cloud Liquid Water/Ice</GCMD>
   </parameter>
   <parameter code="77">
-    <description>Best lifted index (to 500 hPa)</description>
+    <description>Best lifted extent (to 500 hPa)</description>
   </parameter>
   <parameter code="78">
     <description>Convective snow</description>

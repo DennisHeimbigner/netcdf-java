@@ -3,9 +3,14 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.core.util;
+package dap4.dap4lib.util;
 
 import dap4.core.dmr.DapDimension;
+import dap4.core.interfaces.DataIndex;
+import dap4.core.util.DapException;
+import dap4.core.util.PowerSet;
+import dap4.core.util.Slice;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,7 +42,6 @@ public class MultiOdometer extends Odometer {
 
   public MultiOdometer(List<Slice> set, List<DapDimension> dimset) throws DapException {
     super(set, dimset);
-    super.ismulti = true;
     this.sizes = new long[this.rank];
     this.odomset = new ArrayList<>();
     for (int i = 0; i < this.rank; i++) {
@@ -75,7 +79,7 @@ public class MultiOdometer extends Odometer {
       assert this.slicesets.size() == pssize;
       // Create set of odometers comprising this MultiOdometer
       for (int i = 0; i < pssize; i++) {
-        Odometer sslodom = Odometer.factory(this.slicesets.get(i), dimset);
+        Odometer sslodom = OdometerFactory.build(this.slicesets.get(i), dimset);
         this.odomset.add(sslodom);
       }
     }
@@ -113,7 +117,7 @@ public class MultiOdometer extends Odometer {
   }
 
   @Override
-  public Index next() {
+  public DataIndex next() {
     if (this.current >= odomset.size())
       throw new NoSuchElementException();
     Odometer ocurrent = odomset.get(this.current);
@@ -141,6 +145,11 @@ public class MultiOdometer extends Odometer {
   @Override
   public List<Odometer> getSubOdometers() {
     return this.odomset;
+  }
+
+  @Override
+  public boolean isMulti() {
+    return true;
   }
 
 }

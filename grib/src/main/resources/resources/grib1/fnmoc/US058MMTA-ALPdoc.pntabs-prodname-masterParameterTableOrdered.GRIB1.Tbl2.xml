@@ -1311,7 +1311,7 @@
       <fnmocId>clr_air_turb</fnmocId>
       <name>clr_air_turb</name>
       <nameFull/>
-      <description>Scaled Elrod clear air turbulence index.</description>
+      <description>Scaled Elrod clear air turbulence extent.</description>
       <unitsFNMOC>1/s2</unitsFNMOC>
       <productionStatus>current</productionStatus>
     </entry>
@@ -1576,7 +1576,7 @@
       <name>evap_duct_ht</name>
       <nameFull/>
       <description>The estimated height of a duct formed from evaporation of seawater which begins at sea level and
-        rises to an elevation (duct height) corresponding to a change in the slope in the index of refraction.
+        rises to an elevation (duct height) corresponding to a change in the slope in the extent of refraction.
       </description>
       <unitsFNMOC>m</unitsFNMOC>
       <productionStatus>current</productionStatus>

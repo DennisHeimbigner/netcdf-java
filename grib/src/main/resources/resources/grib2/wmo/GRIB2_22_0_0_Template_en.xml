@@ -9639,7 +9639,7 @@
 <No>1438</No>
 <Title_en>Product definition template 4.55 - spatio-temporal changing tiles at a horizontal level or horizontal layer at a point in time</Title_en>
 <OctetNo>15</OctetNo>
-<Contents_en>Tile index (ITN = {1,…, NUT})</Contents_en>
+<Contents_en>Tile extent (ITN = {1,…, NUT})</Contents_en>
 <Note_en>(see Note 1)</Note_en>
 <Status>Operational</Status>
 </GRIB2_22_0_0_Template_en>
@@ -9799,7 +9799,7 @@
 <No>1459</No>
 <Title_en>Product definition template 4.56 - individual ensemble forecast, control and perturbed, at a horizontal level or in a horizontal layer at a point in time for spatio-temporal changing tile parameters</Title_en>
 <OctetNo>15</OctetNo>
-<Contents_en>Tile index (ITN = {1,…, NUT})</Contents_en>
+<Contents_en>Tile extent (ITN = {1,…, NUT})</Contents_en>
 <Note_en>(see Note 1)</Note_en>
 <Status>Deprecated</Status>
 </GRIB2_22_0_0_Template_en>
@@ -10335,7 +10335,7 @@
 <No>1531</No>
 <Title_en>Product definition template 4.59 - individual ensemble forecast, control and perturbed, at a horizontal level or in a horizontal layer at a point in time for spatio-temporal changing tile parameters</Title_en>
 <OctetNo>15</OctetNo>
-<Contents_en>Tile index (ITN = {1,…, NUT})</Contents_en>
+<Contents_en>Tile extent (ITN = {1,…, NUT})</Contents_en>
 <Note_en>(see Note 1)</Note_en>
 <Status>Operational</Status>
 </GRIB2_22_0_0_Template_en>

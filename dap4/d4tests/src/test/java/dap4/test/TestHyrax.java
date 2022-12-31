@@ -117,7 +117,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       String prefix = tuple[1];
       String query = tuple[2]; // excluding leading '?'
       // Unfortunately, The OPeNDAP test server does not appear to support https:
-      String url = server.getURL("http:") + "/" + prefix + "/" + file + INPUTEXT + INPUTQUERY + INPUTFRAG;
+      String url = server.getURL("http:") + "/" + prefix + "/" + file + INPUTEXT + INPUTQUERY;
       if (query != null)
         url += ("&" + DapConstants.CONSTRAINTTAG + "=" + query);
       url += INPUTFRAG;
@@ -125,7 +125,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(file, url, baseline, query);
       testcases.add(tc);
     }
-    singleTest(0, testcases); // choose single test for debugging
+    singleTest("AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", testcases); // choose single test for debugging
     return testcases;
   }
   //////////////////////////////////////////////////

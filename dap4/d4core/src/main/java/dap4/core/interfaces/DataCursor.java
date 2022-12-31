@@ -7,7 +7,6 @@ package dap4.core.interfaces;
 
 import dap4.core.dmr.DapNode;
 import dap4.core.util.DapException;
-import dap4.core.util.Index;
 import dap4.core.util.Slice;
 
 import java.util.List;
@@ -49,14 +48,11 @@ public interface DataCursor {
 
   public DapNode getTemplate();
 
-  public Index getIndex() throws DapException;
+  public DataIndex getIndex() throws DapException;
 
   public boolean isScalar();
 
   public boolean isField();
-
-  // Return null if top-level, else return the struct/seq from which this is derived
-  public DataCursor getContainer();
 
   //////////////////////////////////////////////////
   // Atomic Data Management
@@ -69,9 +65,9 @@ public interface DataCursor {
   // Even if the result is a scalar,
   // a 1-element array will be returned.
 
-  public Object read(List<Slice> slices) throws DapException;
+ // public Object read(List<Slice> slices) throws DapException;
 
-  public Object read(Index index) throws DapException;
+  public Object read(DataIndex index) throws DapException;
 
   //////////////////////////////////////////////////
   // Sequence record management

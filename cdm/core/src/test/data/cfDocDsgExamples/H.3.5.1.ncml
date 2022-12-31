@@ -31,7 +31,7 @@
     </variable>
 
 	<variable name="parentIndex" shape="obs" type="int">
-		<attribute name="long_name" value="index of profile"/>
+		<attribute name="long_name" value="extent of profile"/>
 		<attribute name="instance_dimension" value="profile"/>
 		<values>0 1 2 3 4 5 6 0 1 2 3 4 5 6 0 1 2 3 4 5 6 0 1 2 4 5 6 1 2 4 5 6 1 4 6 1 4</values>
 	</variable>

@@ -26,20 +26,20 @@ The Best dataset has a single forecast time coordinate, the same as 4.3 GRIB Col
 Implementation notes:
 
 The featureType attribute is now GRIB1 or GRIB2.
-For each GRIB file, a grib index is written, named <grib filename>.gbx9. Once written, this never has to be rewritten.
-For each reference time, a cdm index is written, named <collection.referenceTime>.ncx2. This occasionally has to be rewritten when new CDM versions are released, or if you modify your GRIB configuration.
-For each PartitionCollection, a cdm index is written named <collection name>.ncx2. This must be rewritten if any of the collection files change.
+For each GRIB file, a grib extent is written, named <grib filename>.gbx9. Once written, this never has to be rewritten.
+For each reference time, a cdm extent is written, named <collection.referenceTime>.ncx2. This occasionally has to be rewritten when new CDM versions are released, or if you modify your GRIB configuration.
+For each PartitionCollection, a cdm extent is written named <collection name>.ncx2. This must be rewritten if any of the collection files change.
 The cdm indexing uses extension .ncx2, in order to coexist with the .ncx indexes of previous versions. If you are upgrading to 4.5, and no longer running earlier versions, remove the ncx files (save the gbx9 files).
-For large collections, especially if they change, the THREDDS Data Manager (TDM) must be run as a separate process to update the index files. Generally it is strongly recommended to run the TDM, and configure the TDS to only read and never write the indexes.
+For large collections, especially if they change, the THREDDS Data Manager (TDM) must be run as a separate process to update the extent files. Generally it is strongly recommended to run the TDM, and configure the TDS to only read and never write the indexes.
 Collections in the millions of records are now feasible. Java 7 NIO2 package is used to efficiently scan directories.
 
 ### Version 4.6
 
 The GRIB Collections framework has been rewritten in CDM version 4.6, in order to handle very large collections efficiently. Oh wait we already did that in 4.5. Sorry, it wasnt good enough.
 
-Collection index files now use the suffix ncx3. These will be rewritten first time you access the files. The gbx9 files do NOT need to be rewritten, which is good because those are the slow ones.
+Collection extent files now use the suffix ncx3. These will be rewritten first time you access the files. The gbx9 files do NOT need to be rewritten, which is good because those are the slow ones.
 TimePartition can now be set to directory (default), file, a time period, or none. Details here.
-Multiple reference times are handled more efficiently, eg only one index file typically needs to be written.
+Multiple reference times are handled more efficiently, eg only one extent file typically needs to be written.
 Global attributes promoted to dataset properties in the catalog
 Internal changes:
 Internal memory use has been reduced.
@@ -85,7 +85,7 @@ This update element tells the TDS to use the existing indices, and to read them 
 This tdm element tells the TDM to test every 15 minutes if the collection has changed, and to rewrite the indices and and send a trigger to the TDS when it has changed.
 GRIB specific configuration.
 Resulting Datasets:
-The above example generates a TwoD and Best dataset for the entire collection, a reference to the latest datset, as well as one dataset for each reference time in the collection, which become nested datasets in the catalog. These datasets are named by their index files, in the form <collection-name>.<referenceTime>.ncx3, eg GFS-Puerto_Rico-20141110-000000.ncx3
+The above example generates a TwoD and Best dataset for the entire collection, a reference to the latest datset, as well as one dataset for each reference time in the collection, which become nested datasets in the catalog. These datasets are named by their extent files, in the form <collection-name>.<referenceTime>.ncx3, eg GFS-Puerto_Rico-20141110-000000.ncx3
 
 The simplified catalog is:
 ~~~

@@ -5,16 +5,14 @@
 
 package dap4.dap4lib.cdm.nc2;
 
+import dap4.core.util.*;
 import dap4.dap4lib.D4Cursor;
 import dap4.dap4lib.D4DSP;
+import dap4.dap4lib.D4Index;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
-import dap4.core.util.Convert;
-import dap4.core.util.DapException;
-import dap4.core.util.DapUtil;
-import dap4.core.util.Slice;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -31,7 +29,8 @@ import static dap4.dap4lib.D4Cursor.Scheme;
  * either top-level or for a member.
  */
 
-/* package */ class CDMArrayAtomic extends Array implements CDMArray {
+/* package */ class CDMArrayAtomic extends Array implements CDMArray
+{
   /////////////////////////////////////////////////////
   // Constants
 
@@ -43,7 +42,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
   protected DapType basetype = null;
 
   // CDMArray variables
-  protected dap4.dap4lib.D4Cursor data = null;
+  protected D4Cursor data = null;
   protected Group cdmroot = null;
   protected int elementsize = 0; // of one element
   protected long dimsize = 0; // # of elements in array; scalar uses value 1
@@ -53,24 +52,33 @@ import static dap4.dap4lib.D4Cursor.Scheme;
   // Constructor(s)
 
   /**
-   * Constructor
+   * Constructor(s)
    *
    * @param data D4Cursor object providing the actual data
    */
   CDMArrayAtomic(D4Cursor data) throws DapException {
     super(CDMTypeFcns.daptype2cdmtype(((DapVariable) data.getTemplate()).getBaseType()),
-        CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
-    this.dsp = data.getDSP();
+            CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
+    build(data);
+  }
+
+  protected CDMArrayAtomic(CDMArrayAtomic base, Index view, D4Cursor data) throws DapException {
+    super(CDMTypeFcns.daptype2cdmtype(((DapVariable) data.getTemplate()).getBaseType()),view);
+    build(data);
+  }
+
+  protected void build(D4Cursor data) {
     this.data = data;
+    this.dsp = data.getDSP();
     this.template = (DapVariable) this.data.getTemplate();
     this.basetype = this.template.getBaseType();
-
     this.dimsize = DapUtil.dimProduct(this.template.getDimensions());
     this.elementsize = this.basetype.getSize();
   }
 
   /////////////////////////////////////////////////
   // CDMArray Interface
+
   @Override
   public DapType getBaseType() {
     return this.basetype;
@@ -152,56 +160,56 @@ import static dap4.dap4lib.D4Cursor.Scheme;
 
   public double getDouble(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getDouble(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getDouble(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public float getFloat(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getFloat(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getFloat(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public long getLong(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getLong(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getLong(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public int getInt(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getInt(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getInt(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public short getShort(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getShort(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getShort(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public byte getByte(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getByte(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getByte(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public char getChar(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getChar(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getChar(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public boolean getBoolean(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getBoolean(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getBoolean(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public Object getObject(int offset) {
     DapVariable d4var = (DapVariable) getTemplate();
-    long[] dimsizes = DapUtil.getDimSizes(d4var.getDimensions());
-    return getObject(DapUtil.offsetToIndex(offset, dimsizes));
+    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
+    return getObject(D4Index.offsetToIndex(offset, dimsizes));
   }
 
   public Object getStorage() {
@@ -298,7 +306,10 @@ import static dap4.dap4lib.D4Cursor.Scheme;
   }
 
   protected Array createView(Index index) {
-    return this;
+    try {
+      CDMArrayAtomic view = new CDMArrayAtomic(this, index, this.data);
+      return view;
+    } catch (DapException de) {throw new IllegalArgumentException(de);}
   }
 
   //////////////////////////////////////////////////
@@ -310,7 +321,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to double if necessary.
    */
-  protected double getDouble(dap4.core.util.Index idx) {
+  protected double getDouble(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -328,7 +339,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to float if necessary.
    */
-  protected float getFloat(dap4.core.util.Index idx) {
+  protected float getFloat(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -345,7 +356,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to long if necessary.
    */
-  protected long getLong(dap4.core.util.Index idx) {
+  protected long getLong(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -362,7 +373,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to integer if necessary.
    */
-  protected int getInt(dap4.core.util.Index idx) {
+  protected int getInt(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -379,7 +390,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to short if necessary.
    */
-  protected short getShort(dap4.core.util.Index idx) {
+  protected short getShort(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -396,7 +407,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to byte if necessary.
    */
-  protected byte getByte(dap4.core.util.Index idx) {
+  protected byte getByte(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -413,7 +424,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to char if necessary.
    */
-  protected char getChar(dap4.core.util.Index idx) {
+  protected char getChar(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -430,7 +441,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to char if necessary.
    */
-  protected boolean getBoolean(dap4.core.util.Index idx) {
+  protected boolean getBoolean(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);
@@ -447,7 +458,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    * @param idx of element to get
    * @return value at <code>index</code> cast to Object if necessary.
    */
-  protected Object getObject(dap4.core.util.Index idx) {
+  protected Object getObject(D4Index idx) {
     assert data.getScheme() == Scheme.ATOMIC;
     try {
       Object value = data.read(idx);

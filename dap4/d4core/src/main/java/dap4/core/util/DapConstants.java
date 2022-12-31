@@ -57,6 +57,11 @@ public abstract class DapConstants {
 
 
   //////////////////////////////////////////////////
+  // Constants via Enumerations
+
+  public enum ChecksumSource { LOCAL, REMOTE };
+
+  //////////////////////////////////////////////////
   // Dap4 Annotations
 
   public static final String DAP4ENDIANTAG = "ucar.littleendian"; // value = 1 | 0

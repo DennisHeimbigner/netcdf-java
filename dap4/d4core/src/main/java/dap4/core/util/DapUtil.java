@@ -6,6 +6,8 @@
 package dap4.core.util;
 
 import dap4.core.dmr.*;
+import dap4.core.interfaces.DataIndex;
+
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -311,11 +313,11 @@ public abstract class DapUtil // Should only contain static methods
    * @return amount actually read
    * @throws IOException
    */
-  static public int readbinaryfilepartial(InputStream stream, byte[] buffer, int limit) throws IOException {
+  static public int readbinaryfilepartial(InputStream stream, byte[] buffer, int count) throws IOException {
     try {
       // Extract the stream into a bytebuffer
       int offset = 0;
-      int remainder = limit;
+      int remainder = count;
       while (remainder > 0) {
         int red = stream.read(buffer, offset, remainder);
         if (red <= 0)
@@ -669,78 +671,6 @@ public abstract class DapUtil // Should only contain static methods
    */
 
   /**
-   * Provide a helper function to convert an Index object to
-   * a slice list.
-   *
-   * @param indices indicate value to read
-   * @param template variable template
-   * @return corresponding List<Slice>
-   * @throws DapException
-   */
-
-  static public List<Slice> indexToSlices(Index indices, DapVariable template) throws dap4.core.util.DapException {
-    List<DapDimension> dims = template.getDimensions();
-    List<Slice> slices = indexToSlices(indices, dims);
-    return slices;
-  }
-
-  static public List<Slice> indexToSlices(Index indices, List<DapDimension> dimset) throws dap4.core.util.DapException {
-    List<Slice> slices = indexToSlices(indices);
-    return slices;
-  }
-
-  /**
-   * Provide a helper function to convert an offset to
-   * a slice list.
-   *
-   * @param offset offset
-   * @param template variable template
-   *
-   * @return slices
-   * @throws DapException
-   */
-  static public List<Slice> offsetToSlices(long offset, DapVariable template) throws DapException {
-    List<DapDimension> dims = template.getDimensions();
-    long[] dimsizes = DapUtil.getDimSizes(dims);
-    return indexToSlices(offsetToIndex(offset, dimsizes), template);
-  }
-
-  /**
-   * Given an offset (single index) and a set of dimensions
-   * compute the set of dimension indices that correspond
-   * to the offset.
-   */
-
-  static public Index offsetToIndex(long offset, long[] dimsizes) {
-    // offset = d3*(d2*(d1*(x1))+x2)+x3
-    long[] indices = new long[dimsizes.length];
-    for (int i = dimsizes.length - 1; i >= 0; i--) {
-      indices[i] = offset % dimsizes[i];
-      offset = (offset - indices[i]) / dimsizes[i];
-    }
-    return new Index(indices, dimsizes);
-  }
-
-  /**
-   * Given an offset (single index) and a set of dimensions
-   * compute the set of dimension indices that correspond
-   * to the offset.
-   */
-
-  static public List<Slice> indexToSlices(Index indices) throws DapException {
-    // short circuit the scalar case
-    if (indices.getRank() == 0)
-      return Slice.SCALARSLICES;
-    // offset = d3*(d2*(d1*(x1))+x2)+x3
-    List<Slice> slices = new ArrayList<>(indices.rank);
-    for (int i = 0; i < indices.rank; i++) {
-      long isize = indices.indices[i];
-      slices.add(new Slice(isize, isize + 1, 1, indices.dimsizes[i]));
-    }
-    return slices;
-  }
-
-  /**
    * Test if a set of slices represent a contiguous region
    * This is equivalent to saying all strides are one
    *
@@ -769,27 +699,6 @@ public abstract class DapUtil // Should only contain static methods
     return true;
   }
 
-  /**
-   * If a set of slices refers to a single position,
-   * then return the corresponding Index. Otherwise,
-   * throw Exception.
-   *
-   * @param slices
-   * @return Index corresponding to slices
-   * @throws DapException
-   */
-  static public Index slicesToIndex(List<Slice> slices) throws DapException {
-    long[] positions = new long[slices.size()];
-    long[] dimsizes = new long[slices.size()];
-    for (int i = 0; i < positions.length; i++) {
-      Slice s = slices.get(i);
-      if (s.getCount() != 1)
-        throw new DapException("Attempt to convert non-singleton sliceset to index");
-      positions[i] = s.getFirst();
-      dimsizes[i] = s.getMax();
-    }
-    return new Index(positions, dimsizes);
-  }
 
   static public List<Slice> dimsetToSlices(List<DapDimension> dimset) throws dap4.core.util.DapException {
     if (dimset == null || dimset.size() == 0)
@@ -810,5 +719,18 @@ public abstract class DapUtil // Should only contain static methods
     return (s.getFirst() == 0 && s.getStop() == 1);
   }
 
+  static public long[] longvector(int[] iv) {
+    long[] lv = new long[iv.length];
+    for(int i=0;i<iv.length;i++)
+      lv[i] = (long)iv[i];
+    return lv;
+  }
+
+  static public int[] intvector(long[] lv) {
+    int[] iv = new int[lv.length];
+    for(int i=0;i<lv.length;i++)
+      iv[i] = (int)lv[i];
+    return iv;
+  }
 }
 

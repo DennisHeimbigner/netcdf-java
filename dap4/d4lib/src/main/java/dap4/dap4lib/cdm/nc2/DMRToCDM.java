@@ -5,6 +5,7 @@
 
 package dap4.dap4lib.cdm.nc2;
 
+import dap4.core.util.DapContext;
 import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.NodeMap;
@@ -44,7 +45,7 @@ public class DMRToCDM {
   public DMRToCDM(DapNetcdfFile ncfile, D4DSP dsp) throws DapException {
     this.ncfile = ncfile;
     this.dsp = dsp;
-    this.dmr = dsp.getDMR();
+    this.dmr = this.dsp.getDMR();
     this.nodemap = new NodeMap<>();
   }
 

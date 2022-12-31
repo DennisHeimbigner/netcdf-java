@@ -22,7 +22,7 @@ public class MultiSlice extends Slice {
   protected List<Slice> subslices;
 
   // cache some values
-  protected long count = -1;
+  protected int count = -1;
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -78,7 +78,7 @@ public class MultiSlice extends Slice {
 
   @Override
   public int hashCode() {
-    long accum = 0;
+    int accum = 0;
     for (int i = 0; i < this.subslices.size(); i++) {
       Slice s = this.subslices.get(i);
       accum += s.hashCode() * i;
@@ -166,12 +166,12 @@ public class MultiSlice extends Slice {
 
 
   @Override
-  public long getCount() {
+  public int getCount() {
     return this.count;
   }
 
   @Override
-  public Slice setMaxSize(long size) throws DapException {
+  public Slice setMaxSize(int size) throws DapException {
     for (int i = 0; i < this.subslices.size(); i++) {
       this.subslices.get(i).setMaxSize(size);
     }

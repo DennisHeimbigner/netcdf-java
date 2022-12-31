@@ -389,13 +389,13 @@
 	 parameterCategory = 128 ;
 	 parameterNumber = 65 ;
 	}
-#Leaf area index, low vegetation
+#Leaf area extent, low vegetation
 'lai_lv' = {
 	 discipline = 192 ;
 	 parameterCategory = 128 ;
 	 parameterNumber = 66 ;
 	}
-#Leaf area index, high vegetation
+#Leaf area extent, high vegetation
 'lai_hv' = {
 	 discipline = 192 ;
 	 parameterCategory = 128 ;
@@ -1589,13 +1589,13 @@
 	 parameterCategory = 200 ;
 	 parameterNumber = 65 ;
 	}
-#Leaf area index, low vegetation
+#Leaf area extent, low vegetation
 'p66.200' = {
 	 discipline = 192 ;
 	 parameterCategory = 200 ;
 	 parameterNumber = 66 ;
 	}
-#Leaf area index, high vegetation
+#Leaf area extent, high vegetation
 'p67.200' = {
 	 discipline = 192 ;
 	 parameterCategory = 200 ;
@@ -13193,25 +13193,25 @@
 	 parameterCategory = 228 ;
 	 parameterNumber = 28 ;
 	}
-#Soil wetness index in layer 1
+#Soil wetness extent in layer 1
 'swi1' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
 	 parameterNumber = 40 ;
 	}
-#Soil wetness index in layer 2
+#Soil wetness extent in layer 2
 'swi2' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
 	 parameterNumber = 41 ;
 	}
-#Soil wetness index in layer 3
+#Soil wetness extent in layer 3
 'swi3' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
 	 parameterNumber = 42 ;
 	}
-#Soil wetness index in layer 4
+#Soil wetness extent in layer 4
 'swi4' = {
 	 discipline = 192 ;
 	 parameterCategory = 228 ;
@@ -13785,13 +13785,13 @@
 	 parameterCategory = 129 ;
 	 parameterNumber = 65 ;
 	}
-#Leaf area index, low vegetation
+#Leaf area extent, low vegetation
 'p66.129' = {
 	 discipline = 192 ;
 	 parameterCategory = 129 ;
 	 parameterNumber = 66 ;
 	}
-#Leaf area index, high vegetation
+#Leaf area extent, high vegetation
 'p67.129' = {
 	 discipline = 192 ;
 	 parameterCategory = 129 ;
@@ -15081,13 +15081,13 @@
 	 parameterCategory = 131 ;
 	 parameterNumber = 16 ;
 	}
-#Showalter index probability
+#Showalter extent probability
 'saip' = {
 	 discipline = 192 ;
 	 parameterCategory = 131 ;
 	 parameterNumber = 17 ;
 	}
-#Whiting index probability
+#Whiting extent probability
 'whip' = {
 	 discipline = 192 ;
 	 parameterCategory = 131 ;
@@ -16117,7 +16117,7 @@
 	 parameterCategory = 140 ;
 	 parameterNumber = 252 ;
 	}
-#Benjamin-Feir index
+#Benjamin-Feir extent
 'bfi' = {
 	 discipline = 192 ;
 	 parameterCategory = 140 ;
@@ -19843,19 +19843,19 @@
 	 parameterCategory = 201 ;
 	 parameterNumber = 70 ;
 	}
-#KO-index
+#KO-extent
 'p71.201' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
 	 parameterNumber = 71 ;
 	}
-#convection base index
+#convection base extent
 'bas_con' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
 	 parameterNumber = 72 ;
 	}
-#convection top index
+#convection top extent
 'top_con' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
@@ -19915,7 +19915,7 @@
 	 parameterCategory = 201 ;
 	 parameterNumber = 82 ;
 	}
-#dry convection top index
+#dry convection top extent
 'p83.201' = {
 	 discipline = 192 ;
 	 parameterCategory = 201 ;
@@ -20443,7 +20443,7 @@
 	 parameterCategory = 210 ;
 	 parameterNumber = 93 ;
 	}
-#Wildfire vegetation map index
+#Wildfire vegetation map extent
 'vegfire' = {
 	 discipline = 192 ;
 	 parameterCategory = 210 ;
@@ -21211,7 +21211,7 @@
 	 parameterCategory = 211 ;
 	 parameterNumber = 93 ;
 	}
-#Wildfire vegetation map index
+#Wildfire vegetation map extent
 'vegfirediff' = {
 	 discipline = 192 ;
 	 parameterCategory = 211 ;

@@ -59,6 +59,11 @@ public class HttpDSP extends D4DSP {
   //////////////////////////////////////////////////
   // DSP API
 
+  public D4DSP open(String fileurl, ChecksumMode cmode) throws DapException {
+    super.open(fileurl,cmode);
+    return this;
+  }
+
   /**
    * @param url
    * @param context Any parameters that may help to decide.
@@ -67,25 +72,6 @@ public class HttpDSP extends D4DSP {
   public boolean dspMatch(String url, DapContext context) {
     return DapProtocol.isDap4URI(url);
   }
-
-  @Override
-  public HttpDSP open(String url) throws DapException {
-    setLocation(url);
-    parseURL(url);
-    contextualize(getContext());
-    String methodurl = getMethodUrl(RequestMode.DMR, getChecksumMode());
-    try (InputStream stream = makeRequest(RequestMode.DMR, methodurl)) {
-      // Extract and "compile" the server response
-      setData(stream, RequestMode.DMR);
-      ensuredmr(this.ncfile);
-    } catch (IOException e) {
-      throw new DapException(e);
-    }
-    return this;
-  }
-
-  @Override
-  public void close() {}
 
   /////////////////////////////////////////
   // AbstractDSP extensions
@@ -101,16 +87,11 @@ public class HttpDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Load methods
 
-  //////////////////////////////////////////////////
-
-  protected void loadDMR() throws DapException {
-    setRequestMode(RequestMode.DMR);
-    String methodurl = getMethodUrl(RequestMode.DMR, getChecksumMode());
-    try (InputStream stream = makeRequest(RequestMode.DMR, methodurl)) {
-      // Extract and "compile" the server response
-      String document = readDMR();
-      DapDataset dmr = parseDMR(document);
-      setDMR(dmr);
+  public void loadDMR() throws DapException {
+    String methodurl = getMethodUrl(RequestMode.DMR, this.checksummode);
+    try (InputStream stream = makeRequest(methodurl)) {
+      setData(stream, RequestMode.DMR);
+      super.loadDMR();
     } catch (IOException e) {
       throw new DapException(e);
     }
@@ -121,16 +102,12 @@ public class HttpDSP extends D4DSP {
    *
    * @throws DapException
    */
-  protected void loadDAP() throws DapException {
-    setRequestMode(RequestMode.DAP);
-    String methodurl = getMethodUrl(RequestMode.DAP, getChecksumMode());
-    try (InputStream stream = makeRequest(RequestMode.DAP, methodurl)) {
-      assert (getDMR() != null);
-      // Extract and "compile" the server response
+  public void loadDAP() throws DapException {
+    String methodurl = getMethodUrl(RequestMode.DAP, this.checksummode);
+    try (InputStream stream = makeRequest(methodurl)) {
+      // Extract and "compile" the server response, ignoring the leading DMR
       setData(stream, RequestMode.DAP);
-      // "Compile" the databuffer section of the server response
-      D4DataCompiler d4compiler = new D4DataCompiler(this, getChecksumMode(), getRemoteOrder(), this.data);
-      d4compiler.compile();
+      super.loadDAP();
     } catch (IOException ioe) {
       throw new DapException(ioe);
     }
@@ -146,7 +123,7 @@ public class HttpDSP extends D4DSP {
    * @throws DapException
    */
 
-  protected InputStream makeRequest(RequestMode mode, String methodurl) throws DapException {
+  protected InputStream makeRequest(String methodurl) throws DapException {
     // Assume mode is consistent with the url.
     InputStream stream;
     // Make the request and return the input stream for accessing the databuffer

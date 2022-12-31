@@ -34,6 +34,6 @@
 250:2DSP:N2D wave spectra multiple  [m2 s radian-1]
 251:2DFD:N2D wave spectra single  [m2 s radian-1]
 252:WSK:Wave spectral kurtosis []
-253:BFI:Benjamin-Feir index []
+253:BFI:Benjamin-Feir extent []
 254:WSP:Wave spectral peakedness [s-1]
 255:VAR255:undefined

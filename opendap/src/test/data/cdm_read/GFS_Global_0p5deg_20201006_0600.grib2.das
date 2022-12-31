@@ -396,7 +396,7 @@ Attributes {
         String Grib2_Generating_Process_Type "Forecast";
     }
     Haines_index_surface {
-        String long_name "Haines index @ Ground or water surface";
+        String long_name "Haines extent @ Ground or water surface";
         String units "";
         String abbreviation "HINDEX";
         Float32 missing_value NaN;
@@ -406,7 +406,7 @@ Attributes {
         Int32 Grib2_Parameter 2, 4, 2;
         String Grib2_Parameter_Discipline "Land surface products";
         String Grib2_Parameter_Category "Fire Weather Products";
-        String Grib2_Parameter_Name "Haines index";
+        String Grib2_Parameter_Name "Haines extent";
         Int32 Grib2_Level_Type 1;
         String Grib2_Level_Desc "Ground or water surface";
         String Grib2_Generating_Process_Type "Forecast";

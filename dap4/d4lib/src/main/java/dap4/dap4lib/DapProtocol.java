@@ -49,7 +49,7 @@ public abstract class DapProtocol implements DapCodes {
     DAP4SCHEMES.add("dap4");
     DAP4SCHEMES.add("http");
     DAP4SCHEMES.add("https");
-    DAP4SCHEMES.add("file");
+    //Note that file: is missing
   };
 
 

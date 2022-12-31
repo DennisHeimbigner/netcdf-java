@@ -43,7 +43,7 @@
 41 41 10-metre wind direction over waves (deg)
 42 42 Wave energy spectrum (m2 s rad-1)
 43 43 Kurtosis of the sea-surface elevation due to waves (-)
-44 44 Benjamin-Feir index (-)
+44 44 Benjamin-Feir extent (-)
 45 45 Spectral peakedness factor (/s)
 # 46-191 Reserved 
 # 192-254 Reserved for local use 

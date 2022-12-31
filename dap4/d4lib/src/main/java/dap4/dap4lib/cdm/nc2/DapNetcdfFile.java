@@ -6,14 +6,12 @@
 package dap4.dap4lib.cdm.nc2;
 
 import dap4.core.dmr.DapAttribute;
+import dap4.core.dmr.DapDataset;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
-import dap4.core.util.ChecksumMode;
-import dap4.core.util.DapException;
+import dap4.core.util.*;
 import dap4.dap4lib.*;
 import dap4.dap4lib.cdm.CDMUtil;
-import dap4.core.util.DapContext;
-import dap4.core.util.XURI;
 import ucar.ma2.*;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
@@ -23,12 +21,20 @@ import ucar.nc2.iosp.IospHelper;
 import ucar.nc2.util.CancelTask;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.*;
-import java.util.zip.Checksum;
+
+
+/**
+ * This class is the work-horse of the client side.
+ * It uses a D4DSP instance to obtain access to a DMR and
+ * (optionally) a compiled DAP4 data stream.
+ *
+ * Given that, it constructs a translation to CDM.
+ */
 
 public class DapNetcdfFile extends NetcdfFile {
+
   static final boolean DEBUG = false;
   static final boolean PARSEDEBUG = false;
   static final boolean MERGE = false;
@@ -38,27 +44,16 @@ public class DapNetcdfFile extends NetcdfFile {
 
   //////////////////////////////////////////////////
   // Constants
-  static final String QUERYSTART = "?";
-  static final String FRAGSTART = "#";
 
   //////////////////////////////////////////////////
   // Type Declarations
 
   protected static class NullCancelTask implements CancelTask {
-    public boolean isCancel() {
-      return false;
-    }
-
-    public boolean isDone() {
-      return false;
-    }
-
+    public boolean isCancel() {return false;}
+    public boolean isDone() {return false;}
     public void setDone(boolean done) {}
-
     public void setError(String msg) {}
-
     public void setProgress(String msg, int progress) {}
-
   }
 
   //////////////////////////////////////////////////
@@ -81,15 +76,22 @@ public class DapNetcdfFile extends NetcdfFile {
 
   protected boolean allowCompression = true;
   protected boolean closed = false;
-
   protected String location = null; // original argument passed to open
-  protected String dsplocation = null; // what is passed to DSP
-  protected XURI xuri = null;
-  protected D4DSP dsp = null;
-
   protected CancelTask cancel = null;
 
-  // protected NodeMap nodemap = null; unused?
+  protected String dsplocation = null; // what is passed to DSP
+  protected XURI xuri = null;
+
+  protected DapContext cxt = null;
+  protected D4DSP dsp = null;
+  // Extractions from dsp
+  protected DapDataset dmr = null;
+
+  protected ChecksumMode checksummode = null;
+
+  protected boolean daploaded = false; // avoid multiple loads
+
+  protected CDMCompiler cdmcompiler = null;
 
   /**
    * Originally, the array for a variable was stored
@@ -104,12 +106,13 @@ public class DapNetcdfFile extends NetcdfFile {
 
   /**
    * Open a Dap4 connection or file via a D4DSP.
+   * Warning: we do not use a Builder because this object is mutable over time.
    *
    * @param location URL for the request. Note that if this is
    *        intended to send to a file oriented
    *        DSP, then if must be converted to an absolute path.
    *        Note also that the URL path should not have any .dap or .dmr
-   *        extension since using those is the purvue of this class.
+   *        extension since using those is the purview of this class.
    * @param cancelTask check if task is cancelled; may be null.
    * @throws IOException
    */
@@ -124,22 +127,36 @@ public class DapNetcdfFile extends NetcdfFile {
       throw new IOException(use);
     }
     this.dsplocation = xuri.assemble(XURI.URLQUERY);
-    DapContext cxt = new DapContext();
-    // Query takes precedence over fragment
-    cxt.insert(xuri.getFragFields(), true);
-    cxt.insert(xuri.getQueryFields(), true);
     cancel = (cancelTask == null ? nullcancel : cancelTask);
-    // Get and parse the constrained DMR v-a-v URL
-    this.dsp = dspregistry.findMatchingDSP(this.location, cxt); // will set dsp context
+
+    // The DapContext object is the primary means of passing information
+    // between various parts of the DAP4 system.
+    this.cxt = new DapContext();
+    // Insert fragment as (key,value) pairs into the context
+    cxt.insert(xuri.getFragFields(), true);
+    // Query takes precedence over fragment
+    cxt.insert(xuri.getQueryFields(), true);
+    String csummode = (String)cxt.get(DapConstants.CHECKSUMTAG);
+    this.checksummode = ChecksumMode.modeFor(csummode);
+    this.checksummode = ChecksumMode.asTrueFalse(this.checksummode); // Fix the checksum mode to be only TRUE or FALSE
+    this.cxt.put(ChecksumMode.class,this.checksummode);
+
+    // Find the D4DSP class that can process this URL location.
+    this.dsp = dspregistry.findMatchingDSP(this.location, cxt); // find relevant D4DSP subclass
     if (this.dsp == null)
       throw new IOException("No matching DSP: " + this.location);
-    this.dsp.setContext(cxt);
-    this.dsp.setNetcdfFile(this); // cross-link
-    this.dsp.open(this.dsplocation); // side effect: compile DMR
+    this.dsp.open(this.dsplocation,this.checksummode); // side effect: compile DMR
+    this.dsp.loadDMR(); // Get the DMR
+    this.dmr = this.dsp.getDMR(); // get DMR
+    this.cxt.put(DapDataset.class,this.dmr);
     // set the pseudo-location, otherwise we get a name that is full path.
-    setLocation(this.dsp.getDMR().getDataset().getShortName());
+    setLocation(this.dmr.getDataset().getShortName());
+    assert(this.cdmcompiler == null);
+    this.cdmcompiler = new CDMCompiler(this, this.dsp);
+    this.cdmcompiler.compileDMR();
     finish();
-    this.dsp.verifyChecksums();
+    this.dsp.loadContext(this.cxt,RequestMode.DMR);
+
   }
 
   /**
@@ -167,7 +184,6 @@ public class DapNetcdfFile extends NetcdfFile {
       return;
     closed = true; // avoid circular calls
     dsp = null;
-    // nodemap = null; unused?
   }
 
   //////////////////////////////////////////////////
@@ -261,9 +277,10 @@ public class DapNetcdfFile extends NetcdfFile {
     // The section is applied wrt to the DataDMR, so it
     // takes into account any constraint used in forming the dataDMR.
     // We use the Section to produce a view of the underlying variable array.
-    assert this.dsp != null;
+
+    // Read and compile the DAP4 data
     // Ensure that the DSP has data
-    this.dsp.ensuredata(this);
+    ensuredata();
     Array result = arraymap.get(cdmvar);
     if (result == null)
       throw new IOException("No data for variable: " + cdmvar.getFullName());
@@ -279,6 +296,59 @@ public class DapNetcdfFile extends NetcdfFile {
         result = result.sectionNoReduce(ranges);
     }
     return result;
+  }
+
+  protected void ensuredata() throws DapException {
+    if (!this.daploaded) { // do not call twice
+      this.daploaded = true;
+      this.dsp.loadDAP();
+      loadContext();
+      verifyChecksums();
+      assert(this.cdmcompiler != null);
+      this.cdmcompiler.compileData(); // compile to CDM Arrays
+      setArrayMap(this.cdmcompiler.getArrayMap());
+      this.dsp.loadContext(this.cxt,RequestMode.DAP);
+    }
+  }
+
+  protected void loadContext() {
+    this.cxt.put(DapConstants.ChecksumSource.REMOTE,this.dsp.getChecksumMap(DapConstants.ChecksumSource.REMOTE));
+    this.cxt.put(DapConstants.ChecksumSource.LOCAL,this.dsp.getChecksumMap(DapConstants.ChecksumSource.LOCAL));
+    this.cxt.put(D4Cursor.class,this.dsp.getVariableDataMap());
+  }
+
+  protected void verifyChecksums() throws DapException {
+    ChecksumMode cmode = (ChecksumMode)this.cxt.get(ChecksumMode.class);
+    Map<DapVariable,Long> remotechecksummap = (Map<DapVariable,Long>)cxt.get(DapConstants.ChecksumSource.REMOTE);
+    Map<DapVariable,Long> localchecksummap = (Map<DapVariable,Long>)cxt.get(DapConstants.ChecksumSource.LOCAL);
+
+    if(cmode != ChecksumMode.TRUE)
+      return;
+    for(DapVariable dvar: dmr.getTopVariables()) {
+      // Verify the calculated checksums
+      Long remotechecksum = remotechecksummap.get(dvar);
+      Long localchecksum = localchecksummap.get(dvar);
+      assert((localchecksum != null) && (remotechecksum != null));
+      if(!cxt.containsKey("hyrax")) {// Suppress the check for Hyrax, for now
+        if(localchecksum.longValue() != remotechecksum.longValue())
+          throw new DapException("Checksum mismatch: local=" + localchecksum + " remote=" + remotechecksum);
+      }
+      // Verify the checksum Attribute, if any
+      DapAttribute csumattr = dvar.getChecksumAttribute();
+      if(csumattr != null) {
+        assert (csumattr.getValues().length == 1 && csumattr.getBaseType() == DapType.INT32);
+        Long attrcsum = (long) 0;
+        try {
+          attrcsum = Long.parseLong(csumattr.getValues()[0]);
+        } catch (NumberFormatException nfe) {
+          throw new DapException("Illegal Checksum attribute value", nfe);
+        }
+        if(!cxt.containsKey("hyrax")) { // Suppress the check for Hyrax, for now
+          if(localchecksum.longValue() != attrcsum.longValue())
+            throw new DapException("Checksum mismatch: local=" + localchecksum + " attribute=" + attrcsum);
+        }
+      }
+    }
   }
 
 }

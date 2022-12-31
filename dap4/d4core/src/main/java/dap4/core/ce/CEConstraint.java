@@ -638,36 +638,6 @@ public class CEConstraint {
    */
 
   //////////////////////////////////////////////////
-  // Projection processing
-
-  /**
-   * Projection X match
-   * This is actually rather difficult because it requires
-   * sort of the inverse of an odometer. For this reason,
-   * It's implementation is deferred.
-   */
-
-  /**
-   * Projection X Iterator
-   * This basically returns an odometer that
-   * will iterate over the appropriate values.
-   *
-   * @param var over whose dimensions to iterate
-   * @throws DapException
-   */
-  /*
-   * public Odometer
-   * projectionIterator(DapVariable var)
-   * throws DapException
-   * {
-   * Segment seg = findSegment(var);
-   * if(seg == null)
-   * return null;
-   * return Odometer.factory(seg.slices, seg.dimset, false);
-   * }
-   */
-
-  //////////////////////////////////////////////////
   // Selection (Filter) processing
 
   /**
@@ -946,7 +916,7 @@ public class CEConstraint {
         if (newdim == null)
           newdim = dim0;
         // fill in the undefined last value
-        slice.setMaxSize(newdim.getSize());
+        slice.setMaxSize((int)newdim.getSize());
         slice.finish();
         Slice newslice = null;
         if (slice.isConstrained()) {

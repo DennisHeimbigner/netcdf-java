@@ -1064,7 +1064,7 @@
 	}
 
 #paramId: 500120
-#base index (vertical level) of main convective cloud (i)
+#base extent (vertical level) of main convective cloud (i)
 '500120' = {
 	 discipline = 0 ;
 	 parameterCategory = 6 ;
@@ -1073,7 +1073,7 @@
 	}
 
 #paramId: 500121
-#top index (vertical level) of main convective cloud (i)
+#top extent (vertical level) of main convective cloud (i)
 '500121' = {
 	 discipline = 0 ;
 	 parameterCategory = 6 ;
@@ -1309,7 +1309,7 @@
 	}
 
 #paramId: 500149
-#supercell detection index 1 (rot. up+down drafts)
+#supercell detection extent 1 (rot. up+down drafts)
 '500149' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -1317,7 +1317,7 @@
 	}
 
 #paramId: 500150
-#supercell detection index 2 (only rot. up drafts)
+#supercell detection extent 2 (only rot. up drafts)
 '500150' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -1761,7 +1761,7 @@
 	}
 
 #paramId: 500206
-#Leaf area index
+#Leaf area extent
 '500206' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1811,7 +1811,7 @@
 	}
 
 #paramId: 500212
-#Max Leaf area index
+#Max Leaf area extent
 '500212' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1820,7 +1820,7 @@
 	}
 
 #paramId: 500213
-#Min Leaf area index
+#Min Leaf area extent
 '500213' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1877,7 +1877,7 @@
 	}
 
 #paramId: 500219
-#normalized differential vegetation index
+#normalized differential vegetation extent
 '500219' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1886,7 +1886,7 @@
 	}
 
 #paramId: 500220
-#normalized differential vegetation index (NDVI)
+#normalized differential vegetation extent (NDVI)
 '500220' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1895,7 +1895,7 @@
 	}
 
 #paramId: 500221
-#ratio of monthly mean NDVI (normalized differential vegetation index) to annual maximum
+#ratio of monthly mean NDVI (normalized differential vegetation extent) to annual maximum
 '500221' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -1904,7 +1904,7 @@
 	}
 
 #paramId: 500222
-#ratio of monthly mean NDVI (normalized differential vegetation index) to annual maximum
+#ratio of monthly mean NDVI (normalized differential vegetation extent) to annual maximum
 '500222' = {
 	 discipline = 2 ;
 	 parameterCategory = 0 ;
@@ -2606,7 +2606,7 @@
 	}
 
 #paramId: 500302
-#KO index
+#KO extent
 '500302' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -5102,7 +5102,7 @@
 	}
 
 #paramId: 500570
-#dry convection top index
+#dry convection top extent
 '500570' = {
 	 discipline = 0 ;
 	 parameterCategory = 6 ;
@@ -8248,7 +8248,7 @@
 	}
 
 #paramId: 502703
-#Heat index
+#Heat extent
 '502703' = {
 	 discipline = 0 ;
 	 parameterCategory = 0 ;
@@ -8856,7 +8856,7 @@
 	}
 
 #paramId: 502785
-#K index
+#K extent
 '502785' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -8864,7 +8864,7 @@
 	}
 
 #paramId: 502786
-#Total totals index
+#Total totals extent
 '502786' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -8872,7 +8872,7 @@
 	}
 
 #paramId: 502787
-#Sweat index
+#Sweat extent
 '502787' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -8880,7 +8880,7 @@
 	}
 
 #paramId: 502788
-#Energy helicity index
+#Energy helicity extent
 '502788' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -8888,7 +8888,7 @@
 	}
 
 #paramId: 502789
-#Surface lifted index
+#Surface lifted extent
 '502789' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -8896,7 +8896,7 @@
 	}
 
 #paramId: 502790
-#Best (4-layer) lifted index
+#Best (4-layer) lifted extent
 '502790' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -9681,7 +9681,7 @@
 	}
 
 #paramId: 502949
-#Parcel lifted index (to 500 hPa)
+#Parcel lifted extent (to 500 hPa)
 '502949' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -9817,7 +9817,7 @@
 	}
 
 #paramId: 502968
-#Best lifted index (to 500 hPa)
+#Best lifted extent (to 500 hPa)
 '502968' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -10225,7 +10225,7 @@
 	}
 
 #paramId: 503079
-#soil moisture index (multilayers)
+#soil moisture extent (multilayers)
 '503079' = {
 	 discipline = 2 ;
 	 parameterCategory = 3 ;
@@ -10339,7 +10339,7 @@
 	}
 
 #paramId: 503093
-#Benjamin-Feir index
+#Benjamin-Feir extent
 '503093' = {
 	 discipline = 10 ;
 	 parameterCategory = 0 ;
@@ -10771,7 +10771,7 @@
 	}
 
 #paramId: 503160
-#Divergence modified turbulence index (Ellrod and Knox)
+#Divergence modified turbulence extent (Ellrod and Knox)
 '503160' = {
 	 discipline = 0 ;
 	 parameterCategory = 19 ;
@@ -10795,7 +10795,7 @@
 	}
 
 #paramId: 503163
-#Deep convection index
+#Deep convection extent
 '503163' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -11107,7 +11107,7 @@
 	}
 
 #paramId: 503197
-#Showalter index
+#Showalter extent
 '503197' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -11163,7 +11163,7 @@
 	}
 
 #paramId: 503204
-#Surface lifted index
+#Surface lifted extent
 '503204' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
@@ -11180,7 +11180,7 @@
 	}
 
 #paramId: 503206
-#Thunderstorm index for Switzerland (night time)
+#Thunderstorm extent for Switzerland (night time)
 '503206' = {
 	 discipline = 215 ;
 	 parameterCategory = 7 ;
@@ -11188,7 +11188,7 @@
 	}
 
 #paramId: 503207
-#Thunderstorm index for Switzerland (day time)
+#Thunderstorm extent for Switzerland (day time)
 '503207' = {
 	 discipline = 215 ;
 	 parameterCategory = 7 ;
@@ -11292,7 +11292,7 @@
 	}
 
 #paramId: 503218
-#Universal thermal climate index without direct incident short wave radiation
+#Universal thermal climate extent without direct incident short wave radiation
 '503218' = {
 	 discipline = 0 ;
 	 parameterCategory = 0 ;
@@ -11300,7 +11300,7 @@
 	}
 
 #paramId: 503219
-#Universal thermal climate index with direct incident short wave radiation
+#Universal thermal climate extent with direct incident short wave radiation
 '503219' = {
 	 discipline = 0 ;
 	 parameterCategory = 0 ;

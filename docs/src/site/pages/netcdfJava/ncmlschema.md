@@ -141,7 +141,7 @@ A <b>_group_</b> element represents a netCDF group, a container for <b>_variable
 
 #### dimension Element
 
-The <b>_dimension_</b> element represents a netCDF dimension, i.e. a named index of specified length.
+The <b>_dimension_</b> element represents a netCDF dimension, i.e. a named extent of specified length.
 
 ~~~
   <!-- XML encoding of Dimension object -->
@@ -373,7 +373,7 @@ These allow a variable to be a <b>_logical view_</b> of the original variable. O
  <xsd:element name="logicalSlice">
    <xsd:complexType>
      <xsd:attribute name="dimName" type="xsd:token" use="required"/>
-     <xsd:attribute name="index" type="xsd:int" use="required"/>
+     <xsd:attribute name="extent" type="xsd:int" use="required"/>
    </xsd:complexType>
  </xsd:element>
 

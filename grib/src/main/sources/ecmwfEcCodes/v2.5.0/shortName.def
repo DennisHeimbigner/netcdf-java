@@ -374,12 +374,12 @@
 	 table2Version = 128 ;
 	 indicatorOfParameter = 65 ;
 	}
-#Leaf area index, low vegetation
+#Leaf area extent, low vegetation
 'lai_lv' = {
 	 table2Version = 128 ;
 	 indicatorOfParameter = 66 ;
 	}
-#Leaf area index, high vegetation
+#Leaf area extent, high vegetation
 'lai_hv' = {
 	 table2Version = 128 ;
 	 indicatorOfParameter = 67 ;
@@ -2364,12 +2364,12 @@
 	 table2Version = 200 ;
 	 indicatorOfParameter = 65 ;
 	}
-#Leaf area index, low vegetation
+#Leaf area extent, low vegetation
 '~' = {
 	 table2Version = 200 ;
 	 indicatorOfParameter = 66 ;
 	}
-#Leaf area index, high vegetation
+#Leaf area extent, high vegetation
 '~' = {
 	 table2Version = 200 ;
 	 indicatorOfParameter = 67 ;
@@ -3314,7 +3314,7 @@
 	 table2Version = 131 ;
 	 indicatorOfParameter = 97 ;
 	}
-#Maximum of significant wave height index
+#Maximum of significant wave height extent
 'maxswhi' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 216 ;
@@ -8919,22 +8919,22 @@
 	 table2Version = 228 ;
 	 indicatorOfParameter = 29 ;
 	}
-#Soil wetness index in layer 1
+#Soil wetness extent in layer 1
 'swi1' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 40 ;
 	}
-#Soil wetness index in layer 2
+#Soil wetness extent in layer 2
 'swi2' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 41 ;
 	}
-#Soil wetness index in layer 3
+#Soil wetness extent in layer 3
 'swi3' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 42 ;
 	}
-#Soil wetness index in layer 4
+#Soil wetness extent in layer 4
 'swi4' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 43 ;
@@ -9204,12 +9204,12 @@
 	 table2Version = 230 ;
 	 indicatorOfParameter = 251 ;
 	}
-#K index
+#K extent
 'kx' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 121 ;
 	}
-#Total totals index
+#Total totals extent
 'totalx' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 123 ;
@@ -9484,12 +9484,12 @@
 	 table2Version = 129 ;
 	 indicatorOfParameter = 65 ;
 	}
-#Leaf area index, low vegetation
+#Leaf area extent, low vegetation
 '~' = {
 	 table2Version = 129 ;
 	 indicatorOfParameter = 66 ;
 	}
-#Leaf area index, high vegetation
+#Leaf area extent, high vegetation
 '~' = {
 	 table2Version = 129 ;
 	 indicatorOfParameter = 67 ;
@@ -10564,12 +10564,12 @@
 	 table2Version = 131 ;
 	 indicatorOfParameter = 16 ;
 	}
-#Showalter index probability
+#Showalter extent probability
 'saip' = {
 	 table2Version = 131 ;
 	 indicatorOfParameter = 17 ;
 	}
-#Whiting index probability
+#Whiting extent probability
 'whip' = {
 	 table2Version = 131 ;
 	 indicatorOfParameter = 18 ;
@@ -10774,37 +10774,37 @@
 	 table2Version = 131 ;
 	 indicatorOfParameter = 255 ;
 	}
-#10 metre wind gust index
+#10 metre wind gust extent
 '10fgi' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 49 ;
 	}
-#Snowfall index
+#Snowfall extent
 'sfi' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 144 ;
 	}
-#10 metre speed index
+#10 metre speed extent
 '10wsi' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 165 ;
 	}
-#2 metre temperature index
+#2 metre temperature extent
 '2ti' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 167 ;
 	}
-#Maximum temperature at 2 metres index
+#Maximum temperature at 2 metres extent
 'mx2ti' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 201 ;
 	}
-#Minimum temperature at 2 metres index
+#Minimum temperature at 2 metres extent
 'mn2ti' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 202 ;
 	}
-#Total precipitation index
+#Total precipitation extent
 'tpi' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 228 ;
@@ -11454,7 +11454,7 @@
 	 table2Version = 140 ;
 	 indicatorOfParameter = 252 ;
 	}
-#Benjamin-Feir index
+#Benjamin-Feir extent
 'bfi' = {
 	 table2Version = 140 ;
 	 indicatorOfParameter = 253 ;
@@ -14564,17 +14564,17 @@
 	 table2Version = 201 ;
 	 indicatorOfParameter = 70 ;
 	}
-#KO-index
+#KO-extent
 '~' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 71 ;
 	}
-#convection base index
+#convection base extent
 'bas_con' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 72 ;
 	}
-#convection top index
+#convection top extent
 'top_con' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 73 ;
@@ -14624,7 +14624,7 @@
 	 table2Version = 201 ;
 	 indicatorOfParameter = 82 ;
 	}
-#dry convection top index
+#dry convection top extent
 '~' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 83 ;
@@ -15064,7 +15064,7 @@
 	 table2Version = 210 ;
 	 indicatorOfParameter = 93 ;
 	}
-#Wildfire vegetation map index
+#Wildfire vegetation map extent
 'vegfire' = {
 	 table2Version = 210 ;
 	 indicatorOfParameter = 94 ;
@@ -15764,7 +15764,7 @@
 	 table2Version = 211 ;
 	 indicatorOfParameter = 93 ;
 	}
-#Wildfire vegetation map index
+#Wildfire vegetation map extent
 'vegfirediff' = {
 	 table2Version = 211 ;
 	 indicatorOfParameter = 94 ;

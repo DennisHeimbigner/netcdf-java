@@ -353,7 +353,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 07,007032,Height of sensor above local ground (or deck of marine platform),m,2,0,16,m,2,5,Operational
 07,007033,Height of sensor above water surface,m,1,0,12,m,1,4,Operational
 07,007035,Maximum size of Z-dimension,Numeric,0,0,12,Numeric,0,4,Validation
-07,007036,Level index of Z,Numeric,0,0,12,Numeric,0,4,Validation
+07,007036,Level extent of Z,Numeric,0,0,12,Numeric,0,4,Validation
 07,007040,Impact parameter,m,1,62000000,22,m,1,8,Operational
 07,007061,Depth below land surface,m,2,0,14,m,2,5,Operational
 07,007062,Depth below sea/water surface,m,1,0,17,m,1,6,Operational
@@ -499,7 +499,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 11,011034,Vertical gust velocity,m s-1,1,-1024,11,m s-1,1,4,Operational
 11,011035,Vertical gust acceleration,m s-2,2,-8192,14,m s-2,2,5,Operational
 11,011036,Maximum derived equivalent vertical gust speed,m s-1,1,0,10,m s-1,1,4,Operational
-11,011037,Turbulence index,Code table,0,0,6,Code table,0,2,Operational
+11,011037,Turbulence extent,Code table,0,0,6,Code table,0,2,Operational
 11,011038,Time of occurrence of peak eddy dissipation rate,Code table,0,0,5,Code table,0,2,Operational
 11,011039,Extended time of occurrence of peak  eddy dissipation rate,Code table,0,0,6,Code table,0,2,Operational
 11,011040,Maximum wind speed (mean wind),m s-1,1,0,12,m s-1,1,4,Operational
@@ -547,36 +547,36 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 11,011107,Maximum number bad inputs,numeric,0,0,5,numeric,0,2,Validation
 11,011108,Peak Location,numeric,1,0,4,numeric,1,2,Validation
 11,011109,Number of good EDR,numeric,0,0,4,numeric,0,2,Validation
-12,012001,Temperature/dry-bulb temperature,K,1,0,12,°C,1,3,Operational
-12,012002,Wet-bulb temperature,K,1,0,12,°C,1,3,Operational
-12,012003,Dew-point temperature,K,1,0,12,°C,1,3,Operational
-12,012004,Dry-bulb temperature at 2 m,K,1,0,12,°C,1,3,Operational
-12,012005,Wet-bulb temperature at 2 m,K,1,0,12,°C,1,3,Operational
-12,012006,Dew-point temperature at 2 m,K,1,0,12,°C,1,3,Operational
-12,012007,Virtual temperature,K,1,0,12,°C,1,3,Operational
-12,012011,"Maximum temperature, at height and over period specified",K,1,0,12,°C,1,3,Operational
-12,012012,"Minimum temperature, at height and over period specified",K,1,0,12,°C,1,3,Operational
-12,012013,"Ground minimum temperature, past 12 hours",K,1,0,12,°C,1,3,Operational
-12,012014,"Maximum temperature at 2 m, past 12 hours",K,1,0,12,°C,1,3,Operational
-12,012015,"Minimum temperature at 2 m, past 12 hours",K,1,0,12,°C,1,3,Operational
-12,012016,"Maximum temperature at 2 m, past 24 hours",K,1,0,12,°C,1,3,Operational
-12,012017,"Minimum temperature at 2 m, past 24 hours",K,1,0,12,°C,1,3,Operational
-12,012021,Maximum temperature at 2m,K,2,0,16,°C,2,4,Operational
-12,012022,Minimum temperature at 2m,K,2,0,16,°C,2,4,Operational
-12,012023,Temperature,°C,0,-99,8,°C,0,2,Operational
-12,012024,Dew point temperature,°C,0,-99,8,°C,0,2,Operational
-12,012030,Soil temperature,K,1,0,12,°C,1,3,Operational
-12,012049,Temperature change over specified period,K,0,-30,6,°C,0,2,Operational
-12,012051,Standard deviation temperature,K,1,0,10,°C,1,3,Operational
-12,012052,Highest daily mean temperature,K,1,0,12,°C,1,3,Operational
-12,012053,Lowest daily mean temperature,K,1,0,12,°C,1,3,Operational
-12,012060,AWS enclosure internal temperature,K,1,0,12,°C,1,3,Validation
-12,012061,Skin temperature,K,1,0,12,°C,1,3,Operational
-12,012062,Equivalent black body temperature,K,1,0,12,°C,1,3,Operational
-12,012063,Brightness temperature,K,1,0,12,°C,1,3,Operational
+12,012001,Temperature/dry-bulb temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012002,Wet-bulb temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012003,Dew-point temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012004,Dry-bulb temperature at 2 m,K,1,0,12,ï¿½C,1,3,Operational
+12,012005,Wet-bulb temperature at 2 m,K,1,0,12,ï¿½C,1,3,Operational
+12,012006,Dew-point temperature at 2 m,K,1,0,12,ï¿½C,1,3,Operational
+12,012007,Virtual temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012011,"Maximum temperature, at height and over period specified",K,1,0,12,ï¿½C,1,3,Operational
+12,012012,"Minimum temperature, at height and over period specified",K,1,0,12,ï¿½C,1,3,Operational
+12,012013,"Ground minimum temperature, past 12 hours",K,1,0,12,ï¿½C,1,3,Operational
+12,012014,"Maximum temperature at 2 m, past 12 hours",K,1,0,12,ï¿½C,1,3,Operational
+12,012015,"Minimum temperature at 2 m, past 12 hours",K,1,0,12,ï¿½C,1,3,Operational
+12,012016,"Maximum temperature at 2 m, past 24 hours",K,1,0,12,ï¿½C,1,3,Operational
+12,012017,"Minimum temperature at 2 m, past 24 hours",K,1,0,12,ï¿½C,1,3,Operational
+12,012021,Maximum temperature at 2m,K,2,0,16,ï¿½C,2,4,Operational
+12,012022,Minimum temperature at 2m,K,2,0,16,ï¿½C,2,4,Operational
+12,012023,Temperature,ï¿½C,0,-99,8,ï¿½C,0,2,Operational
+12,012024,Dew point temperature,ï¿½C,0,-99,8,ï¿½C,0,2,Operational
+12,012030,Soil temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012049,Temperature change over specified period,K,0,-30,6,ï¿½C,0,2,Operational
+12,012051,Standard deviation temperature,K,1,0,10,ï¿½C,1,3,Operational
+12,012052,Highest daily mean temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012053,Lowest daily mean temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012060,AWS enclosure internal temperature,K,1,0,12,ï¿½C,1,3,Validation
+12,012061,Skin temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012062,Equivalent black body temperature,K,1,0,12,ï¿½C,1,3,Operational
+12,012063,Brightness temperature,K,1,0,12,ï¿½C,1,3,Operational
 12,012064,Instrument temperature,K,1,0,12,K,1,4,Operational
 12,012065,Standard deviation brightness temperature,K,1,0,12,K,1,4,Operational
-12,012066,Antenna temperature,K,2,0,16,°C,2,5,Validation
+12,012066,Antenna temperature,K,2,0,16,ï¿½C,2,5,Validation
 12,012070,Warm load temperature,K,2,0,16,K,2,5,Operational
 12,012071,Coldest cluster temperature,K,1,0,12,K,1,4,Operational
 12,012072,Radiance,W m-2 sr-1,6,0,31,W m-2 sr-1,6,9,Operational
@@ -585,34 +585,34 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 12,012080,Brightness temperature real part,K,2,-10000,16,K,2,5,Operational
 12,012081,Brightness temperature imaginary part,K,2,-10000,16,K,2,5,Operational
 12,012082,Pixel radiometric accuracy,K,2,0,12,K,2,4,Operational
-12,012101,Temperature/dry-bulb temperature,K,2,0,16,°C,2,4,Operational
-12,012102,Wet-bulb temperature,K,2,0,16,°C,2,4,Operational
-12,012103,Dew-point temperature,K,2,0,16,°C,2,4,Operational
-12,012104,Dry-bulb temperature at 2m,K,2,0,16,°C,2,4,Operational
-12,012105,Web-bulb temperature at 2m,K,2,0,16,°C,2,4,Operational
-12,012106,Dew-point temperature at 2m,K,2,0,16,°C,2,4,Operational
-12,012107,Virtual temperature,K,2,0,16,°C,2,4,Operational
-12,012111,"Maximum temperature, at height and over period specified",K,2,0,16,°C,2,4,Operational
-12,012112,"Minimum temperature, at height and over period specified",K,2,0,16,°C,2,4,Operational
-12,012113,"Ground minimum temperature, past 12 hours",K,2,0,16,°C,2,4,Operational
-12,012114,"Maximum temperature at 2m, past 12 hours",K,2,0,16,°C,2,4,Operational
-12,012115,"Minimum temperature at 2m, past 12 hours",K,2,0,16,°C,2,4,Operational
-12,012116,"Maximum temperature at 2m, past 24 hours",K,2,0,16,°C,2,4,Operational
-12,012117,"Minimum temperature at 2m, past 24 hours",K,2,0,16,°C,2,4,Operational
-12,012118,"Maximum temperature at height specified, past 24 hours",K,2,0,16,°C,2,4,Operational
-12,012119,"Minimum  temperature at height specified, past 24 hours",K,2,0,16,°C,2,4,Operational
+12,012101,Temperature/dry-bulb temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012102,Wet-bulb temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012103,Dew-point temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012104,Dry-bulb temperature at 2m,K,2,0,16,ï¿½C,2,4,Operational
+12,012105,Web-bulb temperature at 2m,K,2,0,16,ï¿½C,2,4,Operational
+12,012106,Dew-point temperature at 2m,K,2,0,16,ï¿½C,2,4,Operational
+12,012107,Virtual temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012111,"Maximum temperature, at height and over period specified",K,2,0,16,ï¿½C,2,4,Operational
+12,012112,"Minimum temperature, at height and over period specified",K,2,0,16,ï¿½C,2,4,Operational
+12,012113,"Ground minimum temperature, past 12 hours",K,2,0,16,ï¿½C,2,4,Operational
+12,012114,"Maximum temperature at 2m, past 12 hours",K,2,0,16,ï¿½C,2,4,Operational
+12,012115,"Minimum temperature at 2m, past 12 hours",K,2,0,16,ï¿½C,2,4,Operational
+12,012116,"Maximum temperature at 2m, past 24 hours",K,2,0,16,ï¿½C,2,4,Operational
+12,012117,"Minimum temperature at 2m, past 24 hours",K,2,0,16,ï¿½C,2,4,Operational
+12,012118,"Maximum temperature at height specified, past 24 hours",K,2,0,16,ï¿½C,2,4,Operational
+12,012119,"Minimum  temperature at height specified, past 24 hours",K,2,0,16,ï¿½C,2,4,Operational
 12,012120,Ground temperature,K,2,0,16,?C,2,4,Validation
-12,012121,Ground minimum temperature,K,2,0,16,°C,2,4,Operational
-12,012122,Ground minimum temperature of the preceding night,K,2,0,16,°C,2,4,Operational
-12,012130,Soil temperature,K,2,0,16,°C,2,4,Operational
+12,012121,Ground minimum temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012122,Ground minimum temperature of the preceding night,K,2,0,16,ï¿½C,2,4,Operational
+12,012130,Soil temperature,K,2,0,16,ï¿½C,2,4,Operational
 12,012131,Snow temperature,K,2,0,16,?C,2,4,Validation
 12,012132,Ice surface temperature,K,2,0,16,?C,2,4,Validation
-12,012151,Standard deviation of daily mean temperature,K,2,0,12,°C,2,4,Operational
-12,012152,Highest daily mean temperature,K,2,0,16,°C,2,4,Operational
-12,012153,Lowest daily mean temperature,K,2,0,16,°C,2,4,Operational
-12,012161,Skin temperature,K,2,0,16,°C,2,4,Operational
-12,012162,Equivalent black body temperature,K,2,0,16,°C,2,4,Operational
-12,012163,Brightness temperature,K,2,0,16,°C,2,4,Operational
+12,012151,Standard deviation of daily mean temperature,K,2,0,12,ï¿½C,2,4,Operational
+12,012152,Highest daily mean temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012153,Lowest daily mean temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012161,Skin temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012162,Equivalent black body temperature,K,2,0,16,ï¿½C,2,4,Operational
+12,012163,Brightness temperature,K,2,0,16,ï¿½C,2,4,Operational
 12,012164,Instrument temperature,K,2,0,16,K,2,5,Operational
 12,012165,Direct sun brightness temperature,K,0,0,23,K,0,7,Operational
 12,012166,Snapshot accuracy,K,1,-4000,13,K,1,4,Operational
@@ -656,12 +656,12 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 13,013039,Terrain type (ice/snow),Code table,0,0,3,Code table,0,1,Operational
 13,013040,Surface flag,Code table,0,0,4,Code table,0,2,Operational
 13,013041,Pasquill-Gifford stability category,Code table,0,0,4,Code table,0,2,Operational
-13,013042,Parcel lifted index (to 500 hPa),K,0,-20,6,K,0,2,Operational
-13,013043,Best lifted index (to 500 hPa),K,0,-20,6,K,0,2,Operational
-13,013044,K index,K,0,-30,8,C,0,3,Operational
-13,013045,KO index,K,0,-30,8,K,0,3,Operational
+13,013042,Parcel lifted extent (to 500 hPa),K,0,-20,6,K,0,2,Operational
+13,013043,Best lifted extent (to 500 hPa),K,0,-20,6,K,0,2,Operational
+13,013044,K extent,K,0,-30,8,C,0,3,Operational
+13,013045,KO extent,K,0,-30,8,K,0,3,Operational
 13,013046,Maximum buoyancy,K,0,-30,8,K,0,3,Operational
-13,013047,Modified Showalter stability index,K,0,-60,6,°C,0,2,Operational
+13,013047,Modified Showalter stability extent,K,0,-60,6,ï¿½C,0,2,Operational
 13,013048,Water fraction,%,1,0,10,%,1,4,Operational
 13,013051,"Frequency group, precipitation",Code table,0,0,4,Code table,0,2,Operational
 13,013052,Highest daily amount of precipitation,kg m-2,1,-1,14,kg m-2,1,5,Operational
@@ -735,7 +735,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 14,014052,"Global upward solar radiation, integrated over period specified",J m-2,-2,- 1048574,20,J m-2,-2,7,Validation
 14,014053,"Net radiation (high accuracy), integrated over period specified",J m-2,-2,- 1048574,21,J m-2,-2,7,Validation
 14,014054,"Photosyntetically active radiation, integrated over period specified",J m-2,-3,0,16,J m-2,-3,5,Validation
-14,014055,Solar activity index,Numeric,0,-32768,16,Numeric,0,5,Operational
+14,014055,Solar activity extent,Numeric,0,-32768,16,Numeric,0,5,Operational
 14,014056,Background luminance,Cd m-2,0,0,18,Cd m-2,0,6,Validation
 14,014071,Global UV spectral irradiance,W m-2 nm-1,6,-1048576,21,W m-2 nm-1,6,7,Validation
 14,014072,Global UV irradiation,J m-2,-3,-8192,14,J m-2,-3,4,Validation
@@ -762,7 +762,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 15,015027,Concentration of pollutant (kg m-3),kg m-3,9,0,10,kg m-3,9,4,Operational
 15,015028,Photo dissociation rate,s-1,0,0,10,s-1,0,4,Validation
 15,015029,Extinction coefficient,m-1,9,0,30,m-1,9,10,Validation
-15,015030,Aerosol contamination index,Numeric,2,-1000,12,Numeric,2,4,Operational
+15,015030,Aerosol contamination extent,Numeric,2,-1000,12,Numeric,2,4,Operational
 15,015031,Atmospheric path delay in satellite signal,m,4,10000,15,m,4,5,Operational
 15,015032,Estimated error in atmospheric path delay,m,4,0,10,m,4,4,Operational
 15,015033,Difference in path delays for limb views at extremes of scan,m,5,-10000,15,m,5,5,Operational
@@ -850,7 +850,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 20,020044,Average liquid water content,kg m-3,4,0,7,kg m-3,4,2,Operational
 20,020045,Supercooled large droplet (SLD) conditions,Code table,0,0,2,Code table,0,1,Operational
 20,020048,Evolution of feature,Code table,0,0,4,Code table,0,2,Operational
-20,020050,Cloud index,Code table,0,0,8,Code table,0,3,Operational
+20,020050,Cloud extent,Code table,0,0,8,Code table,0,3,Operational
 20,020051,Amount of low clouds,%,0,0,7,%,0,3,Operational
 20,020052,Amount of middle clouds,%,0,0,7,%,0,3,Operational
 20,020053,Amount of high clouds,%,0,0,7,%,0,3,Operational
@@ -986,7 +986,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 21,021118,Attenuation correction on sigma-0,dB,2,-10000,14,dB,2,5,Operational
 21,021119,Wind scatterometer geophysical model function,Code table,0,0,6,Code table,0,2,Operational
 21,021120,Probability of rain,Numeric,3,0,10,Numeric,3,4,Operational
-21,021121,SEAWINDS NOF* rain index,Numeric,0,0,8,Numeric,0,3,Operational
+21,021121,SEAWINDS NOF* rain extent,Numeric,0,0,8,Numeric,0,3,Operational
 21,021122,Attenuation correction of sigma-0 (from tB),dB,2,-10000,14,dB,2,5,Operational
 21,021123,SEAWINDS normalized radar cross-section,dB,2,-30000,15,dB,2,5,Operational
 21,021128,Number of valid points per second used to derive previous parameters,Numeric,0,0,8,Numeric,0,3,Operational
@@ -1262,7 +1262,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 25,025085,Fraction of clear pixels in HIRS FOV,Numeric,0,0,7,Numeric,0,3,Operational
 25,025086,Depth correction indicator,Code table,0,0,2,Code table,0,1,Operational
 25,025090,Orbit state flag,Code table,0,0,4,Code table,0,2,Operational
-25,025091,Structure constant of the refraction index (Cn2),dB,3,-18192,13,dB,3,5,Operational
+25,025091,Structure constant of the refraction extent (Cn2),dB,3,-18192,13,dB,3,5,Operational
 25,025092,Acoustic propagation velocity,m s-1,2,28000,14,m s-1,2,5,Operational
 25,025093,RASS computation correction,Flag table,0,0,8,Flag table,0,3,Operational
 25,025095,Altimeter state flag,Flag table,0,0,2,Flag table,0,1,Operational
@@ -1400,7 +1400,7 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 33,033053,Ku band ocean retracking quality,Flag table,0,0,21,Flag table,0,7,Operational
 33,033060,GqisFlagQual - individual IASI-System quality flag,Code table,0,0,2,Code table,0,1,Operational
 33,033061,GqisQualIndex - indicator for instrument noise performance (contributions from spectral and radiometric calibration),%,0,0,7,%,0,3,Operational
-33,033062,GqisQualIndexLoc - indicator for geometric quality index,%,0,0,7,%,0,3,Operational
+33,033062,GqisQualIndexLoc - indicator for geometric quality extent,%,0,0,7,%,0,3,Operational
 33,033063,GqisQualIndexRad - indicator for instrument noise performance (contributions from radiometric calibration),%,0,0,7,%,0,3,Operational
 33,033064,GqisQualIndexSpect - indicator for instrument noise performance (contributions from spectral calibration),%,0,0,7,%,0,3,Operational
 33,033065,GqisSysTecSondQual - output of system TEC (Technical Expertise Centre) quality function,Numeric,0,0,24,Numeric,0,8,Operational
@@ -1441,11 +1441,11 @@ Class,FXY,enElementName,BUFR_Unit,BUFR_Scale,BUFR_ReferenceValue,BUFR_DataWidth_
 40,040012,Radiometer data quality flag,Flag table,0,0,8,Flag table,0,3,Operational
 40,040013,Radiometer brightness temperature interpretation flag,Code table,0,0,3,Code table,0,1,Operational
 40,040014,High frequency fluctuations of the sea surface topography correction,m,4,-3000,13,m,4,4,Operational
-40,040015,Normalised differential vegetation index (NDVI),Numeric,2,-100,8,,,,Validation
+40,040015,Normalised differential vegetation extent (NDVI),Numeric,2,-100,8,,,,Validation
 40,040016,Residual RMS in band,Numeric,0,0,16,Numeric,0,5,Validation
 40,040017,Non-normalised principal component score,Numeric,0,-1073741824,31,Numeric,0,10,Validation
-40,040018,GIacAvgImagIIS - Average of imager measurements,W/(m2 sr m-1),6,0,24,W/(m² sr m-1),6,8,Validation
-40,040019,GIacVarImagIIS - Variance of imager measurements,W/(m2 sr m-1),6,0,24,W/(m² sr m-1),6,8,Validation
+40,040018,GIacAvgImagIIS - Average of imager measurements,W/(m2 sr m-1),6,0,24,W/(mï¿½ sr m-1),6,8,Validation
+40,040019,GIacVarImagIIS - Variance of imager measurements,W/(m2 sr m-1),6,0,24,W/(mï¿½ sr m-1),6,8,Validation
 40,040020,GQisFlagQualDetailed - Quality flag for the system,Flag Table,0,0,17,Flag Table,0,6,Validation
 40,040021,Fraction of weighted AVHRR pixel in IASI FOV (Field of View) covered with snow/ice,%,0,0,7,%,0,3,Validation
 40,040022,"Number of missing, bad or failed AVHRR pixels",Numeric,0,0,7,Numeric,0,3,Validation
