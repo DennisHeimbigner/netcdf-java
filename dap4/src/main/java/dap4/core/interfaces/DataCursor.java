@@ -48,8 +48,6 @@ public interface DataCursor {
 
   public DapNode getTemplate();
 
-  public DataIndex getIndex() throws DapException;
-
   public boolean isScalar();
 
   public boolean isField();
@@ -57,15 +55,11 @@ public interface DataCursor {
   //////////////////////////////////////////////////
   // Atomic Data Management
 
-  // As a rule, only one will be fully implemented and the other written
-  // to use the fully implemented one.
   // Returns:
-  // atomic - array of data values
-  // structure/sequence - DataCursor[]
+  // atomic - array[1] of data value
+  // structure/sequence - DataCursor[] -- 1 per field
   // Even if the result is a scalar,
   // a 1-element array will be returned.
-
- // public Object read(List<Slice> slices) throws DapException;
 
   public Object read(DataIndex index) throws DapException;
 

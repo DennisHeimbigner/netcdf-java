@@ -16,20 +16,25 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * For data access, we adopt a cursor model.
  * This comes from database technology where a
  * cursor object is used to walk over the
- * results of a database query. Here the cursor
- * walks the underlying data and stores enough
- * state to extract data depending on its
- * sort. The cursor may (or may not) contain
- * internal subclasses to track various kinds of
- * state.
+ * results of a database query.
+ *
+ * Here the cursor is of the form of an extent
+ * -- a start point plus a length -- that refers to a
+ * subsequence of bytes in dechunked data stream
+ * corresponding to a variable: top-level or field.
+ * The cursor may (or may not) contain internal
+ * subclasses to track various kinds of state.
+ *
+ * Operationally, we support reading a single value as determined
+ * by an Index object relative to the offset position.
  */
 
-public class D4Cursor implements DataCursor {
+public class D4Cursor implements DataCursor
+{
 
   //////////////////////////////////////////////////
   // Mnemonics
@@ -41,18 +46,13 @@ public class D4Cursor implements DataCursor {
   // Instance Variables
 
   protected D4DSP dsp = null;
-
   protected Scheme scheme;
-
   protected DapNode template;
-
-  protected long offset = NULLOFFSET;
-
+  protected long offset = NULLOFFSET; // start point of the variable's data
   protected long dimproduct = 0;
+  protected long extent = 0; // length to the data for the variable
 
-  protected long extent = 0;
-
-  protected long[] bytestrings = null;
+  protected long[] bytestrings = null; // for counted strings
 
   // Following fields are for Structure/Sequence Types
   // For debugging purposes, we keep these separate,
@@ -68,7 +68,6 @@ public class D4Cursor implements DataCursor {
   protected long recordcount = -1; // scheme == SEQUENCE
   protected List<D4Cursor> records = null; // scheme == SEQUENCE
 
-  protected DataIndex arrayindex = null;
   protected long recordindex = -1; // scheme == record
 
   //////////////////////////////////////////////////
@@ -90,6 +89,7 @@ public class D4Cursor implements DataCursor {
     this(c.getScheme(), c.getDSP(), c.getTemplate());
     assert false;
     this.offset = c.offset;
+    this.extent = c.extent;
     this.bytestrings = c.bytestrings;
     this.fieldcursors = new D4Cursor[c.fieldcursors.length];
     for (int i = 0; i < c.fieldcursors.length; i++) {
@@ -115,10 +115,6 @@ public class D4Cursor implements DataCursor {
       buf.append("[]");
     buf.append(":");
     buf.append(getTemplate().toString());
-    if (this.arrayindex != null) {
-      buf.append("::");
-      buf.append(this.arrayindex.toString());
-    }
     if (this.recordindex >= 0) {
       buf.append("*");
       buf.append(this.recordindex);
@@ -145,8 +141,12 @@ public class D4Cursor implements DataCursor {
     return this.template;
   }
 
-  public D4Cursor setIndex(DataIndex index) {
-    this.arrayindex = index;
+  public long getExtent() {
+    return this.extent;
+  }
+
+  public D4Cursor setExtent(long extent) {
+    this.extent = extent;
     return this;
   }
 
@@ -168,12 +168,6 @@ public class D4Cursor implements DataCursor {
   public D4Cursor setTemplate(DapNode template) {
     this.template = template;
     return this;
-  }
-
-  public DataIndex getIndex() throws DapException {
-    if (this.scheme != Scheme.STRUCTURE && this.scheme != Scheme.SEQUENCE)
-      throw new DapException("Not a Sequence|Structure instance");
-    return this.arrayindex;
   }
 
   public long getRecordIndex() throws DapException {
@@ -215,8 +209,6 @@ public class D4Cursor implements DataCursor {
             && ((DapVariable) getTemplate()).getBaseType().getTypeSort().isCompoundType());
     return is;
   }
-
-  public long getExtent() {return this.extent;}
 
   public long getDimProduct() {return this.dimproduct;}
 
@@ -279,7 +271,7 @@ public class D4Cursor implements DataCursor {
     return b;
   }
 
-  public static long getLength(ByteBuffer b) {
+  static public long getLength(ByteBuffer b) {
     if (b.position() + D4LENSIZE > b.limit())
       throw new IllegalArgumentException();
     long n = b.getLong();
@@ -290,8 +282,8 @@ public class D4Cursor implements DataCursor {
   // Read API
 
   public Object read(DataIndex index) throws DapException {
-   // return read(D4Index.indexToSlices(index));
-    switch (this.scheme) {
+   return read(D4Index.indexToSlices(index));
+    /*switch (this.scheme) {
       case ATOMIC:
         return readAtomic(index);
       case STRUCTURE:
@@ -316,7 +308,7 @@ public class D4Cursor implements DataCursor {
         return instances;
       default:
         throw new DapException("Attempt to slice a scalar object");
-    }
+    }*/
   }
 
   public Object read(List<Slice> slices) throws DapException {
@@ -554,7 +546,7 @@ public class D4Cursor implements DataCursor {
     return this.elements[(int) pos];
   }
 
-  public static Scheme schemeFor(DapVariable field) {
+  static public Scheme schemeFor(DapVariable field) {
     DapType ftype = field.getBaseType();
     Scheme scheme = null;
     boolean isscalar = field.getRank() == 0;
