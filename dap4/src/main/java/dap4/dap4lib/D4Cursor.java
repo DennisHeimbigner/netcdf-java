@@ -260,8 +260,9 @@ public class D4Cursor implements DataCursor
     return this;
   }
 
-  public long getElementSize(DapVariable v) {
-    return v.getBaseType().isFixedSize() ? v.getBaseType().getSize() : 0;
+  public DapType getBaseType() {
+    if(!isAtomic()) return null;
+    return ((DapVariable)getTemplate()).getBaseType();
   }
 
   static ByteBuffer skip(long n, ByteBuffer b) {
@@ -281,36 +282,55 @@ public class D4Cursor implements DataCursor
   //////////////////////////////////////////////////
   // Read API
 
+  /**
+   * @param index
+   * @return value at pos index
+   * @throws DapException
+   */
+
   public Object read(DataIndex index) throws DapException {
-   return read(D4Index.indexToSlices(index));
-    /*switch (this.scheme) {
+    switch (this.scheme) {
       case ATOMIC:
         return readAtomic(index);
       case STRUCTURE:
       case SEQUENCE:
-        if (((DapVariable) this.getTemplate()).getRank() == 0 || DapUtil.isScalarSlices(slices))
+        if (((DapVariable) this.getTemplate()).getRank() == 0 || index.isScalar())
           throw new DapException("Cannot slice a scalar variable");
         return new D4Cursor(this);
-      case STRUCTARRAY:
-        // Read the structures specified by slices
-        Odometer odom = OdometerFactory.build(slices);
-        D4Cursor[] instances = new D4Cursor[(int) odom.totalSize()];
-        for (int i = 0; odom.hasNext(); i++) {
-          instances[i] = readStructure(odom.next());
-        }
-        return instances;
-      case SEQARRAY:
-        odom = OdometerFactory.build(slices);
-        instances = new D4Cursor[(int) odom.totalSize()];
-        for (int i = 0; odom.hasNext(); i++) {
-          instances[i] = readSequence(odom.next());
-        }
-        return instances;
+      case STRUCTARRAY: {
+        // Read the structure specified by index
+        D4Cursor[] instance = new D4Cursor[1];
+        instance[0] = readStructure(index);
+        return instance;
+      }
+      case SEQARRAY: {
+        D4Cursor[] instance = new D4Cursor[1];
+        instance[0] = readSequence(index);
+        return instance;
+      }
       default:
         throw new DapException("Attempt to slice a scalar object");
-    }*/
+    }
   }
 
+  /**
+   * Read multiple values specified by walking a set of slices with odometer.
+   * @param slices
+   * @return array of values
+   * @throws DapException
+   */
+  public Object read(List<Slice> slices) throws DapException  {
+    long totalsize = DapUtil.sliceProduct(slices);
+    Odometer points = OdometerFactory.build(slices);
+    Object values = LibTypeFcns.newVector(((DapVariable)this.template).getBaseType(), totalsize);
+    for(long i=0;points.hasNext();i++) {
+      Object result = this.read(points.next());
+      System.arraycopy(result,0,values,(int)i,1);
+    }
+    return values;
+  }
+
+/*
   public Object read(List<Slice> slices) throws DapException {
     switch (this.scheme) {
       case ATOMIC:
@@ -339,6 +359,7 @@ public class D4Cursor implements DataCursor
         throw new DapException("Attempt to slice a scalar object");
     }
   }
+*/
 
   public D4Cursor readField(int findex) throws DapException {
     assert (this.scheme == scheme.RECORD || this.scheme == scheme.STRUCTURE);
@@ -380,6 +401,16 @@ public class D4Cursor implements DataCursor
   //////////////////////////////////////////////////
   // Support methods
 
+  protected Object readAtomic(DataIndex index) throws DapException {
+    assert (index != null);
+    assert this.scheme == Scheme.ATOMIC;
+    DapVariable atomvar = (DapVariable) getTemplate();
+    int rank = index.getRank();
+    DapType basetype = atomvar.getBaseType();
+    return readAs(atomvar, basetype, index);
+  }
+
+/*
   protected Object readAtomic(List<Slice> slices) throws DapException {
     if (slices == null)
       throw new DapException("D4Cursor.read: null set of slices");
@@ -390,6 +421,7 @@ public class D4Cursor implements DataCursor
     DapType basetype = atomvar.getBaseType();
     return readAs(atomvar, basetype, slices);
   }
+*/
 
   /**
    * Allow specification of basetype to use; used for enumerations
@@ -399,7 +431,7 @@ public class D4Cursor implements DataCursor
    * @param slices
    * @return Object of basetype
    * @throws DapException
-   */
+
   protected Object readAs(DapVariable atomvar, DapType basetype, List<Slice> slices) throws DapException {
     if (basetype.getTypeSort() == TypeSort.Enum) {// short circuit this case
       basetype = ((DapEnumeration) basetype).getBaseType();
@@ -414,7 +446,74 @@ public class D4Cursor implements DataCursor
       readOdom(slices, basetype, odom, result);
     return result;
   }
+*/
 
+  /**
+   * Read one value from this array
+   * Allow specification of basetype to use
+   *
+   * @param atomvar
+   * @param basetype
+   * @param index
+   * @return Object of basetype
+   * @throws DapException
+   */
+  protected Object readAs(DapVariable atomvar, DapType basetype, DataIndex index) throws DapException {
+    if (basetype.getTypeSort() == TypeSort.Enum) {// short circuit this case
+      basetype = ((DapEnumeration) basetype).getBaseType();
+      return readAs(atomvar, basetype, index);
+    }
+    Object result = LibTypeFcns.newVector(basetype, 1);
+    readContig(index,basetype,result);
+    return result;
+  }
+
+  protected void readContig(DataIndex index, DapType basetype, Object result) throws DapException {
+    ByteBuffer stream = ((D4DSP) this.dsp).getData();
+    long off = this.offset;
+    long ix = index.index();
+    int elemsize = basetype.getSize();
+    stream.position((int) (off + (ix * elemsize)));
+    long totalsize = basetype.getSize();
+    switch (basetype.getTypeSort()) {
+      case Int8:
+      case UInt8:
+        stream.get((byte[]) result);
+        break;
+      case Char: // remember, we are reading 7-bit ascii, not utf-8 or utf-16
+        byte[] ascii = new byte[1];
+        stream.get(ascii);
+        ((char[]) result)[0] = (char) (ascii[0] & 0x7f);
+        break;
+      case Int16:
+      case UInt16:
+        stream.asShortBuffer().get((short[]) result);
+        skip(totalsize, stream);
+        break;
+      case Int32:
+      case UInt32:
+        stream.asIntBuffer().get((int[]) result);
+        skip(totalsize, stream);
+        break;
+      case Int64:
+      case UInt64:
+        stream.asLongBuffer().get((long[]) result);
+        skip(totalsize, stream);
+        break;
+      case Float32:
+        stream.asFloatBuffer().get((float[]) result);
+        skip(totalsize, stream);
+        break;
+      case Float64:
+        stream.asDoubleBuffer().get((double[]) result);
+        skip(totalsize, stream);
+        break;
+      default:
+        throw new DapException("Contiguous read not supported for type: " + basetype.getTypeSort());
+    }
+  }
+
+/*
   protected void readContig(List<Slice> slices, DapType basetype, long count, Odometer odom, Object result)
       throws DapException {
     ByteBuffer stream = ((D4DSP) this.dsp).getData();
@@ -463,7 +562,9 @@ public class D4Cursor implements DataCursor
         throw new DapException("Contiguous read not supported for type: " + basetype.getTypeSort());
     }
   }
+*/
 
+/*
   protected Object readOdom(List<Slice> slices, DapType basetype, Odometer odom, Object result) throws DapException {
     ByteBuffer stream = this.dsp.getData();
     stream.position((int) this.offset);
@@ -527,6 +628,7 @@ public class D4Cursor implements DataCursor
     }
     return result;
   }
+*/
 
   protected D4Cursor readStructure(DataIndex index) throws DapException {
     assert (this.scheme == Scheme.STRUCTARRAY);

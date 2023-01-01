@@ -13,4 +13,5 @@ public interface DataIndex {
     public int[] getShape();
     public int getShape(int i);
     public int index();
+    public boolean isScalar();
 }

@@ -10,6 +10,7 @@ dependencies {
   implementation project(':httpservices')
   implementation project(':cdm:cdm-core')
   implementation project(':netcdf4')
+  testImplementation project(':cdm-test-utils')
 
   implementation 'org.apache.httpcomponents:httpclient'
   compileOnly 'org.apache.httpcomponents:httpcore'

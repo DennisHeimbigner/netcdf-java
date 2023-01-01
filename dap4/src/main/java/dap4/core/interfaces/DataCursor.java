@@ -55,13 +55,20 @@ public interface DataCursor {
   //////////////////////////////////////////////////
   // Atomic Data Management
 
-  // Returns:
-  // atomic - array[1] of data value
-  // structure/sequence - DataCursor[] -- 1 per field
-  // Even if the result is a scalar,
-  // a 1-element array will be returned.
-
+  /**
+   * @return atomic - array[1] of data value;
+   *                  structure/sequence - DataCursor[] -- 1 per field
+   * Even if the result is a scalar, a 1-element array will be returned.
+  */
   public Object read(DataIndex index) throws DapException;
+
+  /**
+   * @return atomic - array[n] of data values;
+   *                  structure/sequence - DataCursor[n][F] -- 1 per field
+   * Even if the result is a scalar, a 1-element array will be returned.
+   * Usually implemented using read(DataIndex) plus Odometer.
+   */
+  public Object read(List<Slice> slices) throws DapException;
 
   //////////////////////////////////////////////////
   // Sequence record management

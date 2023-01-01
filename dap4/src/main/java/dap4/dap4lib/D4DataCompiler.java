@@ -189,7 +189,6 @@ public class D4DataCompiler {
     while (odom.hasNext()) {
       DataIndex index = odom.next();
       D4Cursor instance = compileStructure(var, dapstruct);
-      instance.setIndex(index);
       instances[(int) index.index()] = instance;
     }
     structarray.setElements(instances);
@@ -233,7 +232,6 @@ public class D4DataCompiler {
     while (odom.hasNext()) {
       DataIndex index = odom.next();
       D4Cursor instance = compileSequence(var, dapseq);
-      instance.setIndex(index);
       instances[(int) index.index()] = instance;
     }
     seqarray.setElements(instances);

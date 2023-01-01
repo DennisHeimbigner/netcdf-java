@@ -5,14 +5,18 @@
 
 package dap4.dap4lib.cdm.nc2;
 
+import dap4.core.dmr.DapDimension;
 import dap4.core.util.*;
 import dap4.dap4lib.D4Cursor;
 import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.D4Index;
+import dap4.dap4lib.LibTypeFcns;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.CDMUtil;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
+import dap4.dap4lib.util.Odometer;
+import dap4.dap4lib.util.OdometerFactory;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -47,6 +51,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
   protected int elementsize = 0; // of one element
   protected long dimsize = 0; // # of elements in array; scalar uses value 1
   protected long totalsize = 0; // elementsize*dimsize except when isbytestring
+  private dap4.dap4lib.LibTypeFcns LibTypeFcns;
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -212,16 +217,16 @@ import static dap4.dap4lib.D4Cursor.Scheme;
     return getObject(D4Index.offsetToIndex(offset, dimsizes));
   }
 
-  public Object getStorage() {
+  public Object getStorage()  {
     try {
-      List<Slice> slices = DapUtil.dimsetToSlices(this.template.getDimensions());
-      Object result = this.data.read(slices);
-      return result;
+      List<DapDimension> dimset = this.template.getDimensions();
+      List<Slice> slices = DapUtil.dimsetToSlices(dimset);
+      Object allvalues = this.data.read(slices);
+      return allvalues;
     } catch (DapException e) {
       throw new IllegalArgumentException();
     }
   }
-
 
   // Unsupported Methods
 

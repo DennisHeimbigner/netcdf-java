@@ -9,22 +9,18 @@ import dap4.core.util.DapConstants;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.dap4lib.HttpDSP;
-import org.apache.http.Header;
-import ucar.httpservices.HTTPSession;
-import ucar.nc2.NetcdfFile;
 import ucar.unidata.util.test.TestDir;
 import ucar.unidata.util.test.UnitTestCommon;
+
 import java.io.File;
 import java.io.FileFilter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-abstract public class DapTestCommon extends UnitTestCommon {
+abstract public class DapTestCommon extends UnitTestCommon
+{
 
   //////////////////////////////////////////////////
   // Constants
@@ -37,7 +33,7 @@ abstract public class DapTestCommon extends UnitTestCommon {
   static public final String TRANSLATETAG = "ucar.translate";
   static public final String TESTTAG = "ucar.testing";
 
-  static final String D4TESTDIRNAME = "d4tests";
+  static final String D4TESTDIRNAME = "";
 
   // Equivalent to the path to the webapp/d4ts for testing purposes
   static protected final String DFALTRESOURCEPATH = "/src/test/data/resources";

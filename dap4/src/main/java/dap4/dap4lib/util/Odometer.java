@@ -53,6 +53,15 @@ public class Odometer implements Iterator<DataIndex> {
 
   protected Odometer() {}
 
+  /**
+   * Build a complete odometer that covers a set of dimensions
+   * @param dimset
+   * @throws DapException
+   */
+  Odometer(List<DapDimension> dimset) throws DapException {
+
+  }
+
   Odometer(List<Slice> set, List<DapDimension> dimset) throws DapException {
     if (set == null)
       throw new DapException("Null slice list");
