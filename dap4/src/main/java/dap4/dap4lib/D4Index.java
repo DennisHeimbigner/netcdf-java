@@ -8,6 +8,7 @@ package dap4.dap4lib;
 import dap4.core.interfaces.DataIndex;
 import dap4.core.util.DapException;
 import dap4.core.util.Slice;
+import ucar.ma2.Index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,15 +26,14 @@ public class D4Index extends ucar.ma2.Index implements DataIndex {
    * compute the set of dimension indices that correspond
    * to the offset.
    */
-
-  static public D4Index offsetToIndex(int offset, int[] shape) {
+  static public Index offsetToIndex(int offset, int[] shape) {
     // offset = d3*(d2*(d1*(x1))+x2)+x3
     int[] indices = new int[shape.length];
     for (int i = shape.length - 1; i >= 0; i--) {
       indices[i] = offset % shape[i];
       offset = (offset - indices[i]) / shape[i];
     }
-    return new D4Index(indices, shape);
+    return new Index(indices, shape);
   }
 
   /**
@@ -83,10 +83,10 @@ public class D4Index extends ucar.ma2.Index implements DataIndex {
 
   public D4Index(int rank) {
     super(rank);
-    if (this.rank > 0) {
-      Arrays.fill(this.current, 0);
-      Arrays.fill(this.shape, 0);
-    }
+  }
+
+  public D4Index(int[] _shape) {
+    super(_shape);
   }
 
   public D4Index(D4Index index) {
@@ -95,10 +95,6 @@ public class D4Index extends ucar.ma2.Index implements DataIndex {
       System.arraycopy(index.getCurrentCounter(), 0, this.current, 0, this.rank);
       System.arraycopy(index.getShape(), 0, this.getShape(), 0, this.rank);
     }
-  }
-
-  public D4Index(int[] _shape) {
-    super(_shape);
   }
 
   public D4Index(int[] indices, int[] dimsizes) {
@@ -133,9 +129,11 @@ public class D4Index extends ucar.ma2.Index implements DataIndex {
    */
   public int index() {
     int offset = this.offset;
-    for (int i = 0; i < this.current.length; i++) {
-      offset *= this.shape[i];
-      offset += this.current[i];
+    int[] cur = getCurrentCounter();
+    int[] sh = getShape();
+    for (int i = 0; i < cur.length; i++) {
+      offset *= sh[i];
+      offset += cur[i];
     }
     return offset;
   }
@@ -143,11 +141,11 @@ public class D4Index extends ucar.ma2.Index implements DataIndex {
   public int getCurrentCounter(int i) {
     if (i < 0 || i >= this.rank)
       throw new IllegalArgumentException();
-    return this.current[i];
+    return getCurrentCounter()[i];
   }
 
   public boolean isScalar() {
-    return (rank == 0 && this.current.length == 1 && index() == 1);
+    return (rank == 0 && getCurrentCounter().length == 1 && index() == 1);
   }
 
 }

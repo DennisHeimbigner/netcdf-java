@@ -126,39 +126,39 @@ import static dap4.dap4lib.D4Cursor.Scheme;
   }
 
   public double getDouble(ucar.ma2.Index cdmidx) {
-    return getDouble(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getDouble(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public float getFloat(ucar.ma2.Index cdmidx) {
-    return getFloat(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getFloat(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public long getLong(ucar.ma2.Index cdmidx) {
-    return getLong(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getLong(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public int getInt(ucar.ma2.Index cdmidx) {
-    return getInt(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getInt(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public short getShort(ucar.ma2.Index cdmidx) {
-    return getShort(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getShort(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public byte getByte(ucar.ma2.Index cdmidx) {
-    return getByte(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getByte(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public char getChar(ucar.ma2.Index cdmidx) {
-    return getChar(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getChar(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public boolean getBoolean(ucar.ma2.Index cdmidx) {
-    return getBoolean(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getBoolean(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   public Object getObject(ucar.ma2.Index cdmidx) {
-    return getObject(CDMUtil.cdmIndexToIndex(cdmidx));
+    return getObject(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
   }
 
   // Convert int base to Index based

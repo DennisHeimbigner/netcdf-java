@@ -25,9 +25,9 @@ netcdf nc4_strings {
 
   data:
     station = 
-      {  "one",   "one",   "one",   "one",   "one",  "one",   "one",   "one",   "one",   "one",  "one",   "one",   "one",   "one",   "one",  "one",   "one",   "one",   "one",   "one",  "one",   "one",   "one",   "one",   "one",  "one",   "one",   "one",   "one",   "one"
+      {  "one",   "two",   "three",   "four",   "five",  "one_b",   "two_b",   "three_b",   "four_b",   "five_b",  "one_c",   "two_c",   "three_c",   "four_c",   "five_c",  "one",   "two",   "three",   "four",   "five",  "one",   "two",   "three",   "four",   "five",  "one_f",   "two_f",   "three_f",   "four_f",   "five_f"
       }
-    scan_line =   "r",   "r",   "r",   "r",   "r"
+    scan_line =   "r",   "r1",   "r2",   "r3",   "r4"
     codec_name =   "mp3"
     lat = 
       {0, 10, 20, 30, 40, 50}

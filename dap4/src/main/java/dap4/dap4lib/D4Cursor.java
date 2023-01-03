@@ -52,7 +52,7 @@ public class D4Cursor implements DataCursor
   protected long dimproduct = 0;
   protected long extent = 0; // length to the data for the variable
 
-  protected long[] bytestrings = null; // for counted strings
+  protected long[] bytestringoffsets = null; // for counted strings
 
   // Following fields are for Structure/Sequence Types
   // For debugging purposes, we keep these separate,
@@ -90,7 +90,7 @@ public class D4Cursor implements DataCursor
     assert false;
     this.offset = c.offset;
     this.extent = c.extent;
-    this.bytestrings = c.bytestrings;
+    this.bytestringoffsets = c.bytestringoffsets;
     this.fieldcursors = new D4Cursor[c.fieldcursors.length];
     for (int i = 0; i < c.fieldcursors.length; i++) {
       D4Cursor dc = c.fieldcursors[i];
@@ -233,7 +233,7 @@ public class D4Cursor implements DataCursor
   public D4Cursor setByteStringOffsets(long dimproduct, long total, long[] positions) {
     this.dimproduct = dimproduct;
     this.extent = total;
-    this.bytestrings = positions;
+    this.bytestringoffsets = positions;
     return this;
   }
 
@@ -508,9 +508,31 @@ public class D4Cursor implements DataCursor
         stream.asDoubleBuffer().get((double[]) result);
         skip(totalsize, stream);
         break;
+      case String:
+      case URL:
+        readString(index, basetype, result);
+        break;
       default:
         throw new DapException("Contiguous read not supported for type: " + basetype.getTypeSort());
     }
+  }
+
+  protected void readString(DataIndex index, DapType basetype, Object result) throws DapException {
+    long pos = index.index();
+    long avail = (this.bytestringoffsets == null ? 0 : this.bytestringoffsets.length);
+    if (pos < 0 || pos > avail)
+      throw new IndexOutOfBoundsException("read: " + index);
+    long strpos = this.bytestringoffsets[(int) pos];
+    // Get the length of this string
+    ByteBuffer stream = this.dsp.getData();
+    long savepos = stream.position();
+    stream.position((int)strpos);
+    // read the length of the string at this position
+    long strlen = getLength(stream);
+    byte[] utf8 = new byte[(int)strlen];
+    stream.get(utf8);
+    ((String[]) result)[0] = new String(utf8, DapUtil.UTF8);
+    stream.position((int)savepos);
   }
 
 /*

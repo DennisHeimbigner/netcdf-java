@@ -277,6 +277,7 @@ public class D4DataCompiler {
   }
 
   protected static void skip(ByteBuffer data, int count) {
+    assert data.position() + count <= data.limit();
     data.position(data.position() + count);
   }
 

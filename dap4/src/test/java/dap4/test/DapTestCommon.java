@@ -9,11 +9,15 @@ import dap4.core.util.DapConstants;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.dap4lib.HttpDSP;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.write.Ncdump;
 import ucar.unidata.util.test.TestDir;
 import ucar.unidata.util.test.UnitTestCommon;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -357,5 +361,45 @@ abstract public class DapTestCommon extends UnitTestCommon
     testcases.add(tc);
     return;
   }
+
+  protected String dumpmetadata(NetcdfDataset ncfile, String datasetname) throws Exception {
+    StringWriter sw = new StringWriter();
+    StringBuilder args = new StringBuilder("-strict");
+    if (datasetname != null) {
+      args.append(" -datasetname ");
+      args.append(datasetname);
+    }
+    // Print the meta-databuffer using these args to NcdumpW
+    try {
+      Ncdump.ncdump(ncfile, args.toString(), sw, null);
+      //if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
+        //throw new Exception("NcdumpW failed");
+    } catch (IOException ioe) {
+      throw new Exception("Ncdump failed", ioe);
+    }
+    sw.close();
+    return sw.toString();
+  }
+
+  protected String dumpdata(NetcdfDataset ncfile, String datasetname) throws Exception {
+    StringBuilder args = new StringBuilder("-strict -vall");
+    if (datasetname != null) {
+      args.append(" -datasetname ");
+      args.append(datasetname);
+    }
+    StringWriter sw = new StringWriter();
+    // Dump the databuffer
+    try {
+      Ncdump.ncdump(ncfile, args.toString(), sw, null);
+      //if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
+      //  throw new Exception("NCdumpW failed");
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+      throw new Exception("NCdump failed", ioe);
+    }
+    sw.close();
+    return sw.toString();
+  }
+
 
 }

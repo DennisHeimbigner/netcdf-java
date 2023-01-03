@@ -5,6 +5,7 @@
 
 package dap4.dap4lib.cdm;
 
+import dap4.core.interfaces.DataIndex;
 import dap4.dap4lib.D4Cursor;
 import dap4.core.dmr.DapDimension;
 import dap4.core.dmr.DapType;
@@ -530,4 +531,63 @@ public abstract class CDMUtil {
   public static ucar.ma2.Index indexToCcMIndex(D4Index d4) {
     return (Index)d4;
   }
+
+  /**
+   * Given an offset (single index) and a set of dimensions
+   * compute the set of dimension indices that correspond
+   * to the offset.
+   */
+  static public Index offsetToIndex(int offset, int[] shape) {
+    // offset = d3*(d2*(d1*(x1))+x2)+x3
+    int[] indices = new int[shape.length];
+    for (int i = shape.length - 1; i >= 0; i--) {
+      indices[i] = offset % shape[i];
+      offset = (offset - indices[i]) / shape[i];
+    }
+    return new Index(indices, shape);
+  }
+
+  /**
+   * Convert DataIndex to list of slices
+   * @param indices to convert
+   * @return list of corresponding slices
+   */
+
+  static public List<Slice> indexToSlices(Index indices) throws DapException {
+    // short circuit the scalar case
+    int rank = indices.getRank();
+    if (rank == 0)
+      return Slice.SCALARSLICES;
+    // offset = d3*(d2*(d1*(x1))+x2)+x3
+    List<Slice> slices = new ArrayList<>(rank);
+    for (int i = 0; i < rank; i++) {
+      int isize = indices.getCurrentCounter()[i];
+      slices.add(new Slice(isize, isize + 1, 1, indices.getShape(i)));
+    }
+    return slices;
+  }
+
+  /**
+   * If a set of slices refers to a single position,
+   * then return the corresponding Index. Otherwise,
+   * throw Exception.
+   *
+   * @param slices
+   * @return Index corresponding to slices
+   * @throws DapException
+   */
+  static public Index slicesToIndex(List<Slice> slices) throws DapException {
+    int[] positions = new int[slices.size()];
+    int[] dimsizes = new int[slices.size()];
+    for (int i = 0; i < positions.length; i++) {
+      Slice s = slices.get(i);
+      if (s.getCount() != 1)
+        throw new DapException("Attempt to convert non-singleton sliceset to index");
+      positions[i] = s.getFirst();
+      dimsizes[i] = s.getMax();
+    }
+    return new Index(positions, dimsizes);
+  }
+
+
 }

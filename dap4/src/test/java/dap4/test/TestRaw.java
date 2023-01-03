@@ -180,23 +180,6 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
     }
   }
 
-  String dumpmetadata(NetcdfDataset ncfile, String datasetname) throws Exception {
-    StringWriter sw = new StringWriter();
-    StringBuilder args = new StringBuilder("-strict");
-    if (datasetname != null) {
-      args.append(" -datasetname ");
-      args.append(datasetname);
-    }
-    // Print the meta-databuffer using these args to NcdumpW
-    try {
-      if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
-        throw new Exception("NcdumpW failed");
-    } catch (IOException ioe) {
-      throw new Exception("NcdumpW failed", ioe);
-    }
-    sw.close();
-    return sw.toString();
-  }
 
   //////////////////////////////////////////////////
   // Support Methods
@@ -214,24 +197,6 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
     return url.toString();
   }
 
-  String dumpdata(NetcdfDataset ncfile, String datasetname) throws Exception {
-    StringBuilder args = new StringBuilder("-strict -vall");
-    if (datasetname != null) {
-      args.append(" -datasetname ");
-      args.append(datasetname);
-    }
-    StringWriter sw = new StringWriter();
-    // Dump the databuffer
-    try {
-      if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
-        throw new Exception("NCdumpW failed");
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-      throw new Exception("NCdumpW failed", ioe);
-    }
-    sw.close();
-    return sw.toString();
-  }
 }
 
 
