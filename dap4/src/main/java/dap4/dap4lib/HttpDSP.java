@@ -60,7 +60,7 @@ public class HttpDSP extends D4DSP {
   // DSP API
 
   public D4DSP open(String fileurl, ChecksumMode cmode) throws DapException {
-    super.open(fileurl,cmode);
+    super.open(fileurl, cmode);
     return this;
   }
 

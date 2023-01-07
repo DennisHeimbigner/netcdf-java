@@ -16,6 +16,9 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.ForbiddenConversionException;
 import ucar.nc2.EnumTypedef;
+import ucar.nc2.Sequence;
+import ucar.nc2.Structure;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -43,36 +46,36 @@ public abstract class CDMTypeFcns {
   public static Class cdmElementClass(DataType dt) {
     switch (dt) {
       case BOOLEAN:
-        return boolean.class;
+        return Boolean.class;
       case ENUM1:
       case BYTE:
-        return byte.class;
+        return Byte.class;
       case CHAR:
-        return char.class;
+        return Character.class;
       case ENUM2:
       case SHORT:
-        return short.class;
+        return Short.class;
       case ENUM4:
       case INT:
-        return int.class;
+        return Integer.class;
       case LONG:
-        return long.class;
+        return Long.class;
       case FLOAT:
-        return float.class;
+        return Float.class;
       case DOUBLE:
-        return double.class;
+        return Double.class;
       case STRING:
         return String.class;
       case OPAQUE:
         return ByteBuffer.class;
       case UBYTE:
-        return byte.class;
+        return Byte.class;
       case USHORT:
-        return short.class;
+        return Short.class;
       case UINT:
-        return int.class;
+        return Integer.class;
       case ULONG:
-        return long.class;
+        return Long.class;
       default:
         break;
     }
@@ -124,6 +127,10 @@ public abstract class CDMTypeFcns {
         throw new ForbiddenConversionException();
     }
     return vector;
+  }
+
+  public static boolean signify(DapType type) {
+    return daptype2cdmtype(type).isUnsigned();
   }
 
   public static Object createVector(DapType type, long count) {
@@ -264,7 +271,6 @@ public abstract class CDMTypeFcns {
     }
     return null;
   }
-
 
   /**
    * Conmpute the size, in databuffer,

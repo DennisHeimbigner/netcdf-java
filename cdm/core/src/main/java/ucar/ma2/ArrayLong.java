@@ -76,7 +76,7 @@ public class ArrayLong extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  ArrayLong(Index ima, boolean isUnsigned, long[] data) {
+  protected ArrayLong(Index ima, boolean isUnsigned, long[] data) {
     super(isUnsigned ? DataType.ULONG : DataType.LONG, ima);
     /*
      * replace by something better

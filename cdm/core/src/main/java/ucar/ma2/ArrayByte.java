@@ -75,7 +75,7 @@ public class ArrayByte extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  ArrayByte(Index ima, boolean isUnsigned, byte[] data) {
+  protected ArrayByte(Index ima, boolean isUnsigned, byte[] data) {
     super(isUnsigned ? DataType.UBYTE : DataType.BYTE, ima);
     /*
      * replace by something better

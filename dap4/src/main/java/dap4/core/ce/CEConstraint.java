@@ -916,7 +916,7 @@ public class CEConstraint {
         if (newdim == null)
           newdim = dim0;
         // fill in the undefined last value
-        slice.setMaxSize((int)newdim.getSize());
+        slice.setMaxSize((int) newdim.getSize());
         slice.finish();
         Slice newslice = null;
         if (slice.isConstrained()) {

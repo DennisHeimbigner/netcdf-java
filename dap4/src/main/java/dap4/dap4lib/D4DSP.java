@@ -42,8 +42,7 @@ import static dap4.core.util.DapConstants.*;
  * It cannot be used standalone.
  */
 
-public abstract class D4DSP
-{
+public abstract class D4DSP {
   //////////////////////////////////////////////////
   // Constants
 
@@ -76,8 +75,7 @@ public abstract class D4DSP
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public D4DSP() {
-  }
+  public D4DSP() {}
 
   //////////////////////////////////////////////////
 
@@ -100,7 +98,9 @@ public abstract class D4DSP
   //////////////////////////////////////////////////
   // Accessors
 
-  public ChecksumMode getChecksumMode() {return this.checksummode;}
+  public ChecksumMode getChecksumMode() {
+    return this.checksummode;
+  }
 
   public Map<DapVariable, D4Cursor> getVariableDataMap() {
     return this.variable_cursors;
@@ -124,7 +124,7 @@ public abstract class D4DSP
   protected D4DSP setData(InputStream stream, RequestMode mode) throws IOException {
     this.mode = mode;
     this.dechunkeddata = new ChunkedInput().dechunk(mode, stream);
-    if(mode == RequestMode.DAP)
+    if (mode == RequestMode.DAP)
       this.data = ByteBuffer.wrap(this.dechunkeddata.getData());
     // This is the definitive remote byte order
     this.remoteorder = this.dechunkeddata.getOrder();
@@ -145,7 +145,7 @@ public abstract class D4DSP
 
   protected void setDMR(DapDataset dmr) {
     this.dmr = dmr;
-    if(this.dmr != null) {
+    if (this.dmr != null) {
       // Add some canonical attributes to the <Dataset>
       this.dmr.setDataset(this.dmr);
       this.dmr.setDapVersion(DapConstants.X_DAP_VERSION);
@@ -155,18 +155,19 @@ public abstract class D4DSP
   }
 
   /*
-  public static String printDMR(DapDataset dmr) {
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-    DMRPrinter printer = new DMRPrinter(dmr, pw);
-    try {
-      printer.print();
-      pw.close();
-      sw.close();
-    } catch (IOException e) {
-    }
-    return sw.toString();
-  }*/
+   * public static String printDMR(DapDataset dmr) {
+   * StringWriter sw = new StringWriter();
+   * PrintWriter pw = new PrintWriter(sw);
+   * DMRPrinter printer = new DMRPrinter(dmr, pw);
+   * try {
+   * printer.print();
+   * pw.close();
+   * sw.close();
+   * } catch (IOException e) {
+   * }
+   * return sw.toString();
+   * }
+   */
 
   //////////////////////////////////////////////////
   // Subclass defined
@@ -209,9 +210,9 @@ public abstract class D4DSP
       case DMR:
         break;
       case DAP:
-        cxt.put(ChecksumSource.REMOTE,d4compiler.getChecksumMap(ChecksumSource.REMOTE));
-        cxt.put(ChecksumSource.LOCAL,d4compiler.getChecksumMap(ChecksumSource.LOCAL));
-        cxt.put(D4Cursor.class,d4compiler.getVariableDataMap());
+        cxt.put(ChecksumSource.REMOTE, d4compiler.getChecksumMap(ChecksumSource.REMOTE));
+        cxt.put(ChecksumSource.LOCAL, d4compiler.getChecksumMap(ChecksumSource.LOCAL));
+        cxt.put(D4Cursor.class, d4compiler.getVariableDataMap());
         break;
     }
   }

@@ -7,13 +7,13 @@ package dap4.dap4lib.cdm.nc2;
 
 import dap4.dap4lib.D4Cursor;
 import dap4.dap4lib.D4DSP;
-import dap4.dap4lib.D4Index;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.core.dmr.DapSequence;
 import dap4.core.dmr.DapStructure;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
 import dap4.core.util.*;
+import dap4.dap4lib.cdm.CDMUtil;
 import ucar.ma2.*;
 import ucar.nc2.Group;
 import java.io.IOException;
@@ -132,7 +132,7 @@ import java.util.List;
     this.cdmroot = group;
     this.dsp = dsp;
     // Since this is a scalar, pull out the single instance
-    this.seqdata = ((D4Cursor[]) data.read(D4Index.SCALAR))[0];
+    this.seqdata = ((D4Cursor[]) data.read(CDMUtil.SCALAR))[0];
     this.recordcount = this.seqdata.getRecordCount();
     this.nmembers = ((DapStructure) this.basetype).getFields().size();
 

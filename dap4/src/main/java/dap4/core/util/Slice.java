@@ -123,7 +123,7 @@ public class Slice {
 
   public Slice(DapDimension dim) throws DapException {
     this();
-    setIndices(0, (int)dim.getSize(), 1, (int)dim.getSize());
+    setIndices(0, (int) dim.getSize(), 1, (int) dim.getSize());
     setWhole(true);
     setConstrained(false);
   }

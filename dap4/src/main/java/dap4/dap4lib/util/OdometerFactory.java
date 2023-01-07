@@ -24,7 +24,7 @@ abstract public class OdometerFactory {
   }
 
   static public Odometer build(List<Slice> slices) throws DapException {
-    return build(slices,null);
+    return build(slices, null);
   }
 
   static public Odometer build(List<Slice> slices, List<DapDimension> dimset) throws DapException {
@@ -33,8 +33,6 @@ abstract public class OdometerFactory {
     if (dimset != null && slices.size() != dimset.size())
       throw new DapException("Rank mismatch");
     // check for scalar case
-    if(slices == null)
-      throw new DapException("Null slice set");
     if (DapUtil.isScalarSlices(slices))
       return buildScalar();
     // Check to see if we need a MultiOdometer
@@ -50,9 +48,9 @@ abstract public class OdometerFactory {
     if (slices == null || slices.size() == 0)
       return buildScalar();
     else if (multi)
-      return new MultiOdometer(slices,dimset);
+      return new MultiOdometer(slices, dimset);
     else
-      return new Odometer(slices,dimset);
+      return new Odometer(slices, dimset);
   }
 
 }

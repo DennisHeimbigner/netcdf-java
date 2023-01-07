@@ -157,7 +157,7 @@ public class CEParserImpl extends CEBisonParser {
 
     Slice x;
     try {
-      x = new Slice((int)first, (int)stop, (int)stride);
+      x = new Slice((int) first, (int) stop, (int) stride);
     } catch (DapException de) {
       throw new ParseException(de);
     }
@@ -203,7 +203,7 @@ public class CEParserImpl extends CEBisonParser {
       throw new ParseException("Attempt to redefine a non-existent shared dimension: " + name);
     // Verify that the slice is consistent with the shared dimension
     try {
-      slice.setMaxSize((int)dim.getSize());
+      slice.setMaxSize((int) dim.getSize());
       slice.finish();
     } catch (DapException de) {
       throw new ParseException(de);

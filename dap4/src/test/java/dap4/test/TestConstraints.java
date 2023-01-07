@@ -136,7 +136,7 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    //props.prop_visual = true;
+    // props.prop_visual = true;
     super.setup();
   }
 

@@ -721,15 +721,15 @@ public abstract class DapUtil // Should only contain static methods
 
   static public long[] longvector(int[] iv) {
     long[] lv = new long[iv.length];
-    for(int i=0;i<iv.length;i++)
-      lv[i] = (long)iv[i];
+    for (int i = 0; i < iv.length; i++)
+      lv[i] = (long) iv[i];
     return lv;
   }
 
   static public int[] intvector(long[] lv) {
     int[] iv = new int[lv.length];
-    for(int i=0;i<lv.length;i++)
-      iv[i] = (int)lv[i];
+    for (int i = 0; i < lv.length; i++)
+      iv[i] = (int) lv[i];
     return iv;
   }
 }

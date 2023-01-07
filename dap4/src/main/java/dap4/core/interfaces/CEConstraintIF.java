@@ -7,8 +7,7 @@ package dap4.core.interfaces;
 
 import dap4.core.dmr.DapNode;
 
-public interface CEConstraintIF
-{
+public interface CEConstraintIF {
 
   //////////////////////////////////////////////////
   // Reference processing

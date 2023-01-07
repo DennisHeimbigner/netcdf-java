@@ -12,7 +12,6 @@ import dap4.core.dmr.DapType;
 import dap4.core.dmr.TypeSort;
 import dap4.core.util.DapException;
 import dap4.core.util.Slice;
-import dap4.dap4lib.D4Index;
 import ucar.ma2.ForbiddenConversionException;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -33,6 +32,8 @@ import java.util.List;
 public abstract class CDMUtil {
 
   static final String hexchars = "0123456789abcdef";
+
+  static final public Index SCALAR = new Index(new int[0], new int[0]);
 
   /**
    * Convert a list of ucar.ma2.Range to a list of Slice
@@ -296,7 +297,7 @@ public abstract class CDMUtil {
    * @throws ForbiddenConversionException if cannot convert to long
    */
 
-  public static long extractLongValue(TypeSort atomtype, D4Cursor dataset, D4Index index) throws DapException {
+  public static long extractLongValue(TypeSort atomtype, D4Cursor dataset, Index index) throws DapException {
     Object result;
     result = dataset.read(index);
     long lvalue = CDMTypeFcns.extract(atomtype, result);
@@ -315,7 +316,7 @@ public abstract class CDMUtil {
    * @throws ForbiddenConversionException if cannot convert to double
    */
 
-  public static double extractDoubleValue(TypeSort atomtype, D4Cursor dataset, D4Index index) throws DapException {
+  public static double extractDoubleValue(TypeSort atomtype, D4Cursor dataset, Index index) throws DapException {
     Object result;
     result = dataset.read(index);
     double dvalue = 0.0;
@@ -523,32 +524,18 @@ public abstract class CDMUtil {
     return slices;
   }
 
-  public static D4Index cdmIndexToIndex(ucar.ma2.Index cdmidx) {
-    D4Index dapidx = new D4Index(cdmidx.getCurrentCounter(), cdmidx.getShape());
+  public static Index cdmIndexToIndex(ucar.ma2.Index cdmidx) {
+    Index dapidx = new Index(cdmidx.getCurrentCounter(), cdmidx.getShape());
     return dapidx;
   }
 
-  public static ucar.ma2.Index indexToCcMIndex(D4Index d4) {
-    return (Index)d4;
-  }
-
-  /**
-   * Given an offset (single index) and a set of dimensions
-   * compute the set of dimension indices that correspond
-   * to the offset.
-   */
-  static public Index offsetToIndex(int offset, int[] shape) {
-    // offset = d3*(d2*(d1*(x1))+x2)+x3
-    int[] indices = new int[shape.length];
-    for (int i = shape.length - 1; i >= 0; i--) {
-      indices[i] = offset % shape[i];
-      offset = (offset - indices[i]) / shape[i];
-    }
-    return new Index(indices, shape);
+  public static ucar.ma2.Index indexToCcMIndex(Index d4) {
+    return (Index) d4;
   }
 
   /**
    * Convert DataIndex to list of slices
+   * 
    * @param indices to convert
    * @return list of corresponding slices
    */
@@ -588,6 +575,5 @@ public abstract class CDMUtil {
     }
     return new Index(positions, dimsizes);
   }
-
 
 }

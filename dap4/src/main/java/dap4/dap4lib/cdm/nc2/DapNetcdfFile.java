@@ -49,10 +49,18 @@ public class DapNetcdfFile extends NetcdfFile {
   // Type Declarations
 
   protected static class NullCancelTask implements CancelTask {
-    public boolean isCancel() {return false;}
-    public boolean isDone() {return false;}
+    public boolean isCancel() {
+      return false;
+    }
+
+    public boolean isDone() {
+      return false;
+    }
+
     public void setDone(boolean done) {}
+
     public void setError(String msg) {}
+
     public void setProgress(String msg, int progress) {}
   }
 
@@ -136,26 +144,26 @@ public class DapNetcdfFile extends NetcdfFile {
     cxt.insert(xuri.getFragFields(), true);
     // Query takes precedence over fragment
     cxt.insert(xuri.getQueryFields(), true);
-    String csummode = (String)cxt.get(DapConstants.CHECKSUMTAG);
+    String csummode = (String) cxt.get(DapConstants.CHECKSUMTAG);
     this.checksummode = ChecksumMode.modeFor(csummode);
     this.checksummode = ChecksumMode.asTrueFalse(this.checksummode); // Fix the checksum mode to be only TRUE or FALSE
-    this.cxt.put(ChecksumMode.class,this.checksummode);
+    this.cxt.put(ChecksumMode.class, this.checksummode);
 
     // Find the D4DSP class that can process this URL location.
     this.dsp = dspregistry.findMatchingDSP(this.location, cxt); // find relevant D4DSP subclass
     if (this.dsp == null)
       throw new IOException("No matching DSP: " + this.location);
-    this.dsp.open(this.dsplocation,this.checksummode); // side effect: compile DMR
+    this.dsp.open(this.dsplocation, this.checksummode); // side effect: compile DMR
     this.dsp.loadDMR(); // Get the DMR
     this.dmr = this.dsp.getDMR(); // get DMR
-    this.cxt.put(DapDataset.class,this.dmr);
+    this.cxt.put(DapDataset.class, this.dmr);
     // set the pseudo-location, otherwise we get a name that is full path.
     setLocation(this.dmr.getDataset().getShortName());
-    assert(this.cdmcompiler == null);
+    assert (this.cdmcompiler == null);
     this.cdmcompiler = new CDMCompiler(this, this.dsp);
     this.cdmcompiler.compileDMR();
     finish();
-    this.dsp.loadContext(this.cxt,RequestMode.DMR);
+    this.dsp.loadContext(this.cxt, RequestMode.DMR);
 
   }
 
@@ -304,38 +312,38 @@ public class DapNetcdfFile extends NetcdfFile {
       this.dsp.loadDAP();
       loadContext();
       verifyChecksums();
-      assert(this.cdmcompiler != null);
+      assert (this.cdmcompiler != null);
       this.cdmcompiler.compileData(); // compile to CDM Arrays
       setArrayMap(this.cdmcompiler.getArrayMap());
-      this.dsp.loadContext(this.cxt,RequestMode.DAP);
+      this.dsp.loadContext(this.cxt, RequestMode.DAP);
     }
   }
 
   protected void loadContext() {
-    this.cxt.put(DapConstants.ChecksumSource.REMOTE,this.dsp.getChecksumMap(DapConstants.ChecksumSource.REMOTE));
-    this.cxt.put(DapConstants.ChecksumSource.LOCAL,this.dsp.getChecksumMap(DapConstants.ChecksumSource.LOCAL));
-    this.cxt.put(D4Cursor.class,this.dsp.getVariableDataMap());
+    this.cxt.put(DapConstants.ChecksumSource.REMOTE, this.dsp.getChecksumMap(DapConstants.ChecksumSource.REMOTE));
+    this.cxt.put(DapConstants.ChecksumSource.LOCAL, this.dsp.getChecksumMap(DapConstants.ChecksumSource.LOCAL));
+    this.cxt.put(D4Cursor.class, this.dsp.getVariableDataMap());
   }
 
   protected void verifyChecksums() throws DapException {
-    ChecksumMode cmode = (ChecksumMode)this.cxt.get(ChecksumMode.class);
-    Map<DapVariable,Long> remotechecksummap = (Map<DapVariable,Long>)cxt.get(DapConstants.ChecksumSource.REMOTE);
-    Map<DapVariable,Long> localchecksummap = (Map<DapVariable,Long>)cxt.get(DapConstants.ChecksumSource.LOCAL);
+    ChecksumMode cmode = (ChecksumMode) this.cxt.get(ChecksumMode.class);
+    Map<DapVariable, Long> remotechecksummap = (Map<DapVariable, Long>) cxt.get(DapConstants.ChecksumSource.REMOTE);
+    Map<DapVariable, Long> localchecksummap = (Map<DapVariable, Long>) cxt.get(DapConstants.ChecksumSource.LOCAL);
 
-    if(cmode != ChecksumMode.TRUE)
+    if (cmode != ChecksumMode.TRUE)
       return;
-    for(DapVariable dvar: dmr.getTopVariables()) {
+    for (DapVariable dvar : dmr.getTopVariables()) {
       // Verify the calculated checksums
       Long remotechecksum = remotechecksummap.get(dvar);
       Long localchecksum = localchecksummap.get(dvar);
-      assert((localchecksum != null) && (remotechecksum != null));
-      if(!cxt.containsKey("hyrax")) {// Suppress the check for Hyrax, for now
-        if(localchecksum.longValue() != remotechecksum.longValue())
+      assert ((localchecksum != null) && (remotechecksum != null));
+      if (!cxt.containsKey("hyrax")) {// Suppress the check for Hyrax, for now
+        if (localchecksum.longValue() != remotechecksum.longValue())
           throw new DapException("Checksum mismatch: local=" + localchecksum + " remote=" + remotechecksum);
       }
       // Verify the checksum Attribute, if any
       DapAttribute csumattr = dvar.getChecksumAttribute();
-      if(csumattr != null) {
+      if (csumattr != null) {
         assert (csumattr.getValues().length == 1 && csumattr.getBaseType() == DapType.INT32);
         Long attrcsum = (long) 0;
         try {
@@ -343,8 +351,8 @@ public class DapNetcdfFile extends NetcdfFile {
         } catch (NumberFormatException nfe) {
           throw new DapException("Illegal Checksum attribute value", nfe);
         }
-        if(!cxt.containsKey("hyrax")) { // Suppress the check for Hyrax, for now
-          if(localchecksum.longValue() != attrcsum.longValue())
+        if (!cxt.containsKey("hyrax")) { // Suppress the check for Hyrax, for now
+          if (localchecksum.longValue() != attrcsum.longValue())
             throw new DapException("Checksum mismatch: local=" + localchecksum + " attribute=" + attrcsum);
         }
       }

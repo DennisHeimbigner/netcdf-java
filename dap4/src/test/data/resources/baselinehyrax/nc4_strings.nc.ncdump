@@ -3,13 +3,13 @@ netcdf nc4_strings {
     lat = 6;
     lon = 5;
   variables:
-    String station(lat, lon);
+    string station(lat, lon);
       string station:names = "site_1", "site_2", "site_3";
       string station:who = "james";
 
-    String scan_line(lon);
+    string scan_line(lon);
 
-    String codec_name;
+    string codec_name;
 
     int lat(lat);
       string lat:_CoordinateAxisType = "Lat";

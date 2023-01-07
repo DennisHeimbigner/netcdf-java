@@ -14,7 +14,7 @@ netcdf nc4_nc_classic_comp {
 
     short pixel(lat, lon);
 
-    String source(lat);
+    string source(lat);
       source:string_length = 5;
 
     int lat(lat);

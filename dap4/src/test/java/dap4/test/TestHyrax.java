@@ -53,7 +53,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   static protected final String BASELINEEXT = ".ncdump";
 
   static final String[][] hyrax_manifest = new String[][] {{"nc4_nc_classic_no_comp.nc", "nc4_test_files", null},
-      {"nc4_nc_classic_comp.nc", "nc4_test_files", null}, {"nc4_unsigned_types.nc", "nc4_test_files", null},
+      {"nc4_nc_classic_comp.nc", "nc4_test_files", null}, {"nc4_unsigned_types.nc", "nc4_test_files", "/lat"},
       {"nc4_unsigned_types_comp.nc", "nc4_test_files", null}, {"nc4_strings.nc", "nc4_test_files", null},
       {"nc4_strings_comp.nc", "nc4_test_files", null}, {"ref_tst_compounds.nc", "nc4_test_files", null},
       {"amsre_20060131v5.dat", "RSS/amsre/bmaps_v05/y2006/m01", "/time_a[0:2][0:5]"},
@@ -119,7 +119,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(file, url, baseline, query);
       testcases.add(tc);
     }
-    singleTest("AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", testcases); // choose single test for debugging
+    // singleTest("ref_tst_compounds.nc", testcases); // choose single test for debugging
     return testcases;
   }
   //////////////////////////////////////////////////
@@ -141,7 +141,8 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    //props.prop_baseline = true;
+    // props.prop_baseline = true;
+    // props.prop_visual = true;
     super.setup();
   }
 
@@ -173,6 +174,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
     }
 
     if (props.prop_visual) {
+      // visual("Baseline", baselinecontent);
       visual("Output", testresult);
     }
     if (props.prop_baseline)

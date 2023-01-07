@@ -8,6 +8,7 @@ package dap4.core.interfaces;
 import dap4.core.dmr.DapNode;
 import dap4.core.util.DapException;
 import dap4.core.util.Slice;
+import ucar.ma2.Index;
 
 import java.util.List;
 
@@ -57,16 +58,16 @@ public interface DataCursor {
 
   /**
    * @return atomic - array[1] of data value;
-   *                  structure/sequence - DataCursor[] -- 1 per field
-   * Even if the result is a scalar, a 1-element array will be returned.
-  */
-  public Object read(DataIndex index) throws DapException;
+   *         structure/sequence - DataCursor[] -- 1 per field
+   *         Even if the result is a scalar, a 1-element array will be returned.
+   */
+  public Object read(Index index) throws DapException;
 
   /**
    * @return atomic - array[n] of data values;
-   *                  structure/sequence - DataCursor[n][F] -- 1 per field
-   * Even if the result is a scalar, a 1-element array will be returned.
-   * Usually implemented using read(DataIndex) plus Odometer.
+   *         structure/sequence - DataCursor[n][F] -- 1 per field
+   *         Even if the result is a scalar, a 1-element array will be returned.
+   *         Usually implemented using read(DataIndex) plus Odometer.
    */
   public Object read(List<Slice> slices) throws DapException;
 

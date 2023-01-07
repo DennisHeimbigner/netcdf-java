@@ -76,7 +76,7 @@ public class ArrayShort extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  ArrayShort(Index ima, boolean isUnsigned, short[] data) {
+  protected ArrayShort(Index ima, boolean isUnsigned, short[] data) {
     super(isUnsigned ? DataType.USHORT : DataType.SHORT, ima);
     /*
      * replace by something better

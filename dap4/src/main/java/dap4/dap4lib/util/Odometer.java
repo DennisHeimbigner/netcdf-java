@@ -9,7 +9,7 @@ import dap4.core.dmr.DapDimension;
 import dap4.core.interfaces.DataIndex;
 import dap4.core.util.DapException;
 import dap4.core.util.Slice;
-import dap4.dap4lib.D4Index;
+import ucar.ma2.Index;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
  * supports iterator
  */
 
-public class Odometer implements Iterator<DataIndex> {
+public class Odometer implements Iterator<Index> {
 
   //////////////////////////////////////////////////
   // Types
@@ -43,7 +43,7 @@ public class Odometer implements Iterator<DataIndex> {
   protected List<DapDimension> dimset = null;
 
   // The current odometer indices
-  protected D4Index index;
+  protected Index index;
 
   // precompute this.slices[i].getLast() - this.slices[i].getStride()
   protected long[] endpoint;
@@ -55,6 +55,7 @@ public class Odometer implements Iterator<DataIndex> {
 
   /**
    * Build a complete odometer that covers a set of dimensions
+   * 
    * @param dimset
    * @throws DapException
    */
@@ -79,19 +80,19 @@ public class Odometer implements Iterator<DataIndex> {
     int[] shape = new int[rank];
     for (int i = 0; i < this.rank; i++)
       shape[i] = slices.get(i).getMax();
-    this.index = new D4Index(shape);
+    this.index = new Index(shape);
     reset();
   }
 
   protected void reset() {
     try {
       int[] newcounter = new int[this.rank];
-    for (int i = 0; i < this.rank; i++) {
-      slices.get(i).finish();
-      newcounter[i] = this.slices.get(i).getFirst();
-      this.endpoint[i] = this.slices.get(i).getLast() - this.slices.get(i).getStride();
-    }
-    this.index.set(newcounter);
+      for (int i = 0; i < this.rank; i++) {
+        slices.get(i).finish();
+        newcounter[i] = this.slices.get(i).getFirst();
+        this.endpoint[i] = this.slices.get(i).getLast() - this.slices.get(i).getStride();
+      }
+      this.index.set(newcounter);
     } catch (DapException de) {
       throw new IllegalArgumentException(de);
     }
@@ -100,15 +101,16 @@ public class Odometer implements Iterator<DataIndex> {
   public String toString() {
     StringBuilder buf = new StringBuilder();
     int[] current = null;
-    if(this.index != null) current = this.index.getCurrentCounter();
-    for(int i = 0; i < rank; i++) {
-      if(i > 0)
+    if (this.index != null)
+      current = this.index.getCurrentCounter();
+    for (int i = 0; i < rank; i++) {
+      if (i > 0)
         buf.append(",");
-      if(dimset != null)
+      if (dimset != null)
         buf.append(dimset.get(i) != null ? dimset.get(i).getShortName() : "null");
       buf.append(this.slices.get(i).toString());
       buf.append(String.format("(%d)", this.slices.get(i).getCount()));
-      if(this.index != null) {
+      if (this.index != null) {
         buf.append(String.format("@%d", current[i]));
       }
     }
@@ -144,13 +146,13 @@ public class Odometer implements Iterator<DataIndex> {
    * from the current odometer indices.
    */
   public long index() {
-    return index.index();
+    return index.currentElement();
   }
 
   /**
    * Return current set of indices
    */
-  public DataIndex indices() {
+  public Index indices() {
     return this.index;
   }
 
@@ -189,7 +191,7 @@ public class Odometer implements Iterator<DataIndex> {
   }
 
   @Override
-  public DataIndex next() {
+  public Index next() {
     int i;
     int lastpos = this.rank;
     int firstpos = 0;

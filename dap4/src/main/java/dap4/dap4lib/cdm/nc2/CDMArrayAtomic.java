@@ -9,7 +9,6 @@ import dap4.core.dmr.DapDimension;
 import dap4.core.util.*;
 import dap4.dap4lib.D4Cursor;
 import dap4.dap4lib.D4DSP;
-import dap4.dap4lib.D4Index;
 import dap4.dap4lib.LibTypeFcns;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.CDMUtil;
@@ -17,10 +16,7 @@ import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
 import dap4.dap4lib.util.Odometer;
 import dap4.dap4lib.util.OdometerFactory;
-import ucar.ma2.Array;
-import ucar.ma2.DataType;
-import ucar.ma2.Index;
-import ucar.ma2.IndexIterator;
+import ucar.ma2.*;
 import ucar.nc2.Group;
 import java.io.IOException;
 import java.util.List;
@@ -33,8 +29,7 @@ import static dap4.dap4lib.D4Cursor.Scheme;
  * either top-level or for a member.
  */
 
-/* package */ class CDMArrayAtomic extends Array implements CDMArray
-{
+   public class CDMArrayAtomic extends Array implements CDMArray {
   /////////////////////////////////////////////////////
   // Constants
 
@@ -63,12 +58,12 @@ import static dap4.dap4lib.D4Cursor.Scheme;
    */
   CDMArrayAtomic(D4Cursor data) throws DapException {
     super(CDMTypeFcns.daptype2cdmtype(((DapVariable) data.getTemplate()).getBaseType()),
-            CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
+        CDMUtil.computeEffectiveShape(((DapVariable) data.getTemplate()).getDimensions()));
     build(data);
   }
 
   protected CDMArrayAtomic(CDMArrayAtomic base, Index view, D4Cursor data) throws DapException {
-    super(CDMTypeFcns.daptype2cdmtype(((DapVariable) data.getTemplate()).getBaseType()),view);
+    super(CDMTypeFcns.daptype2cdmtype(((DapVariable) data.getTemplate()).getBaseType()), view);
     build(data);
   }
 
@@ -125,99 +120,205 @@ import static dap4.dap4lib.D4Cursor.Scheme;
     return CDMTypeFcns.cdmElementClass(dt);
   }
 
-  public double getDouble(ucar.ma2.Index cdmidx) {
-    return getDouble(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public float getFloat(ucar.ma2.Index cdmidx) {
-    return getFloat(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public long getLong(ucar.ma2.Index cdmidx) {
-    return getLong(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public int getInt(ucar.ma2.Index cdmidx) {
-    return getInt(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public short getShort(ucar.ma2.Index cdmidx) {
-    return getShort(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public byte getByte(ucar.ma2.Index cdmidx) {
-    return getByte(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public char getChar(ucar.ma2.Index cdmidx) {
-    return getChar(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public boolean getBoolean(ucar.ma2.Index cdmidx) {
-    return getBoolean(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  public Object getObject(ucar.ma2.Index cdmidx) {
-    return getObject(/*CDMUtil.cdmIndexToIndex*/(cdmidx));
-  }
-
-  // Convert int base to Index based
-
+  /**
+   * Get the array element at a specific dap4 index as a double
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public double getDouble(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getDouble(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.FLOAT64, this.basetype, value);
+      return (Double) java.lang.reflect.Array.get(value, 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as a float
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public float getFloat(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getFloat(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.FLOAT32, this.basetype, value);
+      return (Float) java.lang.reflect.Array.get(value, 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as a long
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public long getLong(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getLong(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.INT64, this.basetype, value);
+      return (Long) java.lang.reflect.Array.get(value, 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as an integer
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public int getInt(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getInt(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.INT32, this.basetype, value);
+      return (Integer) java.lang.reflect.Array.get(value, 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as a short
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public short getShort(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getShort(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.INT16, this.basetype, value);
+      return (Short) java.lang.reflect.Array.get(value, 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as a byte
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public byte getByte(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getByte(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.INT8, this.basetype, value);
+      return (Byte) java.lang.reflect.Array.get(value, 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as a char
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public char getChar(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getChar(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.CHAR, this.basetype, value);
+      return (Character) java.lang.reflect.Array.get(value, 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as a boolean
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public boolean getBoolean(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getBoolean(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      value = Convert.convert(DapType.INT8, this.basetype, value);
+      byte b = (Byte) java.lang.reflect.Array.get(value, 0);
+      return (b != 0);
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
+  /**
+   * Get the array element at a specific dap4 index as an Object
+   *
+   * @param offset of element to get
+   * @return value at <code>index</code> cast as necessary.
+   */
   public Object getObject(int offset) {
-    DapVariable d4var = (DapVariable) getTemplate();
-    int[] dimsizes = DapUtil.intvector(DapUtil.getDimSizes(d4var.getDimensions()));
-    return getObject(D4Index.offsetToIndex(offset, dimsizes));
+    assert data.getScheme() == Scheme.ATOMIC;
+    try {
+      Object value = data.read(offset);
+      return value;
+    } catch (IOException ioe) {
+      throw new IndexOutOfBoundsException(ioe.getMessage());
+    }
   }
 
-  public Object getStorage()  {
+  public double getDouble(Index index) {
+    int offset = index.currentElement();
+    return getDouble(offset);
+  }
+
+  public float getFloat(Index index) {
+    int offset = index.currentElement();
+    return getFloat(offset);
+  }
+
+  public long getLong(Index index) {
+    int offset = index.currentElement();
+    return getLong(offset);
+  }
+
+  public int getInt(Index index) {
+    int offset = index.currentElement();
+    return getInt(offset);
+  }
+
+  public short getShort(Index index) {
+    int offset = index.currentElement();
+    return getShort(offset);
+  }
+
+  public byte getByte(Index index) {
+    int offset = index.currentElement();
+    return getByte(offset);
+  }
+
+  public char getChar(Index index) {
+    int offset = index.currentElement();
+    return getChar(offset);
+  }
+
+  public boolean getBoolean(Index index) {
+    int offset = index.currentElement();
+    return getBoolean(offset);
+  }
+
+  public Object getObject(Index index) {
+    int offset = index.currentElement();
+    return getObject(offset);
+  }
+
+  public Object getStorage() {
     try {
       List<DapDimension> dimset = this.template.getDimensions();
       List<Slice> slices = DapUtil.dimsetToSlices(dimset);
@@ -302,6 +403,22 @@ import static dap4.dap4lib.D4Cursor.Scheme;
     throw new UnsupportedOperationException();
   }
 
+  /**
+   * Create a copy of this Array, copying the data so that physical order is the same as
+   * logical order
+   *
+   * @return the new Array
+   */
+  @Override
+  public Array copy() {
+    try {
+      CDMArrayAtomic newA = new CDMArrayAtomic(this, this.getIndex(), this.data);
+      return newA;
+    } catch (DapException de) {
+      throw new IllegalArgumentException(de);
+    }
+  }
+
   protected void copyTo1DJavaArray(IndexIterator indexIterator, Object o) {
     throw new UnsupportedOperationException();
   }
@@ -314,166 +431,10 @@ import static dap4.dap4lib.D4Cursor.Scheme;
     try {
       CDMArrayAtomic view = new CDMArrayAtomic(this, index, this.data);
       return view;
-    } catch (DapException de) {throw new IllegalArgumentException(de);}
-  }
-
-  //////////////////////////////////////////////////
-  // Internal common extractors
-
-  /**
-   * Get the array element at a specific dap4 index as a double
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to double if necessary.
-   */
-  protected double getDouble(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.FLOAT64, this.basetype, value);
-      return (Double) java.lang.reflect.Array.get(value, 0);
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
+    } catch (DapException de) {
+      throw new IllegalArgumentException(de);
     }
   }
-
-  /**
-   * Get the array element at a specific dap4 index as a float
-   * converting as needed.
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to float if necessary.
-   */
-  protected float getFloat(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.FLOAT32, this.basetype, value);
-      return (Float) java.lang.reflect.Array.get(value, 0);
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
-  /**
-   * Get the array element at a specific dap4 index as a long
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to long if necessary.
-   */
-  protected long getLong(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.INT64, this.basetype, value);
-      return (Long) java.lang.reflect.Array.get(value, 0);
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
-  /**
-   * Get the array element at a specific dap4 index as a integer
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to integer if necessary.
-   */
-  protected int getInt(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.INT32, this.basetype, value);
-      return (Integer) java.lang.reflect.Array.get(value, 0);
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
-  /**
-   * Get the array element at a specific dap4 index as a short
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to short if necessary.
-   */
-  protected short getShort(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.INT16, this.basetype, value);
-      return (Short) java.lang.reflect.Array.get(value, 0);
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
-  /**
-   * Get the array element at a specific dap4 index as a byte
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to byte if necessary.
-   */
-  protected byte getByte(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.INT8, this.basetype, value);
-      return (Byte) java.lang.reflect.Array.get(value, 0);
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
-  /**
-   * Get the array element at a specific dap4 index as a char
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to char if necessary.
-   */
-  protected char getChar(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.CHAR, this.basetype, value);
-      return (Character) java.lang.reflect.Array.get(value, 0);
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
-  /**
-   * Get the array element at a specific dap4 index as a boolean
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to char if necessary.
-   */
-  protected boolean getBoolean(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = Convert.convert(DapType.INT64, this.basetype, value);
-      return ((Long) java.lang.reflect.Array.get(value, 0)) != 0;
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
-  /**
-   * Get the array element at a specific dap4 index as an Object
-   *
-   * @param idx of element to get
-   * @return value at <code>index</code> cast to Object if necessary.
-   */
-  protected Object getObject(D4Index idx) {
-    assert data.getScheme() == Scheme.ATOMIC;
-    try {
-      Object value = data.read(idx);
-      value = java.lang.reflect.Array.get(value, 0);
-      return value;
-    } catch (IOException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
-    }
-  }
-
 
   //////////////////////////////////////////////////
   // DataAtomic Interface

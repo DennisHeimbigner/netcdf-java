@@ -15,6 +15,7 @@ import dap4.core.util.*;
 import dap4.dap4lib.util.Odometer;
 import dap4.dap4lib.util.OdometerFactory;
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.Group;
 import ucar.nc2.Variable;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static dap4.core.dmr.DapType.*;
 import static dap4.core.util.DapConstants.*;
 
 /**
@@ -48,8 +50,8 @@ public class DataToCDM {
   // Extractions from dsp
   protected DapDataset dmr = null;
   protected ChecksumMode checksummode = null;
-  protected Map<DapVariable,Long> localchecksummap = null;
-  protected Map<DapVariable,D4Cursor> variablemap = null;
+  protected Map<DapVariable, Long> localchecksummap = null;
+  protected Map<DapVariable, D4Cursor> variablemap = null;
 
 
   protected Group cdmroot = null;
@@ -142,9 +144,43 @@ public class DataToCDM {
    * @return An Array object wrapping d4var.
    * @throws DapException
    */
-  protected CDMArrayAtomic createAtomicVar(D4Cursor data) throws DapException {
+  protected Array createAtomicVar(D4Cursor data) throws DapException {
     CDMArrayAtomic array = new CDMArrayAtomic(data);
-    return array;
+    Array cdmarray = null;
+    switch (array.getBaseType().getTypeSort()) {
+      case Char:
+        cdmarray = new CDMArrayChar(array);
+        break;
+      case Int8:
+      case UInt8:
+        cdmarray = new CDMArrayByte(array);
+        break;
+      case Int16:
+      case UInt16:
+        cdmarray = new CDMArrayShort(array);
+        break;
+      case Int32:
+      case UInt32:
+        cdmarray = new CDMArrayInt(array);
+        break;
+      case Int64:
+      case UInt64:
+        cdmarray = new CDMArrayLong(array);
+        break;
+      case Float32:
+        cdmarray = new CDMArrayFloat(array);
+        break;
+      case Float64:
+        cdmarray = new CDMArrayDouble(array);
+        break;
+      case String:
+      case URL:
+        cdmarray = new CDMArrayString(array);
+        break;
+      default:
+        throw new UnsupportedOperationException();
+    }
+    return cdmarray;
   }
 
   /**
@@ -163,8 +199,8 @@ public class DataToCDM {
     List<DapDimension> dimset = var.getDimensions();
     Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset));
     while (odom.hasNext()) {
-      DataIndex index = odom.next();
-      long offset = index.index();
+      Index index = odom.next();
+      long offset = index.currentElement();
       D4Cursor[] cursors = (D4Cursor[]) data.read(index);
       D4Cursor ithelement = cursors[0];
       for (int f = 0; f < nmembers; f++) {

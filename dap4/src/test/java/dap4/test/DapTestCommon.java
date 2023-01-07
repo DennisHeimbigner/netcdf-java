@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-abstract public class DapTestCommon extends UnitTestCommon
-{
+abstract public class DapTestCommon extends UnitTestCommon {
 
   //////////////////////////////////////////////////
   // Constants
@@ -372,8 +371,8 @@ abstract public class DapTestCommon extends UnitTestCommon
     // Print the meta-databuffer using these args to NcdumpW
     try {
       Ncdump.ncdump(ncfile, args.toString(), sw, null);
-      //if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
-        //throw new Exception("NcdumpW failed");
+      // if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
+      // throw new Exception("NcdumpW failed");
     } catch (IOException ioe) {
       throw new Exception("Ncdump failed", ioe);
     }
@@ -391,8 +390,8 @@ abstract public class DapTestCommon extends UnitTestCommon
     // Dump the databuffer
     try {
       Ncdump.ncdump(ncfile, args.toString(), sw, null);
-      //if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
-      //  throw new Exception("NCdumpW failed");
+      // if (!ucar.nc2.NCdumpW.print(ncfile, args.toString(), sw, null))
+      // throw new Exception("NCdumpW failed");
     } catch (IOException ioe) {
       ioe.printStackTrace();
       throw new Exception("NCdump failed", ioe);

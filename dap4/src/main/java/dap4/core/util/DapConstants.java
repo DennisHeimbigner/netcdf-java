@@ -59,7 +59,9 @@ public abstract class DapConstants {
   //////////////////////////////////////////////////
   // Constants via Enumerations
 
-  public enum ChecksumSource { LOCAL, REMOTE };
+  public enum ChecksumSource {
+    LOCAL, REMOTE
+  };
 
   //////////////////////////////////////////////////
   // Dap4 Annotations

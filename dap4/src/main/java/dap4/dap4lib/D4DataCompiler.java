@@ -12,6 +12,7 @@ import dap4.core.dmr.*;
 import dap4.core.util.*;
 import dap4.dap4lib.util.Odometer;
 import dap4.dap4lib.util.OdometerFactory;
+import ucar.ma2.Index;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -43,7 +44,7 @@ public class D4DataCompiler {
   protected D4DSP dsp;
 
   // The map of DAP variable to a cursor
-  protected Map<DapVariable,D4Cursor> variable_cursors = new HashMap<>();
+  protected Map<DapVariable, D4Cursor> variable_cursors = new HashMap<>();
 
   // Checksum information
   // We have two checksum maps: one for the remotely calculated value
@@ -74,11 +75,11 @@ public class D4DataCompiler {
   //////////////////////////////////////////////////
   // Accessors
 
-  public Map<DapVariable,D4Cursor> getVariableDataMap() {
+  public Map<DapVariable, D4Cursor> getVariableDataMap() {
     return this.variable_cursors;
   }
 
-  public Map<DapVariable,Long> getChecksumMap(DapConstants.ChecksumSource src) {
+  public Map<DapVariable, Long> getChecksumMap(DapConstants.ChecksumSource src) {
     switch (src) {
       case LOCAL:
         return this.localchecksummap;
@@ -133,8 +134,8 @@ public class D4DataCompiler {
       array = compileSequenceArray(dapvar);
     }
     if (dapvar.isTopLevel()) {
-      this.variable_cursors.put(dapvar,array);
-      if(this.checksummode == ChecksumMode.TRUE) {
+      this.variable_cursors.put(dapvar, array);
+      if (this.checksummode == ChecksumMode.TRUE) {
         // extract the remotechecksum from databuffer src,
         long checksum = extractChecksum(data);
         setChecksum(DapConstants.ChecksumSource.REMOTE, dapvar, checksum);
@@ -187,9 +188,9 @@ public class D4DataCompiler {
     D4Cursor[] instances = new D4Cursor[(int) dimproduct];
     Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset), dimset);
     while (odom.hasNext()) {
-      DataIndex index = odom.next();
+      Index index = odom.next();
       D4Cursor instance = compileStructure(var, dapstruct);
-      instances[(int) index.index()] = instance;
+      instances[(int) index.currentElement()] = instance;
     }
     structarray.setElements(instances);
     return structarray;
@@ -230,9 +231,9 @@ public class D4DataCompiler {
     D4Cursor[] instances = new D4Cursor[(int) dimproduct];
     Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset), dimset);
     while (odom.hasNext()) {
-      DataIndex index = odom.next();
+      Index index = odom.next();
       D4Cursor instance = compileSequence(var, dapseq);
-      instances[(int) index.index()] = instance;
+      instances[(int) index.currentElement()] = instance;
     }
     seqarray.setElements(instances);
     return seqarray;
@@ -253,8 +254,7 @@ public class D4DataCompiler {
     long nrecs = getCount(this.data);
     for (int r = 0; r < nrecs; r++) {
       pos = this.data.position();
-      D4Cursor rec =
-          (D4Cursor) new D4Cursor(D4Cursor.Scheme.RECORD, this.dsp, var).setOffset(pos).setRecordIndex(r);
+      D4Cursor rec = (D4Cursor) new D4Cursor(D4Cursor.Scheme.RECORD, this.dsp, var).setOffset(pos).setRecordIndex(r);
       for (int m = 0; m < dfields.size(); m++) {
         DapVariable dfield = dfields.get(m);
         D4Cursor dvfield = compileVar(dfield, rec);
@@ -273,7 +273,7 @@ public class D4DataCompiler {
     assert this.checksummode == ChecksumMode.TRUE;
     if (data.remaining() < DapConstants.CHECKSUMSIZE)
       throw new DapException("Short serialization: missing checksum");
-    return (long)data.getInt();
+    return (long) data.getInt();
   }
 
   protected static void skip(ByteBuffer data, int count) {
@@ -317,7 +317,7 @@ public class D4DataCompiler {
   public void computeLocalChecksums() throws DapException {
     Checksum crc32alg = new java.util.zip.CRC32();
     byte[] bytedata = data.array(); // Will need to change when we switch to RAF
-    for(DapVariable dvar : this.dmr.getTopVariables()) {
+    for (DapVariable dvar : this.dmr.getTopVariables()) {
       crc32alg.reset();
       // Get the extent of this variable vis-a-vis the data buffer
       D4Cursor cursor = this.dsp.getVariableData().get(dvar);

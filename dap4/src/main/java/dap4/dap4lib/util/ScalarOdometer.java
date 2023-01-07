@@ -7,7 +7,8 @@ package dap4.dap4lib.util;
 
 import dap4.core.interfaces.DataIndex;
 import dap4.core.util.Slice;
-import dap4.dap4lib.D4Index;
+import dap4.dap4lib.cdm.CDMUtil;
+import ucar.ma2.Index;
 
 import java.util.NoSuchElementException;
 
@@ -21,7 +22,7 @@ public class ScalarOdometer extends Odometer {
 
   public ScalarOdometer() {
     this.state = STATE.INITIAL;
-    this.index = new D4Index(0);
+    this.index = CDMUtil.SCALAR;
     this.slices = Slice.SCALARSLICES;
   }
 
@@ -37,11 +38,11 @@ public class ScalarOdometer extends Odometer {
     return this.state != STATE.DONE;
   }
 
-  public DataIndex next() {
+  public Index next() {
     if (this.state == STATE.DONE)
       throw new NoSuchElementException();
     this.state = STATE.DONE;
-    return D4Index.SCALAR;
+    return CDMUtil.SCALAR;
   }
 
   public void remove() {

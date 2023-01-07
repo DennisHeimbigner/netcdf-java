@@ -38,6 +38,7 @@ public class D4Index extends ucar.ma2.Index implements DataIndex {
 
   /**
    * Convert DataIndex to list of slices
+   * 
    * @param indices to convert
    * @return list of corresponding slices
    */

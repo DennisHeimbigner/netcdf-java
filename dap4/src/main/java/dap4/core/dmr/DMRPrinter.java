@@ -93,8 +93,8 @@ public class DMRPrinter {
   protected DapContext cxt = null;
   // Following extracted from context
   protected ByteOrder order = null;
-  protected Map<DapVariable,Long> localchecksummap = null;
-  protected Map<DapVariable,Long> remotechecksummap = null;
+  protected Map<DapVariable, Long> localchecksummap = null;
+  protected Map<DapVariable, Long> remotechecksummap = null;
 
   protected EnumSet<Controls> controls = EnumSet.noneOf(Controls.class);
 
@@ -120,8 +120,8 @@ public class DMRPrinter {
     this.format = (format == null ? ResponseFormat.XML : format);
     this.cxt = (cxt == null ? new DapContext() : cxt);
     this.order = (ByteOrder) this.cxt.get(DapConstants.DAP4ENDIANTAG);
-    this.localchecksummap = (Map<DapVariable,Long>)this.cxt.get("localchecksummap");
-    this.remotechecksummap = (Map<DapVariable,Long>)this.cxt.get("remotechecksummap");
+    this.localchecksummap = (Map<DapVariable, Long>) this.cxt.get("localchecksummap");
+    this.remotechecksummap = (Map<DapVariable, Long>) this.cxt.get("remotechecksummap");
   }
 
   //////////////////////////////////////////////////
@@ -640,12 +640,12 @@ public class DMRPrinter {
   protected void printRequestData(DapVariable var) throws DapException {
     try {// Add per-variable checksum
       Long csum = localchecksummap.get(var);
-      if(csum == null)
+      if (csum == null)
         return;
       DapAttribute a = var.getChecksumAttribute();
-      if(a == null) {
+      if (a == null) {
         a = new DapAttribute(DapConstants.CHECKSUMATTRNAME, DapType.INT32);
-        a.setValues(new String[]{csum.toString()});
+        a.setValues(new String[] {csum.toString()});
       }
       printAttribute(a);
     } catch (IOException ioe) {

@@ -32,8 +32,7 @@ public class RawDSP extends D4DSP {
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public RawDSP() {
-  }
+  public RawDSP() {}
 
   //////////////////////////////////////////////////
   // D4DSP API
@@ -43,7 +42,7 @@ public class RawDSP extends D4DSP {
   @Override
   public D4DSP open(String fileurl, ChecksumMode cmode) throws DapException {
     mode = RequestMode.DAP; // force it
-    super.open(fileurl,cmode);
+    super.open(fileurl, cmode);
     String methodurl = getMethodUrl(mode, this.checksummode);
     parseURL(methodurl); // reparse
     String realpath = this.xuri.getRealPath();
@@ -83,6 +82,7 @@ public class RawDSP extends D4DSP {
 
   /**
    * LoadDMR actually loads DAP since we know that we will need that eventually.
+   * 
    * @throws DapException
    */
 
@@ -101,6 +101,7 @@ public class RawDSP extends D4DSP {
   /**
    * loadDMR will have already loaded the DAP stream,
    * so all that is left is to compile the data stream,
+   * 
    * @throws DapException
    */
   public void loadDAP() throws DapException {

@@ -10,6 +10,7 @@ import dap4.core.interfaces.DataIndex;
 import dap4.core.util.DapException;
 import dap4.core.util.PowerSet;
 import dap4.core.util.Slice;
+import ucar.ma2.Index;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +118,7 @@ public class MultiOdometer extends Odometer {
   }
 
   @Override
-  public DataIndex next() {
+  public Index next() {
     if (this.current >= odomset.size())
       throw new NoSuchElementException();
     Odometer ocurrent = odomset.get(this.current);
