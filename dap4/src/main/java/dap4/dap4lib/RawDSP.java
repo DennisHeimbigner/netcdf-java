@@ -5,13 +5,9 @@
 
 package dap4.dap4lib;
 
-import dap4.core.dmr.DapDataset;
-import dap4.core.dmr.ErrorResponse;
+import dap4.core.dmr.parser.DOM4Parser;
+import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.util.*;
-import dap4.dap4lib.D4DSP;
-import dap4.dap4lib.D4DataCompiler;
-import dap4.dap4lib.cdm.nc2.CDMCompiler;
-import ucar.nc2.NetcdfFile;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -47,7 +43,8 @@ public class RawDSP extends D4DSP {
     parseURL(methodurl); // reparse
     String realpath = this.xuri.getRealPath();
     try (FileInputStream stream = new FileInputStream(realpath)) {
-      setData(stream, RequestMode.DAP);
+      setStream(stream, RequestMode.DAP);
+      super.loadDMR();
     } catch (IOException ioe) {
       throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
     }
@@ -91,7 +88,7 @@ public class RawDSP extends D4DSP {
     parseURL(methodurl); // reparse
     String realpath = this.xuri.getRealPath();
     try (FileInputStream stream = new FileInputStream(realpath)) {
-      setData(stream, RequestMode.DAP);
+      setStream(stream, RequestMode.DAP);
       super.loadDMR();
     } catch (IOException ioe) {
       throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
@@ -104,7 +101,7 @@ public class RawDSP extends D4DSP {
    * 
    * @throws DapException
    */
-  public void loadDAP() throws DapException {
+  public void loadDAP() throws IOException {
     super.loadDAP();
   }
 

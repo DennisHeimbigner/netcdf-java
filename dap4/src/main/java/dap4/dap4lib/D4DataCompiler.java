@@ -10,10 +10,13 @@ import dap4.core.interfaces.DataIndex;
 import dap4.core.util.ChecksumMode;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
+import dap4.dap4lib.cdm.CDMTypeFcns;
+import dap4.dap4lib.cdm.CDMUtil;
 import dap4.dap4lib.util.Odometer;
 import dap4.dap4lib.util.OdometerFactory;
-import ucar.ma2.Index;
+import ucar.ma2.*;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -21,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.Checksum;
 
+import static dap4.core.interfaces.DataCursor.Scheme.*;
 import static dap4.dap4lib.D4Cursor.Scheme;
+import static dap4.dap4lib.D4Cursor.schemeFor;
 
 public class D4DataCompiler {
 
@@ -35,16 +40,11 @@ public class D4DataCompiler {
 
   protected DapDataset dmr = null;
 
-  // Make compile arguments global
-  protected ByteBuffer data = null;
-
   protected ChecksumMode checksummode = null;
-  protected ByteOrder order = null;
+  protected ByteOrder remoteorder = null;
 
   protected D4DSP dsp;
-
-  // The map of DAP variable to a cursor
-  protected Map<DapVariable, D4Cursor> variable_cursors = new HashMap<>();
+  protected DeChunkedInputStream stream = null;
 
   // Checksum information
   // We have two checksum maps: one for the remotely calculated value
@@ -63,21 +63,17 @@ public class D4DataCompiler {
    * @param stream the source of dechunked data
    */
 
-  public D4DataCompiler(D4DSP dsp, ChecksumMode checksummode, ByteOrder order, ByteBuffer stream) throws DapException {
+  public D4DataCompiler(D4DSP dsp, ChecksumMode checksummode, ByteOrder remoteorder)
+      throws DapException {
     this.dsp = dsp;
     this.dmr = this.dsp.getDMR();
+    this.stream = this.dsp.getStream();
     this.checksummode = ChecksumMode.asTrueFalse(checksummode);
-    this.order = order;
-    this.data = stream;
-    this.data.order(order);
+    this.remoteorder = remoteorder;
   }
 
   //////////////////////////////////////////////////
   // Accessors
-
-  public Map<DapVariable, D4Cursor> getVariableDataMap() {
-    return this.variable_cursors;
-  }
 
   public Map<DapVariable, Long> getChecksumMap(DapConstants.ChecksumSource src) {
     switch (src) {
@@ -103,186 +99,241 @@ public class D4DataCompiler {
 
   /**
    * The goal here is to process the serialized
-   * databuffer and locate top-level variable positions
-   * in the serialized databuffer. Access to non-top-level
-   * variables is accomplished on the fly.
+   * databuffer and pull out top-level variable positions
+   * in the serialized databuffer.
+   * In some cases -- String, Sequence, Structure --
+   * significant transforms are applied to the data
+   * to make it usable with ucar.ma2.Array.
    *
    * @throws DapException
    */
-  public void compile() throws DapException {
-    assert (this.dmr != null && this.data != null);
+  public void compile() throws IOException {
+    assert (this.dmr != null && this.stream != null);
     // iterate over the variables represented in the databuffer
     for (DapVariable vv : this.dmr.getTopVariables()) {
-      D4Cursor data = compileVar(vv, null);
+      Object storage = compileVar(vv);
+      D4Cursor data = new D4Cursor(schemeFor(vv), this.dsp, vv).setStorage(storage);
+      createArray(vv, data);
       this.dsp.addVariableData(vv, data);
     }
-    // compute the localchecksums from databuffer src,
-    if (this.checksummode == ChecksumMode.TRUE) {
-      computeLocalChecksums();
-    }
-  }
-
-  protected D4Cursor compileVar(DapVariable dapvar, D4Cursor container) throws DapException {
-    boolean isscalar = dapvar.getRank() == 0;
-    D4Cursor array = null;
-    DapType type = dapvar.getBaseType();
-    if (type.isAtomic())
-      array = compileAtomicVar(dapvar);
-    else if (type.isStructType()) {
-      array = compileStructureArray(dapvar);
-    } else if (type.isSeqType()) {
-      array = compileSequenceArray(dapvar);
-    }
-    if (dapvar.isTopLevel()) {
-      this.variable_cursors.put(dapvar, array);
-      if (this.checksummode == ChecksumMode.TRUE) {
-        // extract the remotechecksum from databuffer src,
-        long checksum = extractChecksum(data);
-        setChecksum(DapConstants.ChecksumSource.REMOTE, dapvar, checksum);
-      }
-    }
-    return array;
   }
 
   /**
+   * Return a compiled version of the data for this variable.
+   * Possible return values are:
+   * 1. String - String[]
+   * 2. Opaque - Bytebuffer[]
+   * 3. Fixed atomic - <type>[]
+   * 4. Structure - Object[][nfields]
+   * 5. Sequence - Object[][nfields]
+   */
+  protected Object compileVar(DapVariable dapvar) throws IOException {
+    Object data = null;
+    DapType type = dapvar.getBaseType();
+    if (dapvar.isTopLevel() && this.checksummode == ChecksumMode.TRUE)
+      this.stream.startChecksum();
+    if (type.isAtomic())
+      data = compileAtomicVar(dapvar);
+    else if (type.isStructType()) {
+      data = compileStructureArray(dapvar);
+    } else if (type.isSeqType()) {
+      data = compileSequenceArray(dapvar);
+    }
+    if (dapvar.isTopLevel() && this.checksummode == ChecksumMode.TRUE) {
+      long crc32 = this.stream.endChecksum(); // extract the remotechecksum from databuffer src,
+      setChecksum(DapConstants.ChecksumSource.REMOTE, dapvar, crc32);
+    }
+    return data;
+  }
+
+  /**
+   * Compile fixed-sized atomic types
+   * Storage = <type>[]
+   * 
    * @param var
    * @return data
    * @throws DapException
    */
-
-  protected D4Cursor compileAtomicVar(DapVariable var) throws DapException {
+  protected Object compileAtomicVar(DapVariable var) throws IOException {
     DapType daptype = var.getBaseType();
-    D4Cursor cursor = new D4Cursor(Scheme.ATOMIC, (D4DSP) this.dsp, var);
-    cursor.setOffset(this.data.position());
-    long total = 0;
+
+    // special cases
+    if (daptype.isStringType()) // string or URL
+      return compileStringVar(var);
+    if (daptype.isOpaqueType())
+      return compileOpaqueVar(var);
+
+    // All other fixed-size atomic types
     long dimproduct = var.getCount();
-    long[] positions = new long[(int) dimproduct];
-    if (!daptype.isEnumType() && !daptype.isFixedSize()) {
-      // this is a string, url, or opaque
-      int savepos = this.data.position();
-      // Walk the bytestring and return the instance count (in databuffer)
-      total = walkByteStrings(positions, data);
-      this.data.position(savepos);// leave position unchanged
-      cursor.setByteStringOffsets(dimproduct, total, positions);
-    } else {
-      total = dimproduct * daptype.getSize();
-      positions[0] = this.data.position();
-      cursor.setByteStringOffsets(dimproduct, total, positions);
+    long total = dimproduct * daptype.getSize();
+    byte[] bytes = new byte[(int) dimproduct]; // total space required
+    this.stream.read(bytes);
+    // Convert to vector of required type
+    Object storage = CDMTypeFcns.bytesAsTypeVec(daptype, bytes);
+    CDMTypeFcns.decodebytes(daptype, bytes, storage);
+    return storage;
+  }
+
+  /**
+   * Read and convert a string typed array
+   * 
+   * @param var
+   * @return cursor
+   * @throws DapException
+   */
+  protected Object compileStringVar(DapVariable var) throws IOException {
+    DapType daptype = var.getBaseType();
+    assert daptype.isStringType();
+    long dimproduct = var.getCount(); // == # strings
+    String[] storage = new String[(int) dimproduct];
+    int count = 0;
+    // read each string
+    for (int i = 0; i < dimproduct; i++) {
+      int strsize = getCount();
+      byte[] sbytes = new byte[strsize];
+      int red = this.stream.read(sbytes);
+      assert red == strsize;
+      storage[count] = new String(sbytes, DapUtil.UTF8);
+      count++;
     }
-    skip(data, (int) total);
-    return cursor;
+    return storage;
+  }
+
+  /**
+   * Read and convert an opaque typed array
+   * 
+   * @param var
+   * @return cursor
+   * @throws DapException
+   */
+  protected Object compileOpaqueVar(DapVariable var) throws IOException {
+    DapType daptype = var.getBaseType();
+    assert daptype.isOpaqueType();
+    long dimproduct = var.getCount(); // == # opaque objects
+    ByteBuffer[] storage = new ByteBuffer[(int) dimproduct];
+    int count = 0;
+    // read each string
+    for (int i = 0; i < dimproduct; i++) {
+      int osize = getCount();
+      byte[] obytes = new byte[osize];
+      int red = this.stream.read(obytes);
+      assert red == osize;
+      storage[count] = ByteBuffer.wrap(obytes);
+      count++;
+    }
+    return storage;
   }
 
   /**
    * Compile a structure array.
+   * Since we are using ArrayStructureMA, we need to capture
+   * Our storage is Object[dimproduct]; this will be
+   * converted properly when the D4Cursor Array is created.
    *
    * @param var the template
-   * @return A DataCompoundArray for the databuffer for this struct.
+   * @return a StructureData[dimproduct] for the data for this struct.
    * @throws DapException
    */
-  protected D4Cursor compileStructureArray(DapVariable var) throws DapException {
+  protected Object compileStructureArray(DapVariable var) throws IOException {
     DapStructure dapstruct = (DapStructure) var.getBaseType();
-    D4Cursor structarray = new D4Cursor(Scheme.STRUCTARRAY, this.dsp, var).setOffset(this.data.position());
-    List<DapDimension> dimset = var.getDimensions();
-    long dimproduct = DapUtil.dimProduct(dimset);
-    D4Cursor[] instances = new D4Cursor[(int) dimproduct];
-    Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset), dimset);
-    while (odom.hasNext()) {
-      Index index = odom.next();
-      D4Cursor instance = compileStructure(var, dapstruct);
-      instances[(int) index.currentElement()] = instance;
+    long dimproduct = var.getCount();
+    Object[] storage = new Object[(int) dimproduct];
+    Index idx = Index.factory(CDMUtil.computeEffectiveShape(var.getDimensions()));
+    long idxsize = idx.getSize();
+    for (int offset = 0; (offset < idxsize); offset = idx.incr()) {
+      Object instance = compileStructure(dapstruct);
+      storage[offset] = instance;
     }
-    structarray.setElements(instances);
-    return structarray;
+    return storage;
   }
 
   /**
    * Compile a structure instance.
+   * Storage is Object[dapstruct.getFields().size()];
    *
    * @param dapstruct The template
    * @return A DataStructure for the databuffer for this struct.
    * @throws DapException
    */
-  protected D4Cursor compileStructure(DapVariable var, DapStructure dapstruct) throws DapException {
-    int pos = this.data.position();
-    D4Cursor d4ds = new D4Cursor(Scheme.STRUCTURE, (D4DSP) this.dsp, var).setOffset(pos);
+  protected Object compileStructure(DapStructure dapstruct) throws IOException {
     List<DapVariable> dfields = dapstruct.getFields();
+    Object[] storage = new Object[dfields.size()];
     for (int m = 0; m < dfields.size(); m++) {
       DapVariable dfield = dfields.get(m);
-      D4Cursor dvfield = compileVar(dfield, d4ds);
-      d4ds.addField(m, dvfield);
-      assert dfield.getParent() != null;
+      Object dvfield = compileVar(dfield);
+      storage[m] = dvfield;
     }
-    return d4ds;
+    return storage;
   }
 
   /**
    * Compile a sequence array.
-   *
+   * Our storage is Object[dimproduct]
+   * 
    * @param var the template
-   * @return A DataCompoundArray for the databuffer for this sequence.
+   * @return Object[recordcount]
    * @throws DapException
    */
-  protected D4Cursor compileSequenceArray(DapVariable var) throws DapException {
+  protected Object compileSequenceArray(DapVariable var) throws IOException {
     DapSequence dapseq = (DapSequence) var.getBaseType();
-    D4Cursor seqarray = new D4Cursor(Scheme.SEQARRAY, this.dsp, var).setOffset(this.data.position());
-    List<DapDimension> dimset = var.getDimensions();
-    long dimproduct = DapUtil.dimProduct(dimset);
-    D4Cursor[] instances = new D4Cursor[(int) dimproduct];
-    Odometer odom = OdometerFactory.build(DapUtil.dimsetToSlices(dimset), dimset);
-    while (odom.hasNext()) {
-      Index index = odom.next();
-      D4Cursor instance = compileSequence(var, dapseq);
-      instances[(int) index.currentElement()] = instance;
+    long dimproduct = var.getCount();
+    Object[] storage = new Object[(int) dimproduct];
+    Index idx = Index.factory(CDMUtil.computeEffectiveShape(var.getDimensions()));
+    long idxsize = idx.getSize();
+    for (int offset = 0; (offset < idxsize); offset = idx.incr()) {
+      Object seq = compileSequence(dapseq);
+      storage[offset] = seq;
     }
-    seqarray.setElements(instances);
-    return seqarray;
+    return storage;
   }
 
   /**
    * Compile a sequence as a set of records.
+   * Our storage is Object[] where |storage| == nrecords
    *
    * @param dapseq
    * @return sequence
    * @throws DapException
    */
-  public D4Cursor compileSequence(DapVariable var, DapSequence dapseq) throws DapException {
-    int pos = this.data.position();
-    D4Cursor seq = new D4Cursor(Scheme.SEQUENCE, this.dsp, var).setOffset(pos);
+  public Object compileSequence(DapSequence dapseq) throws IOException {
     List<DapVariable> dfields = dapseq.getFields();
     // Get the count of the number of records
-    long nrecs = getCount(this.data);
+    long nrecs = getCount();
+    Object[] records = new Object[(int) nrecs];
     for (int r = 0; r < nrecs; r++) {
-      pos = this.data.position();
-      D4Cursor rec = (D4Cursor) new D4Cursor(D4Cursor.Scheme.RECORD, this.dsp, var).setOffset(pos).setRecordIndex(r);
-      for (int m = 0; m < dfields.size(); m++) {
-        DapVariable dfield = dfields.get(m);
-        D4Cursor dvfield = compileVar(dfield, rec);
-        rec.addField(m, dvfield);
-        assert dfield.getParent() != null;
-      }
-      seq.addRecord(rec);
+      Object record = compileStructure((DapStructure) dapseq);
+      records[r] = record;
     }
-    return seq;
+    return records;
   }
 
   //////////////////////////////////////////////////
   // Utilities
 
-  protected long extractChecksum(ByteBuffer data) throws DapException {
+  protected int extractChecksum() throws IOException {
     assert this.checksummode == ChecksumMode.TRUE;
-    if (data.remaining() < DapConstants.CHECKSUMSIZE)
-      throw new DapException("Short serialization: missing checksum");
-    return (long) data.getInt();
+    byte[] bytes = new byte[4]; // 4 == sizeof(checksum)
+    int red = this.stream.read(bytes);
+    assert red == 4;
+    ByteBuffer bb = ByteBuffer.wrap(bytes).order(this.remoteorder);
+    int csum = (int) bb.getInt();
+    return csum;
   }
 
-  protected static void skip(ByteBuffer data, int count) {
-    assert data.position() + count <= data.limit();
-    data.position(data.position() + count);
+  protected void skip(long count) throws IOException {
+    for (long i = 0; i < count; i++) {
+      int c = this.stream.read();
+      if (c < 0)
+        break;
+    }
   }
 
-  protected static int getCount(ByteBuffer data) {
-    long count = data.getLong();
+  protected int getCount() throws IOException {
+    byte[] bytes = new byte[8]; // 8 == sizeof(long)
+    int red = this.stream.read(bytes);
+    assert red == 8;
+    ByteBuffer bb = ByteBuffer.wrap(bytes).order(this.remoteorder);
+    long count = bb.getLong();
     count = (count & 0xFFFFFFFF);
     return (int) count;
   }
@@ -293,11 +344,11 @@ public class D4DataCompiler {
    * @param daptype
    * @return type's serialized form size
    */
-  protected static int computeTypeSize(DapType daptype) {
+  protected int computeTypeSize(DapType daptype) {
     return LibTypeFcns.size(daptype);
   }
 
-  protected static long walkByteStrings(long[] positions, ByteBuffer databuffer) {
+  protected long walkByteStrings(long[] positions, ByteBuffer databuffer) throws IOException {
     int count = positions.length;
     long total = 0;
     int savepos = databuffer.position();
@@ -305,34 +356,97 @@ public class D4DataCompiler {
     for (int i = 0; i < count; i++) {
       int pos = databuffer.position();
       positions[i] = pos;
-      int size = getCount(databuffer);
+      int size = getCount();
       total += DapConstants.COUNTSIZE;
       total += size;
-      skip(databuffer, size);
+      skip(size);
     }
     databuffer.position(savepos);// leave position unchanged
     return total;
   }
 
-  public void computeLocalChecksums() throws DapException {
-    Checksum crc32alg = new java.util.zip.CRC32();
-    byte[] bytedata = data.array(); // Will need to change when we switch to RAF
-    for (DapVariable dvar : this.dmr.getTopVariables()) {
-      crc32alg.reset();
-      // Get the extent of this variable vis-a-vis the data buffer
-      D4Cursor cursor = this.dsp.getVariableData().get(dvar);
-      long offset = cursor.getOffset();
-      long extent = cursor.getExtent();
-      assert (extent <= data.limit());
-      int savepos = data.position();
-      data.position(0);
-      // Slice out the part on which to compute the CRC32 and compute CRC32
-      crc32alg.update(bytedata, (int) offset, (int) extent);
-      long crc32 = crc32alg.getValue(); // get the digest value
-      crc32 = (crc32 & 0x00000000FFFFFFFFL); /* crc is 32 bits */
-      data.position(savepos);
-      setChecksum(DapConstants.ChecksumSource.LOCAL, dvar, crc32);
+  public Array createArray(DapVariable var, Object storage) {
+    Array array = null;
+    switch (schemeFor(var)) {
+      case ATOMIC:
+        array = createAtomicArray(var, storage);
+        break;
+      case STRUCTARRAY:
+        array = createStructureArray(var, storage);
+        break;
+      case SEQARRAY:
+        //array = createSequenceArray(var, storage);
+        break;
+      case STRUCTURE:
+      case SEQUENCE:
+      default:
+        assert false;
     }
+    return array;
+  }
+
+  protected Array createAtomicArray(DapVariable var, Object storage) {
+    DapType dtype = var.getBaseType();
+    if (dtype.isEnumType()) {
+      // Coverity[FB.BC_UNCONFIRMED_CAST]
+      dtype = ((DapEnumeration) (var.getBaseType()));
+    }
+    DataType cdmtype = CDMTypeFcns.daptype2cdmtype(dtype);
+    int[] shape = CDMUtil.computeEffectiveShape(var.getDimensions());
+    Array array = Array.factory(cdmtype, shape, storage);
+    return array;
+  }
+
+  protected Array createStructureArray(DapVariable var, Object storage) {
+    DapType dtype = var.getBaseType();
+    StructureMembers members = computemembers(var);
+    int[] shape = CDMUtil.computeEffectiveShape(var.getDimensions());
+    Object[] instances = (Object[])storage;
+    StructureData[] structdata = new StructureData[instances.length];
+    for(int i=0;i<instances.length;i++) {
+      Object[] fields = (Object[])instances[i];
+      StructureDataW sdw = new StructureDataW(members);
+      for(int f=0;f<members.getMembers().size();f++) {
+        StructureMembers.Member fm = sdw.getMembers().get(f);
+        DapVariable d4field = ((DapStructure)dtype).getField(f);
+        Object fielddata = fields[f];
+        Array fieldarray = createArray(d4field,fielddata);
+        sdw.setMemberData(fm,fieldarray);
+      }
+      structdata[i] = sdw;
+    }
+    ArrayStructureW array = new ArrayStructureW(members, shape, structdata);
+    return array;
+  }
+
+  /**
+   * Compute the StructureMembers object
+   * from a DapStructure. May need to recurse
+   * if a field is itself a Structure
+   *
+   * @param var The DapVariable to use to construct
+   *        a StructureMembers object.
+   * @return The StructureMembers object for the given DapStructure
+   */
+  static StructureMembers computemembers(DapVariable var) {
+    DapStructure ds = (DapStructure) var.getBaseType();
+    StructureMembers sm = new StructureMembers(ds.getShortName());
+    List<DapVariable> fields = ds.getFields();
+    for (int i = 0; i < fields.size(); i++) {
+      DapVariable field = fields.get(i);
+      DapType dt = field.getBaseType();
+      DataType cdmtype = CDMTypeFcns.daptype2cdmtype(dt);
+      StructureMembers.Member m =
+          sm.addMember(field.getShortName(), "", null, cdmtype, CDMUtil.computeEffectiveShape(field.getDimensions()));
+      m.setDataParam(i); // So we can index into various lists
+      // recurse if this field is itself a structure
+      if (dt.getTypeSort().isStructType()) {
+        StructureMembers subsm = computemembers(field);
+        m.setStructureMembers(subsm);
+      }
+    }
+    return sm;
   }
 
 }
+

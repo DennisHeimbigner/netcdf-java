@@ -50,42 +50,4 @@ public interface DataCursor {
   public DapNode getTemplate();
 
   public boolean isScalar();
-
-  public boolean isField();
-
-  //////////////////////////////////////////////////
-  // Atomic Data Management
-
-  /**
-   * @return atomic - array[1] of data value;
-   *         structure/sequence - DataCursor[] -- 1 per field
-   *         Even if the result is a scalar, a 1-element array will be returned.
-   */
-  public Object read(Index index) throws DapException;
-
-  /**
-   * @return atomic - array[n] of data values;
-   *         structure/sequence - DataCursor[n][F] -- 1 per field
-   *         Even if the result is a scalar, a 1-element array will be returned.
-   *         Usually implemented using read(DataIndex) plus Odometer.
-   */
-  public Object read(List<Slice> slices) throws DapException;
-
-  //////////////////////////////////////////////////
-  // Sequence record management
-  // assert scheme == SEQUENCE
-
-  public long getRecordCount() throws DapException;
-
-  public DataCursor readRecord(long i) throws DapException;
-
-  public long getRecordIndex() throws DapException; // assert scheme == RECORD
-
-  //////////////////////////////////////////////////
-  // field management
-  // assert scheme == STRUCTURE | scheme == RECORD
-
-  public int fieldIndex(String name) throws DapException; // Convert a name to an index
-
-  public DataCursor readField(int fieldindex) throws DapException;
 }

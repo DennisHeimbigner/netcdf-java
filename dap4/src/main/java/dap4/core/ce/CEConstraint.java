@@ -266,7 +266,7 @@ public class CEConstraint {
   public static void release(DapDataset dmr) {
     universals.remove(dmr);
   }
-
+/*
   protected static DataCursor fieldValue(DapVariable sqvar, DapSequence seq, DataCursor record, String field)
       throws DapException {
     DapVariable dapv = seq.findByName(field);
@@ -282,6 +282,8 @@ public class CEConstraint {
       throw new DapException("No such field: " + field);
     return da;
   }
+
+ */
 
   protected static int compare(Object lvalue, Object rvalue) throws DapException {
     if (lvalue instanceof String && rvalue instanceof String)
@@ -318,7 +320,7 @@ public class CEConstraint {
         return expr.value;
 
       case SEGMENT:
-        return fieldValue(var, seq, record, expr.name);
+        return null; //???return fieldValue(var, seq, record, expr.name);
 
       case EXPR:
         Object lhs = eval(var, seq, record, expr.lhs);

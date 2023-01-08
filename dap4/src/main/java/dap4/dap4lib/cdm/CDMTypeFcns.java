@@ -21,7 +21,7 @@ import ucar.nc2.Structure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
+import java.nio.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +43,7 @@ public abstract class CDMTypeFcns {
   // Static Methods
 
   /* Needed to implement Array.getElement() */
-  public static Class cdmElementClass(DataType dt) {
+  static public Class cdmElementClass(DataType dt) {
     switch (dt) {
       case BOOLEAN:
         return Boolean.class;
@@ -82,7 +82,7 @@ public abstract class CDMTypeFcns {
     return null;
   }
 
-  public static Object createVector(DataType type, long count) {
+  static public Object createVector(DataType type, long count) {
     int icount = (int) count;
     Object vector = null;
     switch (type) {
@@ -129,17 +129,17 @@ public abstract class CDMTypeFcns {
     return vector;
   }
 
-  public static boolean signify(DapType type) {
+  static public boolean signify(DapType type) {
     return daptype2cdmtype(type).isUnsigned();
   }
 
-  public static Object createVector(DapType type, long count) {
+  static public Object createVector(DapType type, long count) {
     if (type.getAtomicType() == TypeSort.Enum)
       return createVector(((DapEnumeration) type).getBaseType(), count);
     return CoreTypeFcns.createVector(type.getTypeSort(), count);
   }
 
-  public static DataType enumTypeFor(DapType type) {
+  static public DataType enumTypeFor(DapType type) {
     switch (type.getTypeSort()) {
       case Char:
       case Int8:
@@ -164,7 +164,7 @@ public abstract class CDMTypeFcns {
     return null;
   }
 
-  public static DapType cdmtype2daptype(DataType datatype) {
+  static public DapType cdmtype2daptype(DataType datatype) {
     switch (datatype) {
       case CHAR:
         return DapType.CHAR;
@@ -210,7 +210,7 @@ public abstract class CDMTypeFcns {
     return null;
   }
 
-  public static DataType daptype2cdmtype(DapType type) {
+  static public DataType daptype2cdmtype(DapType type) {
     assert (type != null);
     switch (type.getTypeSort()) {
       case Char:
@@ -280,7 +280,7 @@ public abstract class CDMTypeFcns {
    * @param atomtype The type of interest
    * @return the size, in databuffer
    */
-  public static int daptypeSize(TypeSort atomtype) {
+  static public int daptypeSize(TypeSort atomtype) {
     switch (atomtype) {
       case Char: // remember serial size is 1, not 2.
       case UInt8:
@@ -303,7 +303,7 @@ public abstract class CDMTypeFcns {
     return 0;
   }
 
-  public static long extract(TypeSort sort, Object value) {
+  static public long extract(TypeSort sort, Object value) {
     long lvalue = 0;
     switch (sort) {
       case Int8:
@@ -344,7 +344,7 @@ public abstract class CDMTypeFcns {
     return lvalue;
   }
 
-  public static Object convert(TypeSort dstsort, TypeSort srcsort, Object src) {
+  static public Object convert(TypeSort dstsort, TypeSort srcsort, Object src) {
     Object result = null;
     long lval;
     boolean ok = true;
@@ -1127,7 +1127,7 @@ public abstract class CDMTypeFcns {
   }
 
 
-  public static void vectorcopy(DapType datatype, Object src, Object dst, long srcoffset, long dstoffset)
+  static public void vectorcopy(DapType datatype, Object src, Object dst, long srcoffset, long dstoffset)
       throws DapException {
     switch (datatype.getTypeSort()) {
       case UInt8:
@@ -1185,7 +1185,7 @@ public abstract class CDMTypeFcns {
    * @param o
    * @return parsed attribute
    */
-  public static Object attributeParse(DataType cdmtype, EnumTypedef en, Object o) {
+  static public Object attributeParse(DataType cdmtype, EnumTypedef en, Object o) {
     String so = o.toString();
     if (en != null) {
       switch (cdmtype) {
@@ -1293,7 +1293,7 @@ public abstract class CDMTypeFcns {
     return o;
   }
 
-  public static boolean isPrimitiveVector(DataType type, Object o) {
+  static public boolean isPrimitiveVector(DataType type, Object o) {
     Class c = o.getClass();
     if (!c.isArray())
       return false;
@@ -1332,7 +1332,7 @@ public abstract class CDMTypeFcns {
     return false;
   }
 
-  public static Array arrayify(DataType datatype, Object o) {
+  static public Array arrayify(DataType datatype, Object o) {
     // 1. o is a constant
     if (!o.getClass().isArray()) {
       Object ovec = createVector(datatype, 1);
@@ -1343,13 +1343,13 @@ public abstract class CDMTypeFcns {
     return Array.factory(datatype, shape, o);
   }
 
-  public static Array arrayify(DapType type, Object o) {
+  static public Array arrayify(DapType type, Object o) {
     if (type.getAtomicType() == TypeSort.Enum)
       return arrayify(((DapEnumeration) type).getBaseType(), o);
     return arrayify(CDMTypeFcns.daptype2cdmtype(type), o);
   }
 
-  public static List listify(Object vector) {
+  static public List listify(Object vector) {
     List list = new ArrayList();
     int icount = java.lang.reflect.Array.getLength(vector);
     for (int i = 0; i < icount; i++) {
@@ -1358,24 +1358,72 @@ public abstract class CDMTypeFcns {
     return list;
   }
 
+  static public Object bytesAsTypeVec(DapType daptype, byte[] bytes) {
+    TypeSort tsort = daptype.getTypeSort();
+    int count = (bytes.length / daptype.getSize());
+    switch (tsort) {
+      case Char:
+        return new char[count];
+      case Int8:
+      case UInt8:
+        return new byte[count];
+      case Int16:
+      case UInt16:
+        return new short[count];
+      case Int32:
+      case UInt32:
+        return new int[count];
+      case Int64:
+      case UInt64:
+        return new long[count];
+      case Enum:
+        // Coverity[FB.BC_UNCONFIRMED_CAST]
+        return bytesAsTypeVec(((DapEnumeration) daptype).getBaseType(), bytes);
+      default:
+        break;
+    }
+    return null;
+  }
 
-  /*
-   * static public Array
-   * arraysection(Array a, List<Slice> slices)
-   * {
-   * int rank = slices.size();
-   * int[] origin = new int[rank];
-   * int[] subshape = new int[rank];
-   * for(int i = 0; i < rank; i++) {
-   * origin[i] = 0;
-   * subshape[i] = (int) index.get(i);
-   * }
-   * subshape[rank - 1] = 1; // remove vlen dimension
-   * Array records;
-   * try {
-   * records = seqarray.section(origin, subshape, null);
-   * } catch (InvalidRangeException e) {
-   * throw new DapException("Illegal index", e);
-   * }
-   */
+  static public void decodebytes(DapType daptype, byte[] bytes, Object vector) {
+    TypeSort tsort = daptype.getTypeSort();
+    ByteBuffer bb = ByteBuffer.wrap(bytes);
+    switch (tsort) {
+      case Char:
+        CharBuffer cb = bb.asCharBuffer();
+        char[] cv = (char[]) vector;
+        cb.get(cv);
+        break;
+      case Int8:
+      case UInt8:
+        bb.get((byte[])vector);
+        break;
+      case Int16:
+      case UInt16:
+        ShortBuffer sb = bb.asShortBuffer();
+        short[] sv = (short[]) vector;
+        sb.get(sv);
+        break;
+      case Int32:
+      case UInt32:
+        IntBuffer ib = bb.asIntBuffer();
+        int[] iv = (int[]) vector;
+        ib.get(iv);
+        break;
+      case Int64:
+      case UInt64:
+        LongBuffer lb = bb.asLongBuffer();
+        long[] lv = (long[]) vector;
+        lb.get(lv);
+        break;
+      case Enum:
+        // Coverity[FB.BC_UNCONFIRMED_CAST]
+        decodebytes(((DapEnumeration) daptype).getBaseType(), bytes, vector);
+        break;
+      default:
+        break;
+    }
+
+  }
+
 }

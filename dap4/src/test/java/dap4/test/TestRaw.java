@@ -102,7 +102,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    singleTest(1,testcases); // choose single test for debugging
+    singleTest("test_one_vararray", testcases); // choose single test for debugging
     return testcases;
   }
 

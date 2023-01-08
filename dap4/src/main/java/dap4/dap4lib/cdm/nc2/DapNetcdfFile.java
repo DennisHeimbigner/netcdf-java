@@ -99,8 +99,6 @@ public class DapNetcdfFile extends NetcdfFile {
 
   protected boolean daploaded = false; // avoid multiple loads
 
-  protected CDMCompiler cdmcompiler = null;
-
   /**
    * Originally, the array for a variable was stored
    * using var.setCacheData(). However, that is illegal
@@ -153,18 +151,13 @@ public class DapNetcdfFile extends NetcdfFile {
     this.dsp = dspregistry.findMatchingDSP(this.location, cxt); // find relevant D4DSP subclass
     if (this.dsp == null)
       throw new IOException("No matching DSP: " + this.location);
-    this.dsp.open(this.dsplocation, this.checksummode); // side effect: compile DMR
-    this.dsp.loadDMR(); // Get the DMR
+    this.dsp.open(this.dsplocation, this.checksummode); // side effect: get DMR
     this.dmr = this.dsp.getDMR(); // get DMR
     this.cxt.put(DapDataset.class, this.dmr);
     // set the pseudo-location, otherwise we get a name that is full path.
     setLocation(this.dmr.getDataset().getShortName());
-    assert (this.cdmcompiler == null);
-    this.cdmcompiler = new CDMCompiler(this, this.dsp);
-    this.cdmcompiler.compileDMR();
     finish();
     this.dsp.loadContext(this.cxt, RequestMode.DMR);
-
   }
 
   /**
@@ -306,15 +299,12 @@ public class DapNetcdfFile extends NetcdfFile {
     return result;
   }
 
-  protected void ensuredata() throws DapException {
+  protected void ensuredata() throws IOException {
     if (!this.daploaded) { // do not call twice
       this.daploaded = true;
       this.dsp.loadDAP();
       loadContext();
       verifyChecksums();
-      assert (this.cdmcompiler != null);
-      this.cdmcompiler.compileData(); // compile to CDM Arrays
-      setArrayMap(this.cdmcompiler.getArrayMap());
       this.dsp.loadContext(this.cxt, RequestMode.DAP);
     }
   }

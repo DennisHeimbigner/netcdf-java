@@ -10,15 +10,12 @@ import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.util.ChecksumMode;
 import dap4.core.util.*;
-import dap4.dap4lib.cdm.nc2.CDMCompiler;
 import dap4.dap4lib.cdm.nc2.DapNetcdfFile;
 import org.xml.sax.SAXException;
-import ucar.ma2.ArrayInt;
+import ucar.ma2.Array;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,12 +23,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.Checksum;
 
 import static dap4.core.util.DapConstants.*;
 
 /**
- * This Class wraps a DAP4 serialization (as chunked input)
+ * This Class takes a DAP4 serialization (as chunked input) stream
  * and exports access to a compiled DMR, a compiled DAP4 data stream,
  * and various parameters such as byteorder of the data stream.
  *
@@ -43,6 +39,7 @@ import static dap4.core.util.DapConstants.*;
  */
 
 public abstract class D4DSP {
+
   //////////////////////////////////////////////////
   // Constants
 
@@ -52,12 +49,13 @@ public abstract class D4DSP {
   //////////////////////////////////////////////////
   // Instance variables
 
+  protected String dmrtext = null;
   protected DapDataset dmr = null;
   protected String location = null;
 
   // Input stream
-  protected ChunkedInput dechunkeddata = null; // underlying byte vector
-  protected ByteBuffer data = null;
+  protected DeChunkedInputStream stream = null;
+
   protected XURI xuri = null;
 
   // Exported information
@@ -68,9 +66,8 @@ public abstract class D4DSP {
   // DAP stream compilation
   D4DataCompiler d4compiler = null;
 
-  // CDM Translation
-  protected CDMCompiler cdmCompiler = null;
   protected Map<DapVariable, D4Cursor> variable_cursors = new HashMap<>();
+  protected Map<DapVariable, Array> variable_arrays = new HashMap<>();
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -98,6 +95,10 @@ public abstract class D4DSP {
   //////////////////////////////////////////////////
   // Accessors
 
+  public DeChunkedInputStream getStream() {
+    return this.stream;
+  }
+
   public ChecksumMode getChecksumMode() {
     return this.checksummode;
   }
@@ -113,21 +114,15 @@ public abstract class D4DSP {
       return this.d4compiler.remotechecksummap;
   }
 
-  public ByteBuffer getData() {
-    return this.data;
-  }
-
-  public String getError() {
-    return this.dechunkeddata.getError();
-  }
-
-  protected D4DSP setData(InputStream stream, RequestMode mode) throws IOException {
+  protected D4DSP setStream(InputStream input, RequestMode mode) throws IOException {
     this.mode = mode;
-    this.dechunkeddata = new ChunkedInput().dechunk(mode, stream);
-    if (mode == RequestMode.DAP)
-      this.data = ByteBuffer.wrap(this.dechunkeddata.getData());
+    this.stream = new DeChunkedInputStream(input, mode);
+    byte[] chunk = this.stream.getCurrentChunk();
+    if (this.stream.getState() == DeChunkedInputStream.State.ERROR)
+      reportError(chunk);
+    this.dmrtext = new String(chunk, DapUtil.UTF8);
     // This is the definitive remote byte order
-    this.remoteorder = this.dechunkeddata.getOrder();
+    this.remoteorder = this.stream.getRemoteOrder();
     return this;
   }
 
@@ -137,6 +132,7 @@ public abstract class D4DSP {
 
   protected void addVariableData(DapVariable var, D4Cursor cursor) {
     this.variable_cursors.put(var, cursor);
+    this.variable_arrays.put(var,cursor.getArray());
   }
 
   public DapDataset getDMR() {
@@ -189,16 +185,16 @@ public abstract class D4DSP {
    *
    * @throws DapException
    */
-  public void loadDMR() throws DapException {
+  public void loadDMR() throws IOException {
     String document = readDMR();
     DapDataset dmr = parseDMR(document);
     setDMR(dmr);
   }
 
-  public void loadDAP() throws DapException {
+  public void loadDAP() throws IOException {
     try {
       // "Compile" the databuffer section of the server response
-      d4compiler = new D4DataCompiler(this, this.checksummode, this.remoteorder, this.data);
+      d4compiler = new D4DataCompiler(this, this.checksummode, this.remoteorder);
       d4compiler.compile();
     } catch (IOException ioe) {
       throw new DapException(ioe);
@@ -212,14 +208,16 @@ public abstract class D4DSP {
       case DAP:
         cxt.put(ChecksumSource.REMOTE, d4compiler.getChecksumMap(ChecksumSource.REMOTE));
         cxt.put(ChecksumSource.LOCAL, d4compiler.getChecksumMap(ChecksumSource.LOCAL));
-        cxt.put(D4Cursor.class, d4compiler.getVariableDataMap());
+        cxt.put(D4Cursor.class, getVariableDataMap());
         break;
     }
   }
 
-  protected String readDMR() throws DapException {
+  protected String readDMR() throws IOException {
+    byte[] chunk = this.stream.getCurrentChunk();
     // Clean up dmr
-    String dmrtext = this.dechunkeddata.getDMR().trim();
+    String dmrtext = new String(chunk,DapUtil.UTF8);
+    dmrtext = dmrtext.trim();
     if (dmrtext.length() == 0)
       throw new DapException("Empty DMR");
     StringBuilder buf = new StringBuilder(dmrtext);
@@ -242,13 +240,9 @@ public abstract class D4DSP {
    * Do what is necessary to ensure that DMR and DAP compilation will work
    */
 
-  public void ensuredmr(DapNetcdfFile ncfile) throws DapException {
+  public void ensuredmr(DapNetcdfFile ncfile) throws IOException {
     if (this.dmr == null) { // do not call twice
       loadDMR();
-      if (cdmCompiler == null)
-        cdmCompiler = new CDMCompiler(ncfile, this);
-      cdmCompiler.compileDMR();
-      ncfile.setArrayMap(cdmCompiler.getArrayMap());
     }
   }
 
@@ -388,20 +382,20 @@ public abstract class D4DSP {
    */
   protected void processMaps(DapDataset dataset) throws DapException {
     List<DapNode> nodes = dataset.getNodeList();
-    for (DapNode node : nodes) {
+    for(DapNode node : nodes) {
       switch (node.getSort()) {
         case MAP:
           DapMap map = (DapMap) node;
           String targetname = map.getTargetName();
           DapVariable target;
           target = (DapVariable) dataset.findByFQN(targetname, DapSort.VARIABLE, DapSort.SEQUENCE, DapSort.STRUCTURE);
-          if (target == null)
+          if(target == null)
             throw new DapException("Mapref: undefined target variable: " + targetname);
           // Verify that this is a legal map =>
           // 1. it is outside the scope of its parent if the parent
           // is a structure.
           DapNode container = target.getContainer();
-          if ((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE))
+          if((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE))
             throw new DapException("Mapref: map target variable not in outer scope: " + targetname);
           map.setVariable(target);
           break;
@@ -409,6 +403,11 @@ public abstract class D4DSP {
           break; /* ignore */
       }
     }
+  }
+
+  protected void reportError(byte[] chunk) throws IOException {
+    String msg = new String(chunk,DapUtil.UTF8);
+    throw new DapException(msg);
   }
 
 }
