@@ -89,7 +89,8 @@ public class HttpDSP extends D4DSP {
 
   public void loadDMR() throws DapException {
     String methodurl = getMethodUrl(RequestMode.DMR, this.checksummode);
-    try (InputStream stream = makeRequest(methodurl)) {
+    try {
+      InputStream stream = makeRequest(methodurl); // close later
       setStream(stream, RequestMode.DMR);
       super.loadDMR();
     } catch (IOException e) {

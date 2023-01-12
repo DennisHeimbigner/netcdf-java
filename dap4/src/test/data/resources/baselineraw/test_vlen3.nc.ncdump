@@ -1,12 +1,18 @@
-netcdf test_utf8 {
-  dimensions:
-    d2 = 2;
+netcdf test_vlen3 {
   variables:
-    string vs(d2);
+
+    Structure {
+
+      Sequence {
+        int f1;
+      } f1(*);
+
+    } v1;
+
 
   // global attributes:
   string :_CoordSysBuilder = "ucar.nc2.dataset.conv.DefaultConvention";
 
   data:
-    vs =   "Καλημέα",   "abc"
-}
+
+null

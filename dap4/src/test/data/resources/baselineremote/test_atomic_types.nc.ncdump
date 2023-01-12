@@ -25,7 +25,7 @@ netcdf test_atomic_types {
 
     char vc;
 
-    String vs;
+    string vs;
 
     opaque vo;
 

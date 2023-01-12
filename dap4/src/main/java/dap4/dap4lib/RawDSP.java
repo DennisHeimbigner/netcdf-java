@@ -42,9 +42,9 @@ public class RawDSP extends D4DSP {
     String methodurl = getMethodUrl(mode, this.checksummode);
     parseURL(methodurl); // reparse
     String realpath = this.xuri.getRealPath();
-    try (FileInputStream stream = new FileInputStream(realpath)) {
+    try {
+      FileInputStream stream = new FileInputStream(realpath);
       setStream(stream, RequestMode.DAP);
-      super.loadDMR();
     } catch (IOException ioe) {
       throw new DapException(ioe).setCode(DapCodes.SC_INTERNAL_SERVER_ERROR);
     }
@@ -87,7 +87,8 @@ public class RawDSP extends D4DSP {
     String methodurl = getMethodUrl(mode, this.checksummode);
     parseURL(methodurl); // reparse
     String realpath = this.xuri.getRealPath();
-    try (FileInputStream stream = new FileInputStream(realpath)) {
+    try {
+      FileInputStream stream = new FileInputStream(realpath);
       setStream(stream, RequestMode.DAP);
       super.loadDMR();
     } catch (IOException ioe) {

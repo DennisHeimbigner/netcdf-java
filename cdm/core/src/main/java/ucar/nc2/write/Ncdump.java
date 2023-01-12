@@ -382,7 +382,7 @@ public class Ncdump {
       return;
     }
 
-    if ((array.getElementType() == Character.class) && (array.getRank() > 0)) {
+    if ((array instanceof ArrayChar) && (array.getRank() > 0)) {
       printStringArray(out, (ArrayChar) array, ilev, ct);
 
     } else if (array.getElementType() == String.class) {

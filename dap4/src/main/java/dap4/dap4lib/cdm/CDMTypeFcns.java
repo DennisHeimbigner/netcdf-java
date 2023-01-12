@@ -1376,6 +1376,10 @@ public abstract class CDMTypeFcns {
       case Int64:
       case UInt64:
         return new long[count];
+      case Float32:
+        return new float[count];
+      case Float64:
+        return new double[count];
       case Enum:
         // Coverity[FB.BC_UNCONFIRMED_CAST]
         return bytesAsTypeVec(((DapEnumeration) daptype).getBaseType(), bytes);
@@ -1385,14 +1389,14 @@ public abstract class CDMTypeFcns {
     return null;
   }
 
-  static public void decodebytes(DapType daptype, byte[] bytes, Object vector) {
+  static public void decodebytes(ByteOrder remoteorder, DapType daptype, byte[] bytes, Object vector) {
     TypeSort tsort = daptype.getTypeSort();
-    ByteBuffer bb = ByteBuffer.wrap(bytes);
+    ByteBuffer bb = ByteBuffer.wrap(bytes).order(remoteorder);
     switch (tsort) {
       case Char:
-        CharBuffer cb = bb.asCharBuffer();
+        String cb = new String(bytes,DapUtil.UTF8);
         char[] cv = (char[]) vector;
-        cb.get(cv);
+        for(int i=0;i<cv.length;i++) cv[i] = cb.charAt(i);
         break;
       case Int8:
       case UInt8:
@@ -1416,9 +1420,19 @@ public abstract class CDMTypeFcns {
         long[] lv = (long[]) vector;
         lb.get(lv);
         break;
+      case Float32:
+        FloatBuffer fb = bb.asFloatBuffer();
+        float[] fv = (float[]) vector;
+        fb.get(fv);
+        break;
+      case Float64:
+        DoubleBuffer db = bb.asDoubleBuffer();
+        double[] dv = (double[]) vector;
+        db.get(dv);
+        break;
       case Enum:
         // Coverity[FB.BC_UNCONFIRMED_CAST]
-        decodebytes(((DapEnumeration) daptype).getBaseType(), bytes, vector);
+        decodebytes(remoteorder,((DapEnumeration) daptype).getBaseType(), bytes, vector);
         break;
       default:
         break;

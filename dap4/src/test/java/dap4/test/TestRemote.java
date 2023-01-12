@@ -52,8 +52,9 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   static protected final String BASELINEEXT = ".nc.ncdump";
 
   // Following files cannot be tested because of flaws in sequence handling
+  // by the CDM code in ucar.nc2.dataset.
   static protected String[] EXCLUSIONS =
-      {"test_vlen2", "test_vlen3", "test_vlen4", "test_vlen5", "test_vlen6", "test_vlen7", "test_vlen8"};
+          {"test_vlen2", "test_vlen3", "test_vlen4", "test_vlen5", "test_vlen6", "test_vlen7", "test_vlen8"};
 
   //////////////////////////////////////////////////
   // Static Fields
@@ -104,7 +105,7 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    // singleTest(0, testcases); // choose single test for debugging
+    //singleTest("test_utf8", testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -127,7 +128,8 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    // props.prop_visual = true;
+    //props.prop_visual = true;
+    //props.prop_baseline = true;
     super.setup();
   }
 
@@ -152,21 +154,21 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;
-    if (!props.prop_baseline) {
+    if(props.prop_baseline) {
+      writefile(tc.baseline, testresult);
+    } else {
       try {
         baselinecontent = readfile(tc.baseline);
       } catch (NoSuchFileException nsf) {
         Assert.fail(tc.name + ": ***Fail: test comparison file not found: " + tc.baseline);
       }
     }
-
-    if (props.prop_visual) {
-      visual("Baseline", baselinecontent);
+    if(props.prop_visual) {
+      if(baselinecontent != null)
+        visual("Input", baselinecontent);
       visual("Output", testresult);
     }
-    if (props.prop_baseline)
-      writefile(tc.baseline, testresult);
-    else if (props.prop_diff) { // compare with baseline
+    if(!props.prop_baseline && props.prop_diff) { // compare with baseline
       System.err.println("Comparison: vs " + tc.baseline);
       Assert.assertTrue("*** FAIL", same(getTitle(), baselinecontent, testresult));
       System.out.println(tc.name + ": Passed");

@@ -10,8 +10,8 @@ netcdf test_opaque_array.7 {
 
   data:
     vo2 =       0x0123456789abcdef,
-      0x0123456789abcdef,
-      0x0123456789abcdef,
-      0x0123456789abcdef;
+      0xabcdef0000000000,
+      0xfedcba9876543210,
+      0xfedcba9999999999;
 
 }

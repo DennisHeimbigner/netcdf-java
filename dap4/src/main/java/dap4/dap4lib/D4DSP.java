@@ -10,14 +10,11 @@ import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.util.ChecksumMode;
 import dap4.core.util.*;
-import dap4.dap4lib.cdm.nc2.DapNetcdfFile;
 import org.xml.sax.SAXException;
-import ucar.ma2.Array;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +52,7 @@ public abstract class D4DSP {
 
   // Input stream
   protected DeChunkedInputStream stream = null;
+  protected boolean streamclosed = false;
 
   protected XURI xuri = null;
 
@@ -66,8 +64,7 @@ public abstract class D4DSP {
   // DAP stream compilation
   D4DataCompiler d4compiler = null;
 
-  protected Map<DapVariable, D4Cursor> variable_cursors = new HashMap<>();
-  protected Map<DapVariable, Array> variable_arrays = new HashMap<>();
+  protected Map<DapVariable, D4Cursor> datamap = new HashMap<>();
 
   //////////////////////////////////////////////////
   // Constructor(s)
@@ -104,7 +101,7 @@ public abstract class D4DSP {
   }
 
   public Map<DapVariable, D4Cursor> getVariableDataMap() {
-    return this.variable_cursors;
+    return this.datamap;
   }
 
   public Map<DapVariable, Long> getChecksumMap(ChecksumSource src) {
@@ -116,23 +113,18 @@ public abstract class D4DSP {
 
   protected D4DSP setStream(InputStream input, RequestMode mode) throws IOException {
     this.mode = mode;
-    this.stream = new DeChunkedInputStream(input, mode);
-    byte[] chunk = this.stream.getCurrentChunk();
+    this.stream = new DeChunkedInputStream(input, mode); // side effect: read DMR &/or error
+    this.streamclosed = false;
     if (this.stream.getState() == DeChunkedInputStream.State.ERROR)
-      reportError(chunk);
-    this.dmrtext = new String(chunk, DapUtil.UTF8);
+      reportError(this.stream.getErrorText());
+    this.dmrtext = this.stream.getDMRText();
     // This is the definitive remote byte order
     this.remoteorder = this.stream.getRemoteOrder();
     return this;
   }
 
-  public Map<DapVariable, D4Cursor> getVariableData() throws DapException {
-    return this.variable_cursors;
-  }
-
   protected void addVariableData(DapVariable var, D4Cursor cursor) {
-    this.variable_cursors.put(var, cursor);
-    this.variable_arrays.put(var,cursor.getArray());
+    this.datamap.put(var, cursor);
   }
 
   public DapDataset getDMR() {
@@ -189,6 +181,11 @@ public abstract class D4DSP {
     String document = readDMR();
     DapDataset dmr = parseDMR(document);
     setDMR(dmr);
+    if(this.mode == RequestMode.DMR) {
+      assert !this.streamclosed;
+      this.stream.close(); // no longer needed
+      this.streamclosed = true;
+    }
   }
 
   public void loadDAP() throws IOException {
@@ -196,6 +193,9 @@ public abstract class D4DSP {
       // "Compile" the databuffer section of the server response
       d4compiler = new D4DataCompiler(this, this.checksummode, this.remoteorder);
       d4compiler.compile();
+      assert !this.streamclosed;
+      this.stream.close(); // no longer needed
+      this.streamclosed = true;
     } catch (IOException ioe) {
       throw new DapException(ioe);
     }
@@ -214,9 +214,8 @@ public abstract class D4DSP {
   }
 
   protected String readDMR() throws IOException {
-    byte[] chunk = this.stream.getCurrentChunk();
-    // Clean up dmr
-    String dmrtext = new String(chunk,DapUtil.UTF8);
+    // Get and clean up dmr
+    String dmrtext = this.stream.getDMRText();
     dmrtext = dmrtext.trim();
     if (dmrtext.length() == 0)
       throw new DapException("Empty DMR");
@@ -235,16 +234,6 @@ public abstract class D4DSP {
 
   //////////////////////////////////////////////////
   // Misc. Utilities
-
-  /**
-   * Do what is necessary to ensure that DMR and DAP compilation will work
-   */
-
-  public void ensuredmr(DapNetcdfFile ncfile) throws IOException {
-    if (this.dmr == null) { // do not call twice
-      loadDMR();
-    }
-  }
 
   protected void parseURL(String url) throws DapException {
     try {
@@ -405,9 +394,8 @@ public abstract class D4DSP {
     }
   }
 
-  protected void reportError(byte[] chunk) throws IOException {
-    String msg = new String(chunk,DapUtil.UTF8);
-    throw new DapException(msg);
+  protected void reportError(String errmsg) throws IOException {
+    throw new DapException(errmsg);
   }
 
 }

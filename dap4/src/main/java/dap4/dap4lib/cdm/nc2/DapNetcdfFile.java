@@ -5,14 +5,13 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-import dap4.core.dmr.DapAttribute;
-import dap4.core.dmr.DapDataset;
-import dap4.core.dmr.DapType;
-import dap4.core.dmr.DapVariable;
+import dap4.core.dmr.*;
 import dap4.core.util.*;
 import dap4.dap4lib.*;
 import dap4.dap4lib.cdm.CDMUtil;
+import dap4.dap4lib.cdm.NodeMap;
 import ucar.ma2.*;
+import ucar.nc2.CDMNode;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
 import ucar.nc2.Variable;
@@ -95,17 +94,14 @@ public class DapNetcdfFile extends NetcdfFile {
   // Extractions from dsp
   protected DapDataset dmr = null;
 
+  protected CDMCompiler cdmCompiler = null;
+
   protected ChecksumMode checksummode = null;
 
   protected boolean daploaded = false; // avoid multiple loads
 
-  /**
-   * Originally, the array for a variable was stored
-   * using var.setCacheData(). However, that is illegal
-   * for Structures and Sequences, so (for now)
-   * we maintain a map variable->array.
-   */
-  protected Map<Variable, Array> arraymap = new HashMap<>();
+  // Variable map
+  protected Map<Variable, Array> arraymap = null;
 
   /////////////////////////////////////////////////
   // Constructor(s)
@@ -152,6 +148,7 @@ public class DapNetcdfFile extends NetcdfFile {
     if (this.dsp == null)
       throw new IOException("No matching DSP: " + this.location);
     this.dsp.open(this.dsplocation, this.checksummode); // side effect: get DMR
+    ensuredmr();
     this.dmr = this.dsp.getDMR(); // get DMR
     this.cxt.put(DapDataset.class, this.dmr);
     // set the pseudo-location, otherwise we get a name that is full path.
@@ -203,10 +200,6 @@ public class DapNetcdfFile extends NetcdfFile {
 
   public D4DSP getDSP() {
     return this.dsp;
-  }
-
-  public void setArrayMap(Map<Variable, Array> map) {
-    this.arraymap = map;
   }
 
   //////////////////////////////////////////////////
@@ -299,16 +292,6 @@ public class DapNetcdfFile extends NetcdfFile {
     return result;
   }
 
-  protected void ensuredata() throws IOException {
-    if (!this.daploaded) { // do not call twice
-      this.daploaded = true;
-      this.dsp.loadDAP();
-      loadContext();
-      verifyChecksums();
-      this.dsp.loadContext(this.cxt, RequestMode.DAP);
-    }
-  }
-
   protected void loadContext() {
     this.cxt.put(DapConstants.ChecksumSource.REMOTE, this.dsp.getChecksumMap(DapConstants.ChecksumSource.REMOTE));
     this.cxt.put(DapConstants.ChecksumSource.LOCAL, this.dsp.getChecksumMap(DapConstants.ChecksumSource.LOCAL));
@@ -349,4 +332,41 @@ public class DapNetcdfFile extends NetcdfFile {
     }
   }
 
+  /**
+   * Do what is necessary to ensure that DMR and DAP compilation will work
+   */
+  public void ensuredmr() throws IOException {
+    if (this.dmr == null) { // do not call twice
+      this.dsp.loadDMR();
+      this.dmr = this.dsp.getDMR();
+      if (this.cdmCompiler == null)
+        this.cdmCompiler = new CDMCompiler(this, this.dsp);
+      this.cdmCompiler.compileDMR();
+    }
+  }
+
+  public void ensuredata() throws IOException {
+    if (!this.daploaded) { // do not call twice
+      this.daploaded = true;
+      this.dsp.loadDAP();
+      loadContext();
+      verifyChecksums();
+      this.dsp.loadContext(this.cxt, RequestMode.DAP);
+      if (this.cdmCompiler == null)
+        this.cdmCompiler = new CDMCompiler(this, this.dsp);
+      this.cdmCompiler.compileData();
+      // Prepare the array map
+      assert this.arraymap == null;
+      this.arraymap = new HashMap<Variable, Array>();
+      Map<DapVariable,D4Cursor> datamap = this.dsp.getVariableDataMap();
+      NodeMap<CDMNode, DapNode> nodemap = this.cdmCompiler.getNodeMap();
+      for(Map.Entry<DapVariable,D4Cursor> entry: datamap.entrySet()) {
+        DapVariable dv = entry.getKey();
+        D4Cursor dc = entry.getValue();
+        Variable v = (Variable)nodemap.get(entry.getKey());
+        assert(dc.getArray() != null);
+        arraymap.put(v,dc.getArray());
+      }
+    }
+  }
 }

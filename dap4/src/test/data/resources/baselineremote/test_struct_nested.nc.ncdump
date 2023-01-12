@@ -25,15 +25,12 @@ netcdf test_struct_nested {
 
   data:
     x = 
-      {
-        field1 = 
-          {
-            x = 1
+      {        field1 = 
+          {            x = 1
             y = -2
           } field1(0)
         field2 = 
-          {
-            x = 255
+          {            x = 255
             y = 90
           } field2(0)
       } x(0)

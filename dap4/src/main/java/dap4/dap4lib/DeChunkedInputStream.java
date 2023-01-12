@@ -6,13 +6,10 @@
 package dap4.dap4lib;
 
 
-import dap4.core.dmr.DapVariable;
-import dap4.core.dmr.ErrorResponse;
 import dap4.core.util.DapConstants;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -22,9 +19,9 @@ import java.util.zip.Checksum;
 /**
  * This class transforms a chunked input stream to a de-chunked input stream.
  * Given the input stream, produce a ByteBuffer with all chunking information removed.
- * If the input ends with an error, then return that error information
- * Note that we still need to know the size of the leading DMR if the mode is DAP,
- * so in both DMR and DAP modes, save the size of the DMR
+ * There are two special cases.
+ * 1. Error chunk -- cache the error chunk as text and provide accessors to obtain it.
+ * 2. DMR -- cache the DMR, whatever the mode, and provide accessors.
  *
  */
 
@@ -78,13 +75,20 @@ public class DeChunkedInputStream extends InputStream {
   protected long crc32 = 0;
   protected boolean checksumming = false;
 
+  // Cache two special chunks
+  protected String errortext = null;
+  protected String dmrtext = null;
+
   //////////////////////////////////////////////////
   // Constructor(s)
 
-  public DeChunkedInputStream(InputStream src, RequestMode mode) {
+  public DeChunkedInputStream(InputStream src, RequestMode mode) throws IOException {
     this.source = src;
     this.chunk = new Chunk();
     this.mode = mode;
+    readDMR(this.chunk);
+    if(state == State.ERROR)
+      throw new DapException("DeChunkedInputStream: cannot read DMR");
   }
 
   //////////////////////////////////////////////////
@@ -133,20 +137,27 @@ public class DeChunkedInputStream extends InputStream {
   // Reads up to len bytes of data from the input stream into an array of bytes.
   public int read(byte[] b, int off, int len) throws IOException {
     if (b.length < off + len)
-      len = (b.length - off); // avoid overflow
-    if (this.chunk.avail == 0) {
-      int red = readChunk(this.chunk); // read next chunk
-      if (red <= 0)
-        return red;
-      assert this.chunk.avail == red;
+      throw new DapException("DeChunkedInputStream: illegal arguments: len+offset > |b|"); // avoid overflow
+    int remainder = len; // track # of bytes to read
+    int pos = off; // read point in b
+    while(remainder > 0) {
+      if(this.chunk.avail == 0) {
+        int red = readChunk(this.chunk); // read next chunk
+        if(red <= 0) throw new IOException("DeChunkedInputStream: IO error");
+        assert this.chunk.avail == red;
+      }
+      assert this.chunk.avail > 0;
+      int avail = this.chunk.avail;
+      int toread = avail; // max readable
+      if(avail > remainder)
+        toread = remainder; // only read what we need
+      System.arraycopy(this.chunk.chunk, this.chunk.pos, b, pos, toread); // transfer what we can
+      this.chunk.pos += toread; // track source availability
+      this.chunk.avail -= toread;
+      pos += toread; // track dest availability
+      remainder -= toread;
     }
-    assert this.chunk.avail > 0;
-    if (len > this.chunk.avail)
-      len = this.chunk.avail; // read what is available
-    System.arraycopy(this.chunk.chunk, this.chunk.pos, b, off, len);
-    if(checksumming) computeChecksum(b,off,len);
-    this.chunk.pos += len;
-    this.chunk.avail -= len;
+    if(checksumming) computeChecksum(b, off, len);
     return len;
   }
 
@@ -180,6 +191,13 @@ public class DeChunkedInputStream extends InputStream {
     return this.state;
   }
 
+  public String getErrorText() {
+    return this.errortext;
+  }
+
+  public String getDMRText() {
+    return this.dmrtext;
+  }
   // Primarily to access DMR and ERROR chunks
   public byte[] getCurrentChunk() throws IOException {
     if (this.state == State.INITIAL)
@@ -197,9 +215,7 @@ public class DeChunkedInputStream extends InputStream {
   // Methods
 
   protected int readChunk(Chunk chunk) throws IOException {
-    if (this.mode == RequestMode.DMR)
-      return readDMR(chunk);
-    // assert this.mode == RequestMode.DAP;
+    assert this.mode == RequestMode.DAP;
     switch (state) {
       case INITIAL:
       case MORE:
@@ -223,6 +239,9 @@ public class DeChunkedInputStream extends InputStream {
         // read the whole chunk
         int red = DapUtil.readbinaryfilepartial(source, this.chunk.chunk, this.chunk.size);
         assert (red == this.chunk.size);
+        // If we are in an error state, then throw exception
+        if(this.state == State.ERROR)
+          throw new DapException("DeChunkedInputStream: Error chunk encountered");
         break;
       case END:
       case ERROR:
@@ -232,18 +251,32 @@ public class DeChunkedInputStream extends InputStream {
   }
 
   protected int readDMR(Chunk chunk) throws IOException {
-    // assert this.mode == RequestMode.DMR;
-    switch (this.state) {
-      case INITIAL:
+    assert(this.state == State.INITIAL);
+    switch (this.mode) {
+      case DMR:
         this.remoteorder = ByteOrder.nativeOrder(); // do not really know
         this.chunk.chunk = DapUtil.readbinaryfile(source); // read whole input stream as DMR
         this.chunk.size = this.chunk.chunk.length;
-        this.chunk.pos = 0;
-        this.chunk.avail = this.chunk.size;
-        this.state = State.END;
+        if(this.chunk.size > 0) {
+          this.dmrtext = new String(this.chunk.chunk, DapUtil.UTF8);
+          // Make sure the state looks correct
+          this.chunk.pos = this.chunk.size;
+          this.chunk.avail = 0;
+          this.state = State.END;
+          this.remoteorder = ByteOrder.nativeOrder(); // do not really know
+        } else {
+          this.state = State.ERROR;
+          throw new DapException("DeChunkedInputStream: Error chunk encountered when reading DMR");
+        }
+        break;
+      case DAP:
+        this.remoteorder = ByteOrder.nativeOrder(); // do not really know
+        readChunk(this.chunk);
+        this.dmrtext = new String(this.chunk.chunk, DapUtil.UTF8);
+        this.skip(this.chunk.size);
         break;
       default:
-        throw new DapException("Illegal chunk state");
+        throw new DapException("Illegal request mode");
     }
     return this.chunk.size;
   }
@@ -286,7 +319,7 @@ public class DeChunkedInputStream extends InputStream {
 
   public long endChecksum() {
     this.crc32 = crc32alg.getValue(); // get the digest value
-    this.crc32 = this.crc32 & 0x00000000FFFFFFFFL; /* crc is 32 bits */
+    this.crc32 = this.crc32 & 0x00000000FFFFFFFFL; /* crc is 32 bits unsigned */
     this.checksumming = false;
     return this.crc32;
   }

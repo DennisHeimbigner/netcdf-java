@@ -12,6 +12,7 @@ import dap4.core.dmr.*;
 import dap4.core.util.*;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.CDMUtil;
+import dap4.dap4lib.cdm.nc2.D4StructureDataIterator;
 import dap4.dap4lib.util.Odometer;
 import dap4.dap4lib.util.OdometerFactory;
 import ucar.ma2.*;
@@ -60,7 +61,7 @@ public class D4DataCompiler {
    *
    * @param dsp the D4DSP
    * @param checksummode
-   * @param stream the source of dechunked data
+   * @param remoteorder
    */
 
   public D4DataCompiler(D4DSP dsp, ChecksumMode checksummode, ByteOrder remoteorder)
@@ -113,7 +114,8 @@ public class D4DataCompiler {
     for (DapVariable vv : this.dmr.getTopVariables()) {
       Object storage = compileVar(vv);
       D4Cursor data = new D4Cursor(schemeFor(vv), this.dsp, vv).setStorage(storage);
-      createArray(vv, data);
+      assert data.getArray() == null;
+      data.setArray(createArray(vv, data.getStorage()));
       this.dsp.addVariableData(vv, data);
     }
   }
@@ -140,8 +142,12 @@ public class D4DataCompiler {
       data = compileSequenceArray(dapvar);
     }
     if (dapvar.isTopLevel() && this.checksummode == ChecksumMode.TRUE) {
-      long crc32 = this.stream.endChecksum(); // extract the remotechecksum from databuffer src,
-      setChecksum(DapConstants.ChecksumSource.REMOTE, dapvar, crc32);
+      // Save the locally computed checksum
+      long localcrc32 = this.stream.endChecksum(); // extract the remotechecksum from databuffer src,
+      setChecksum(DapConstants.ChecksumSource.LOCAL, dapvar, localcrc32);
+      // Save the checksum sent by the server
+      long remotecrc32 = extractChecksum();
+      setChecksum(DapConstants.ChecksumSource.REMOTE, dapvar, remotecrc32);
     }
     return data;
   }
@@ -166,11 +172,15 @@ public class D4DataCompiler {
     // All other fixed-size atomic types
     long dimproduct = var.getCount();
     long total = dimproduct * daptype.getSize();
-    byte[] bytes = new byte[(int) dimproduct]; // total space required
-    this.stream.read(bytes);
+    byte[] bytes = new byte[(int) total]; // total space required
+    int red = this.stream.read(bytes);
+    if(red <= 0)
+      throw new IOException("D4DataCompiler: read failure");
+    if(red < total)
+      throw new DapException("D4DataCompiler: short read");
     // Convert to vector of required type
     Object storage = CDMTypeFcns.bytesAsTypeVec(daptype, bytes);
-    CDMTypeFcns.decodebytes(daptype, bytes, storage);
+    CDMTypeFcns.decodebytes(this.remoteorder, daptype, bytes, storage);
     return storage;
   }
 
@@ -240,7 +250,7 @@ public class D4DataCompiler {
     Object[] storage = new Object[(int) dimproduct];
     Index idx = Index.factory(CDMUtil.computeEffectiveShape(var.getDimensions()));
     long idxsize = idx.getSize();
-    for (int offset = 0; (offset < idxsize); offset = idx.incr()) {
+    for (int offset = 0; (offset < idxsize); offset++) {
       Object instance = compileStructure(dapstruct);
       storage[offset] = instance;
     }
@@ -280,7 +290,7 @@ public class D4DataCompiler {
     Object[] storage = new Object[(int) dimproduct];
     Index idx = Index.factory(CDMUtil.computeEffectiveShape(var.getDimensions()));
     long idxsize = idx.getSize();
-    for (int offset = 0; (offset < idxsize); offset = idx.incr()) {
+    for (int offset = 0; (offset < idxsize); offset++) {
       Object seq = compileSequence(dapseq);
       storage[offset] = seq;
     }
@@ -310,13 +320,15 @@ public class D4DataCompiler {
   //////////////////////////////////////////////////
   // Utilities
 
-  protected int extractChecksum() throws IOException {
+  protected long extractChecksum() throws IOException {
     assert this.checksummode == ChecksumMode.TRUE;
     byte[] bytes = new byte[4]; // 4 == sizeof(checksum)
     int red = this.stream.read(bytes);
     assert red == 4;
     ByteBuffer bb = ByteBuffer.wrap(bytes).order(this.remoteorder);
-    int csum = (int) bb.getInt();
+    long csum = (int) bb.getInt();
+    csum = csum & 0x00000000FFFFFFFF;
+    csum = csum & 0x00000000FFFFFFFFL; /* crc is 32 bits unsigned */
     return csum;
   }
 
@@ -375,7 +387,7 @@ public class D4DataCompiler {
         array = createStructureArray(var, storage);
         break;
       case SEQARRAY:
-        //array = createSequenceArray(var, storage);
+        array = createSequenceArray(var, storage);
         break;
       case STRUCTURE:
       case SEQUENCE:
@@ -417,6 +429,48 @@ public class D4DataCompiler {
     }
     ArrayStructureW array = new ArrayStructureW(members, shape, structdata);
     return array;
+  }
+
+  /**
+   * Create an Array object for a DAP4 Sequence.
+   * Unfortunately, the whole CDM Sequence/VLEN mechanism
+   * is completely hosed, with no hope of a simple fix.
+   * It appears that the only thing we can do is support scalar sequences.
+   * However in useless hope, the code is written as if arrays of sequences
+   * can be supported.
+   * @param var
+   * @param storage
+   * @return
+   */
+  protected Array createSequenceArray(DapVariable var, Object storage) {
+    DapType dtype = var.getBaseType();
+    StructureMembers members = computemembers(var);
+    int[] shape = CDMUtil.computeEffectiveShape(var.getDimensions());
+    Object[] allinstancedata = (Object[])storage;
+    int ninstances = allinstancedata.length;
+    if(ninstances != 1) // enforce scalar assumption
+      throw new IndexOutOfBoundsException("Non-scalar Dap4 Sequences not supported");
+    Array[] allinstances = new Array[ninstances];
+    for(int i=0;i<ninstances;i++) { // iterate over all sequence instances array
+      Object[] ithelemdata = (Object[]) allinstancedata[i];
+      int nrecords = ithelemdata.length;
+      StructureData[] allrecords = new StructureData[nrecords]; // for creating the record iterator
+      for(int r = 0; r < nrecords; r++) { // iterate over the records of one sequence
+        Object[] onerecorddata = (Object[]) ithelemdata[r];
+        StructureDataW onerecord = new StructureDataW(members);
+        for(int f = 0; f < members.getMembers().size(); f++) { // iterate over fields in one record
+          StructureMembers.Member fm = members.getMember(f);
+          DapVariable d4field = ((DapStructure) dtype).getField(f);
+          Array fieldarray = createArray(d4field, onerecorddata[f]);
+          onerecord.setMemberData(fm, fieldarray);
+        }
+        allrecords[r] = onerecord;
+      }
+      D4StructureDataIterator onesequence = new D4StructureDataIterator().setList(allrecords);
+      ArraySequence oneseq = new ArraySequence(members,onesequence,nrecords);
+      allinstances[i] = oneseq;
+    }
+    return allinstances[0]; // enforce scalar assumption
   }
 
   /**

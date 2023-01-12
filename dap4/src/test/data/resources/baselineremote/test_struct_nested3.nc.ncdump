@@ -20,12 +20,9 @@ netcdf test_struct_nested3 {
 
   data:
     x = 
-      {
-        field3 = 
-          {
-            field2 = 
-              {
-                field1 = 17
+      {        field3 = 
+          {            field2 = 
+              {                field1 = 17
               } field2(0)
           } field3(0)
       } x(0)
