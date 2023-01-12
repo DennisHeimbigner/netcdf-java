@@ -78,7 +78,7 @@ abstract public class DataToCDM {
       assert cursor != null && v != null;
       Array array = cursor.getArray();
       assert array != null;
-      arraymap.put(v,array);
+      arraymap.put(v, array);
     }
     return arraymap;
   }

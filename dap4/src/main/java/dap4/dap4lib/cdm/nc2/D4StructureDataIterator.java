@@ -10,8 +10,7 @@ import ucar.ma2.StructureDataIterator;
 
 import java.io.IOException;
 
-public class D4StructureDataIterator implements StructureDataIterator
-{
+public class D4StructureDataIterator implements StructureDataIterator {
 
   protected StructureData[] list;
   protected int position;

@@ -87,7 +87,7 @@ public class DeChunkedInputStream extends InputStream {
     this.chunk = new Chunk();
     this.mode = mode;
     readDMR(this.chunk);
-    if(state == State.ERROR)
+    if (state == State.ERROR)
       throw new DapException("DeChunkedInputStream: cannot read DMR");
   }
 
@@ -124,7 +124,8 @@ public class DeChunkedInputStream extends InputStream {
     int c = this.chunk.chunk[this.chunk.pos];
     this.chunk.pos++;
     this.chunk.avail--;
-    if(checksumming) computeChecksum(c);
+    if (checksumming)
+      computeChecksum(c);
     return c;
   }
 
@@ -140,16 +141,17 @@ public class DeChunkedInputStream extends InputStream {
       throw new DapException("DeChunkedInputStream: illegal arguments: len+offset > |b|"); // avoid overflow
     int remainder = len; // track # of bytes to read
     int pos = off; // read point in b
-    while(remainder > 0) {
-      if(this.chunk.avail == 0) {
+    while (remainder > 0) {
+      if (this.chunk.avail == 0) {
         int red = readChunk(this.chunk); // read next chunk
-        if(red <= 0) throw new IOException("DeChunkedInputStream: IO error");
+        if (red <= 0)
+          throw new IOException("DeChunkedInputStream: IO error");
         assert this.chunk.avail == red;
       }
       assert this.chunk.avail > 0;
       int avail = this.chunk.avail;
       int toread = avail; // max readable
-      if(avail > remainder)
+      if (avail > remainder)
         toread = remainder; // only read what we need
       System.arraycopy(this.chunk.chunk, this.chunk.pos, b, pos, toread); // transfer what we can
       this.chunk.pos += toread; // track source availability
@@ -157,20 +159,22 @@ public class DeChunkedInputStream extends InputStream {
       pos += toread; // track dest availability
       remainder -= toread;
     }
-    if(checksumming) computeChecksum(b, off, len);
+    if (checksumming)
+      computeChecksum(b, off, len);
     return len;
   }
 
   public long skip(long n) throws IOException {
     long count = n;
     while (count > 0) {
-      if(this.chunk.avail == 0) {
+      if (this.chunk.avail == 0) {
         int red = readChunk(this.chunk); // read next chunk
-        if(red <= 0) return (n - count);
+        if (red <= 0)
+          return (n - count);
         assert this.chunk.avail == red;
       }
       assert this.chunk.avail > 0;
-      if(count <= this.chunk.avail) {
+      if (count <= this.chunk.avail) {
         this.chunk.pos += count;
         this.chunk.avail -= count;
         count = n; // we read n bytes
@@ -178,7 +182,7 @@ public class DeChunkedInputStream extends InputStream {
       } else {
         this.chunk.pos += this.chunk.avail;
         this.chunk.avail -= this.chunk.avail;
-        count -= this.chunk.avail;        
+        count -= this.chunk.avail;
       }
     }
     return count;
@@ -198,6 +202,7 @@ public class DeChunkedInputStream extends InputStream {
   public String getDMRText() {
     return this.dmrtext;
   }
+
   // Primarily to access DMR and ERROR chunks
   public byte[] getCurrentChunk() throws IOException {
     if (this.state == State.INITIAL)
@@ -240,7 +245,7 @@ public class DeChunkedInputStream extends InputStream {
         int red = DapUtil.readbinaryfilepartial(source, this.chunk.chunk, this.chunk.size);
         assert (red == this.chunk.size);
         // If we are in an error state, then throw exception
-        if(this.state == State.ERROR)
+        if (this.state == State.ERROR)
           throw new DapException("DeChunkedInputStream: Error chunk encountered");
         break;
       case END:
@@ -251,13 +256,13 @@ public class DeChunkedInputStream extends InputStream {
   }
 
   protected int readDMR(Chunk chunk) throws IOException {
-    assert(this.state == State.INITIAL);
+    assert (this.state == State.INITIAL);
     switch (this.mode) {
       case DMR:
         this.remoteorder = ByteOrder.nativeOrder(); // do not really know
         this.chunk.chunk = DapUtil.readbinaryfile(source); // read whole input stream as DMR
         this.chunk.size = this.chunk.chunk.length;
-        if(this.chunk.size > 0) {
+        if (this.chunk.size > 0) {
           this.dmrtext = new String(this.chunk.chunk, DapUtil.UTF8);
           // Make sure the state looks correct
           this.chunk.pos = this.chunk.size;

@@ -119,7 +119,8 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(file, url, baseline, query);
       testcases.add(tc);
     }
-    //singleTest("AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", testcases); // choose single test for debugging
+    // singleTest("AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", testcases); // choose single test for
+    // debugging
     return testcases;
   }
   //////////////////////////////////////////////////
@@ -142,7 +143,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   public void setup() {
     // Set any properties
     props.prop_baseline = true;
-    //props.prop_visual = true;
+    // props.prop_visual = true;
     super.setup();
   }
 
@@ -165,7 +166,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;
-    if(props.prop_baseline) {
+    if (props.prop_baseline) {
       writefile(tc.baseline, testresult);
     } else {
       try {
@@ -174,12 +175,12 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
         Assert.fail(tc.name + ": ***Fail: test comparison file not found: " + tc.baseline);
       }
     }
-    if(props.prop_visual) {
-      if(baselinecontent != null)
+    if (props.prop_visual) {
+      if (baselinecontent != null)
         visual("Input", baselinecontent);
       visual("Output", testresult);
     }
-    if(!props.prop_baseline && props.prop_diff) { // compare with baseline
+    if (!props.prop_baseline && props.prop_diff) { // compare with baseline
       System.err.println("Comparison: vs " + tc.baseline);
       Assert.assertTrue("*** FAIL", same(getTitle(), baselinecontent, testresult));
       System.out.println(tc.name + ": Passed");

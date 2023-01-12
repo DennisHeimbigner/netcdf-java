@@ -1394,13 +1394,14 @@ public abstract class CDMTypeFcns {
     ByteBuffer bb = ByteBuffer.wrap(bytes).order(remoteorder);
     switch (tsort) {
       case Char:
-        String cb = new String(bytes,DapUtil.UTF8);
+        String cb = new String(bytes, DapUtil.UTF8);
         char[] cv = (char[]) vector;
-        for(int i=0;i<cv.length;i++) cv[i] = cb.charAt(i);
+        for (int i = 0; i < cv.length; i++)
+          cv[i] = cb.charAt(i);
         break;
       case Int8:
       case UInt8:
-        bb.get((byte[])vector);
+        bb.get((byte[]) vector);
         break;
       case Int16:
       case UInt16:
@@ -1432,7 +1433,7 @@ public abstract class CDMTypeFcns {
         break;
       case Enum:
         // Coverity[FB.BC_UNCONFIRMED_CAST]
-        decodebytes(remoteorder,((DapEnumeration) daptype).getBaseType(), bytes, vector);
+        decodebytes(remoteorder, ((DapEnumeration) daptype).getBaseType(), bytes, vector);
         break;
       default:
         break;

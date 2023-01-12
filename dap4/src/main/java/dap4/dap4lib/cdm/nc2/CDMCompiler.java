@@ -110,7 +110,7 @@ public class CDMCompiler {
    */
 
   public void compileData() throws DapException {
-    // Convert the Data  to CDM arrays
+    // Convert the Data to CDM arrays
     // and return a mapping from Variable -> Array
     this.arraymap = DataToCDM.createDataMap(this.dsp, this.nodemap);
   }

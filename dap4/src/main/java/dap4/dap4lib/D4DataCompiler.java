@@ -64,8 +64,7 @@ public class D4DataCompiler {
    * @param remoteorder
    */
 
-  public D4DataCompiler(D4DSP dsp, ChecksumMode checksummode, ByteOrder remoteorder)
-      throws DapException {
+  public D4DataCompiler(D4DSP dsp, ChecksumMode checksummode, ByteOrder remoteorder) throws DapException {
     this.dsp = dsp;
     this.dmr = this.dsp.getDMR();
     this.stream = this.dsp.getStream();
@@ -174,9 +173,9 @@ public class D4DataCompiler {
     long total = dimproduct * daptype.getSize();
     byte[] bytes = new byte[(int) total]; // total space required
     int red = this.stream.read(bytes);
-    if(red <= 0)
+    if (red <= 0)
       throw new IOException("D4DataCompiler: read failure");
-    if(red < total)
+    if (red < total)
       throw new DapException("D4DataCompiler: short read");
     // Convert to vector of required type
     Object storage = CDMTypeFcns.bytesAsTypeVec(daptype, bytes);
@@ -413,17 +412,17 @@ public class D4DataCompiler {
     DapType dtype = var.getBaseType();
     StructureMembers members = computemembers(var);
     int[] shape = CDMUtil.computeEffectiveShape(var.getDimensions());
-    Object[] instances = (Object[])storage;
+    Object[] instances = (Object[]) storage;
     StructureData[] structdata = new StructureData[instances.length];
-    for(int i=0;i<instances.length;i++) {
-      Object[] fields = (Object[])instances[i];
+    for (int i = 0; i < instances.length; i++) {
+      Object[] fields = (Object[]) instances[i];
       StructureDataW sdw = new StructureDataW(members);
-      for(int f=0;f<members.getMembers().size();f++) {
+      for (int f = 0; f < members.getMembers().size(); f++) {
         StructureMembers.Member fm = sdw.getMembers().get(f);
-        DapVariable d4field = ((DapStructure)dtype).getField(f);
+        DapVariable d4field = ((DapStructure) dtype).getField(f);
         Object fielddata = fields[f];
-        Array fieldarray = createArray(d4field,fielddata);
-        sdw.setMemberData(fm,fieldarray);
+        Array fieldarray = createArray(d4field, fielddata);
+        sdw.setMemberData(fm, fieldarray);
       }
       structdata[i] = sdw;
     }
@@ -438,6 +437,7 @@ public class D4DataCompiler {
    * It appears that the only thing we can do is support scalar sequences.
    * However in useless hope, the code is written as if arrays of sequences
    * can be supported.
+   * 
    * @param var
    * @param storage
    * @return
@@ -446,19 +446,19 @@ public class D4DataCompiler {
     DapType dtype = var.getBaseType();
     StructureMembers members = computemembers(var);
     int[] shape = CDMUtil.computeEffectiveShape(var.getDimensions());
-    Object[] allinstancedata = (Object[])storage;
+    Object[] allinstancedata = (Object[]) storage;
     int ninstances = allinstancedata.length;
-    if(ninstances != 1) // enforce scalar assumption
+    if (ninstances != 1) // enforce scalar assumption
       throw new IndexOutOfBoundsException("Non-scalar Dap4 Sequences not supported");
     Array[] allinstances = new Array[ninstances];
-    for(int i=0;i<ninstances;i++) { // iterate over all sequence instances array
+    for (int i = 0; i < ninstances; i++) { // iterate over all sequence instances array
       Object[] ithelemdata = (Object[]) allinstancedata[i];
       int nrecords = ithelemdata.length;
       StructureData[] allrecords = new StructureData[nrecords]; // for creating the record iterator
-      for(int r = 0; r < nrecords; r++) { // iterate over the records of one sequence
+      for (int r = 0; r < nrecords; r++) { // iterate over the records of one sequence
         Object[] onerecorddata = (Object[]) ithelemdata[r];
         StructureDataW onerecord = new StructureDataW(members);
-        for(int f = 0; f < members.getMembers().size(); f++) { // iterate over fields in one record
+        for (int f = 0; f < members.getMembers().size(); f++) { // iterate over fields in one record
           StructureMembers.Member fm = members.getMember(f);
           DapVariable d4field = ((DapStructure) dtype).getField(f);
           Array fieldarray = createArray(d4field, onerecorddata[f]);
@@ -467,7 +467,7 @@ public class D4DataCompiler {
         allrecords[r] = onerecord;
       }
       D4StructureDataIterator onesequence = new D4StructureDataIterator().setList(allrecords);
-      ArraySequence oneseq = new ArraySequence(members,onesequence,nrecords);
+      ArraySequence oneseq = new ArraySequence(members, onesequence, nrecords);
       allinstances[i] = oneseq;
     }
     return allinstances[0]; // enforce scalar assumption

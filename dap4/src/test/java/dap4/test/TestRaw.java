@@ -34,8 +34,7 @@ import static dap4.core.util.DapConstants.CHECKSUMATTRNAME;
  */
 
 @RunWith(Parameterized.class)
-public class TestRaw extends DapTestCommon implements Dap4ManifestIF
-{
+public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
 
   //////////////////////////////////////////////////
   // Constants
@@ -52,7 +51,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF
   // Following files cannot be tested because of flaws in sequence handling
   // by the CDM code in ucar.nc2.dataset.
   static protected String[] EXCLUSIONS =
-          {"test_vlen2", "test_vlen3", "test_vlen4", "test_vlen5", "test_vlen6", "test_vlen7", "test_vlen8"};
+      {"test_vlen2", "test_vlen3", "test_vlen4", "test_vlen5", "test_vlen6", "test_vlen7", "test_vlen8"};
 
   // Attribute suppression
   static String RE_ENDIAN = "\n[ \t]*<Attribute[ \t]+name=[\"]_DAP4_Little_Endian[\"].*?</Attribute>[ \t]*";
@@ -75,8 +74,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase extends TestCaseCommon
-  {
+  static class TestCase extends TestCaseCommon {
     public String url;
     public String baseline;
 
@@ -99,14 +97,14 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF
   static public List<TestCaseCommon> defineTestCases() {
     List<TestCaseCommon> testcases = new ArrayList<>();
     String[][] manifest = excludeNames(dap4_manifest, EXCLUSIONS);
-    for(String[] tuple : manifest) {
+    for (String[] tuple : manifest) {
       String name = tuple[0];
       String url = buildURL(name);
       String baseline = resourceroot + BASELINEDIR + "/" + name + BASELINEEXT;
       TestCase tc = new TestCase(name, url, baseline);
       testcases.add(tc);
     }
-    //singleTest("test_vlen3", testcases); // choose single test for debugging
+    // singleTest("test_vlen3", testcases); // choose single test for debugging
     return testcases;
   }
 
@@ -129,8 +127,8 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF
   @Before
   public void setup() {
     // Set any properties
-    //props.prop_visual = true;
-    //props.prop_baseline = true;
+    // props.prop_visual = true;
+    // props.prop_baseline = true;
     super.setup();
   }
 
@@ -161,7 +159,7 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;
-    if(props.prop_baseline) {
+    if (props.prop_baseline) {
       writefile(tc.baseline, testresult);
     } else {
       try {
@@ -175,12 +173,12 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF
         Assert.fail(tc.name + ": ***Fail: test comparison file not found: " + tc.baseline);
       }
     }
-    if(props.prop_visual) {
-      if(baselinecontent != null)
+    if (props.prop_visual) {
+      if (baselinecontent != null)
         visual("Input", baselinecontent);
       visual("Output", testresult);
     }
-    if(!props.prop_baseline && props.prop_diff) { // compare with baseline
+    if (!props.prop_baseline && props.prop_diff) { // compare with baseline
       System.err.println("Comparison: vs " + tc.baseline);
       Assert.assertTrue("*** FAIL", same(getTitle(), baselinecontent, testresult));
       System.out.println(tc.name + ": Passed");

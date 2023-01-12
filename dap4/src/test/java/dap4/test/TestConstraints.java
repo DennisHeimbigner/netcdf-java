@@ -34,8 +34,7 @@ import java.util.regex.Pattern;
  */
 
 @RunWith(Parameterized.class)
-public class TestConstraints extends DapTestCommon implements Dap4ManifestIF
-{
+public class TestConstraints extends DapTestCommon implements Dap4ManifestIF {
 
   //////////////////////////////////////////////////
   // Constants
@@ -57,7 +56,7 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF
   // Following files cannot be tested because of flaws in sequence handling
   // by the CDM code in ucar.nc2.dataset.
   static protected String[] EXCLUSIONS =
-          {"test_vlen2", "test_vlen3", "test_vlen4", "test_vlen5", "test_vlen6", "test_vlen7", "test_vlen8"};
+      {"test_vlen2", "test_vlen3", "test_vlen4", "test_vlen5", "test_vlen6", "test_vlen7", "test_vlen8"};
 
   //////////////////////////////////////////////////
   // Static Fields
@@ -78,8 +77,7 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase extends TestCaseCommon
-  {
+  static class TestCase extends TestCaseCommon {
     public String url;
     public String baseline;
     public String ce; // for debugging
@@ -106,12 +104,12 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF
     List<TestCaseCommon> testcases = new ArrayList<>();
     String[][] manifest = excludeNames(constraint_manifest, EXCLUSIONS);
     // Separate the manifest string into the file name and the index and the query parts
-    for(String[] tuple : manifest) {
+    for (String[] tuple : manifest) {
       String file = tuple[0];
       String index = tuple[1];
       String query = tuple[2]; // excluding leading '?'
       String url =
-              server.getURL() + "/" + file + INPUTEXT + INPUTQUERY + DapConstants.CONSTRAINTTAG + query + INPUTFRAG;
+          server.getURL() + "/" + file + INPUTEXT + INPUTQUERY + DapConstants.CONSTRAINTTAG + query + INPUTFRAG;
       String baseline = resourceroot + BASELINEDIR + "/" + file + "." + index + BASELINEEXT;
       TestCase tc = new TestCase(file + "." + index, url, baseline, query);
       testcases.add(tc);
@@ -139,7 +137,7 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF
   @Before
   public void setup() {
     // Set any properties
-    //props.prop_visual = true;
+    // props.prop_visual = true;
     // props.prop_baseline = true;
     super.setup();
   }
@@ -163,7 +161,7 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;
-    if(props.prop_baseline) {
+    if (props.prop_baseline) {
       writefile(tc.baseline, testresult);
     } else {
       try {
@@ -172,12 +170,12 @@ public class TestConstraints extends DapTestCommon implements Dap4ManifestIF
         Assert.fail(tc.name + ": ***Fail: test comparison file not found: " + tc.baseline);
       }
     }
-    if(props.prop_visual) {
-      if(baselinecontent != null)
+    if (props.prop_visual) {
+      if (baselinecontent != null)
         visual("Input", baselinecontent);
       visual("Output", testresult);
     }
-    if(!props.prop_baseline && props.prop_diff) { // compare with baseline
+    if (!props.prop_baseline && props.prop_diff) { // compare with baseline
       System.err.println("Comparison: vs " + tc.baseline);
       Assert.assertTrue("*** FAIL", same(getTitle(), baselinecontent, testresult));
       System.out.println(tc.name + ": Passed");

@@ -181,7 +181,7 @@ public abstract class D4DSP {
     String document = readDMR();
     DapDataset dmr = parseDMR(document);
     setDMR(dmr);
-    if(this.mode == RequestMode.DMR) {
+    if (this.mode == RequestMode.DMR) {
       assert !this.streamclosed;
       this.stream.close(); // no longer needed
       this.streamclosed = true;
@@ -371,20 +371,20 @@ public abstract class D4DSP {
    */
   protected void processMaps(DapDataset dataset) throws DapException {
     List<DapNode> nodes = dataset.getNodeList();
-    for(DapNode node : nodes) {
+    for (DapNode node : nodes) {
       switch (node.getSort()) {
         case MAP:
           DapMap map = (DapMap) node;
           String targetname = map.getTargetName();
           DapVariable target;
           target = (DapVariable) dataset.findByFQN(targetname, DapSort.VARIABLE, DapSort.SEQUENCE, DapSort.STRUCTURE);
-          if(target == null)
+          if (target == null)
             throw new DapException("Mapref: undefined target variable: " + targetname);
           // Verify that this is a legal map =>
           // 1. it is outside the scope of its parent if the parent
           // is a structure.
           DapNode container = target.getContainer();
-          if((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE))
+          if ((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE))
             throw new DapException("Mapref: map target variable not in outer scope: " + targetname);
           map.setVariable(target);
           break;

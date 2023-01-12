@@ -266,24 +266,24 @@ public class CEConstraint {
   public static void release(DapDataset dmr) {
     universals.remove(dmr);
   }
-/*
-  protected static DataCursor fieldValue(DapVariable sqvar, DapSequence seq, DataCursor record, String field)
-      throws DapException {
-    DapVariable dapv = seq.findByName(field);
-    if (dapv == null)
-      throw new DapException("Unknown variable in filter: " + field);
-    if (!dapv.isAtomic())
-      throw new DapException("Non-atomic variable in filter: " + field);
-    if (dapv.getRank() > 0)
-      throw new DapException("Non-scalar variable in filter: " + field);
-    int fieldindex = seq.indexByName(field);
-    DataCursor da = (DataCursor) (record.readField(fieldindex));
-    if (da == null)
-      throw new DapException("No such field: " + field);
-    return da;
-  }
-
- */
+  /*
+   * protected static DataCursor fieldValue(DapVariable sqvar, DapSequence seq, DataCursor record, String field)
+   * throws DapException {
+   * DapVariable dapv = seq.findByName(field);
+   * if (dapv == null)
+   * throw new DapException("Unknown variable in filter: " + field);
+   * if (!dapv.isAtomic())
+   * throw new DapException("Non-atomic variable in filter: " + field);
+   * if (dapv.getRank() > 0)
+   * throw new DapException("Non-scalar variable in filter: " + field);
+   * int fieldindex = seq.indexByName(field);
+   * DataCursor da = (DataCursor) (record.readField(fieldindex));
+   * if (da == null)
+   * throw new DapException("No such field: " + field);
+   * return da;
+   * }
+   * 
+   */
 
   protected static int compare(Object lvalue, Object rvalue) throws DapException {
     if (lvalue instanceof String && rvalue instanceof String)
@@ -320,7 +320,7 @@ public class CEConstraint {
         return expr.value;
 
       case SEGMENT:
-        return null; //???return fieldValue(var, seq, record, expr.name);
+        return null; // ???return fieldValue(var, seq, record, expr.name);
 
       case EXPR:
         Object lhs = eval(var, seq, record, expr.lhs);
