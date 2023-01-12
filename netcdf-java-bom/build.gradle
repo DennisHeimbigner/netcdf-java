@@ -24,7 +24,7 @@ dependencies {
     api project(':legacy')
     api project(':netcdf4')
     api project(':opendap')
-    api project(':dap4')
+//    api project(':dap4')
     api project(':udunits')
     api project(':uibase')
     api project(':uicdm')
