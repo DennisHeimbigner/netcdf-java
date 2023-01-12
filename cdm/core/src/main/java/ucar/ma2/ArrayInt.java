@@ -77,7 +77,7 @@ public class ArrayInt extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  protected ArrayInt(Index ima, boolean isUnsigned, int[] data) {
+  ArrayInt(Index ima, boolean isUnsigned, int[] data) {
     super(isUnsigned ? DataType.UINT : DataType.INT, ima);
     /*
      * replace by something better

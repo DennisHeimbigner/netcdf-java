@@ -13,8 +13,6 @@ import dap4.core.util.*;
 import dap4.dap4lib.cdm.CDMTypeFcns;
 import dap4.dap4lib.cdm.CDMUtil;
 import dap4.dap4lib.cdm.nc2.D4StructureDataIterator;
-import dap4.dap4lib.util.Odometer;
-import dap4.dap4lib.util.OdometerFactory;
 import ucar.ma2.*;
 
 import java.io.IOException;

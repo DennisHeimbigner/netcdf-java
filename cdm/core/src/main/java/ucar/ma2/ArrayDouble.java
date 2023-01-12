@@ -80,7 +80,7 @@ public class ArrayDouble extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store. if null, allocate
    */
-  protected ArrayDouble(Index ima, double[] data) {
+  ArrayDouble(Index ima, double[] data) {
     super(DataType.DOUBLE, ima);
 
     if (data != null) {

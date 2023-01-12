@@ -562,9 +562,8 @@ public class Ncdump {
     out.format("%n%s{", indent);
     indent.incr();
     for (int ii = 0; ii < last; ii++) {
-      Object o = ma.slice(0, ii);
-      Array slice = (Array) o; // replaces ArrayObject slice = (ArrayObject)o; because ArrayObject is over-castinng
-                               // since printStringArray takes Array
+      Array slice = (Array) ma.slice(0, ii); // replaces ArrayObject slice = (ArrayObject)o; because ArrayObject is
+                                             // over-casting since printStringArray takes Array
       if (ii > 0)
         out.format(",");
       printStringArray(out, slice, indent, ct);

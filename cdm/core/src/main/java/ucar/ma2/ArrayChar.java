@@ -78,7 +78,7 @@ public class ArrayChar extends Array implements Iterable<String> {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  protected ArrayChar(Index ima, char[] data) {
+  ArrayChar(Index ima, char[] data) {
     super(DataType.CHAR, ima);
     /*
      * replace by something better

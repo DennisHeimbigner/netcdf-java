@@ -76,7 +76,7 @@ public class ArrayString extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  protected ArrayString(Index ima, String[] data) {
+  ArrayString(Index ima, String[] data) {
     super(DataType.STRING, ima);
     /*
      * replace by something better

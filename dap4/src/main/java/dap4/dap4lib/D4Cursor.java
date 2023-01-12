@@ -7,15 +7,7 @@ package dap4.dap4lib;
 
 import dap4.core.dmr.*;
 import dap4.core.interfaces.DataCursor;
-import dap4.core.util.*;
-import dap4.dap4lib.util.Odometer;
-import dap4.dap4lib.util.OdometerFactory;
 import ucar.ma2.Array;
-import ucar.ma2.Index;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Wrap an Array representing a variables' data, where the variable

@@ -75,7 +75,7 @@ public class ArrayFloat extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  protected ArrayFloat(Index ima, float[] data) {
+  ArrayFloat(Index ima, float[] data) {
     super(DataType.FLOAT, ima);
     /*
      * replace by something better

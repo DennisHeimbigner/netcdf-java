@@ -92,7 +92,7 @@ public class ArrayObject extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store. if null, allocate
    */
-  public ArrayObject(DataType dtype, Class elementType, boolean isVlen, Index ima, Object[] data) {
+  ArrayObject(DataType dtype, Class elementType, boolean isVlen, Index ima, Object[] data) {
     super(dtype, ima);
     this.elementType = elementType;
     this.isVlen = isVlen;

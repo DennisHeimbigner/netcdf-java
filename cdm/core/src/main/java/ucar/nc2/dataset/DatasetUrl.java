@@ -30,9 +30,9 @@ public class DatasetUrl {
   private static final String alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
   private static final String slashalpha = "\\/" + alpha;
 
-  private static final String[] FRAGPROTOCOLS = {"dap4", "d4ts", "dap2", "dods", "cdmremote", "thredds", "ncml"};
-  private static final ServiceType[] FRAGPROTOSVCTYPE = {ServiceType.DAP4, ServiceType.DAP4, ServiceType.OPENDAP,
-      ServiceType.OPENDAP, ServiceType.THREDDS, ServiceType.THREDDS, ServiceType.NCML};
+  private static final String[] FRAGPROTOCOLS = {"dap4", "dap2", "dods", "cdmremote", "thredds", "ncml"};
+  private static final ServiceType[] FRAGPROTOSVCTYPE = {ServiceType.DAP4, ServiceType.OPENDAP, ServiceType.OPENDAP,
+      ServiceType.THREDDS, ServiceType.THREDDS, ServiceType.NCML};
 
   /**
    * Return the set of leading protocols for a url; may be more than one.

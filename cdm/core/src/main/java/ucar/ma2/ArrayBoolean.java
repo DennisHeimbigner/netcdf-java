@@ -73,7 +73,7 @@ public class ArrayBoolean extends Array {
    * @param ima use this IndexArray as the index
    * @param data use this as the backing store
    */
-  protected ArrayBoolean(Index ima, boolean[] data) {
+  ArrayBoolean(Index ima, boolean[] data) {
     super(DataType.BOOLEAN, ima);
     /*
      * replace by something better
