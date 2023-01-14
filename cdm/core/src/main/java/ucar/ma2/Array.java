@@ -640,7 +640,8 @@ public abstract class Array {
     origin[dim] = value;
     shape[dim] = 1;
     try {
-      return sectionNoReduce(origin, shape, null).reduce(dim); // preserve other dim 1
+      Array nra = sectionNoReduce(origin, shape, null);
+      return nra.reduce(dim); // preserve other dim 1
     } catch (InvalidRangeException e) {
       throw new IllegalArgumentException();
     }
@@ -912,7 +913,8 @@ public abstract class Array {
    * @return the new Array
    */
   public Array reduce(int dim) {
-    return createView(indexCalc.reduce(dim));
+    Index ix = indexCalc.reduce(dim);
+    return createView(ix);
   }
 
   //////////////////////////////////////////////////////////////
