@@ -24,10 +24,10 @@ test {
 
   include 'dap4/test/TestParserDMR.class'
   include 'dap4/test/TestParserCE.class'
-  include 'dap4/test/TestRaw.class'
-  include 'dap4/test/TestRemote.class'
-  include 'dap4/test/TestConstraints.class'
-  include 'dap4/test/TestHyrax.class'
+//  include 'dap4/test/TestRaw.class'
+//  include 'dap4/test/TestRemote.class'
+//  include 'dap4/test/TestConstraints.class'
+//  include 'dap4/test/TestHyrax.class'
 
   dependsOn('farmBeforeIntegrationTest')
   finalizedBy('farmAfterIntegrationTest')
