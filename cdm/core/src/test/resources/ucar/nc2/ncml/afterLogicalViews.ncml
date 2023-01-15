@@ -5,7 +5,7 @@
     </variable>
     
     <variable name="slice">
-        <logicalSlice dimName="a" extent="1" />
+        <logicalSlice dimName="a" index="1" />
     </variable>
     
     <variable name="reduce">

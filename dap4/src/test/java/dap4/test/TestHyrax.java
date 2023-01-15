@@ -142,7 +142,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   @Before
   public void setup() {
     // Set any properties
-    props.prop_baseline = true;
+    //props.prop_baseline = true;
     // props.prop_visual = true;
     super.setup();
   }
