@@ -159,13 +159,13 @@ kg m**-2
 ......................
 154
 GIVRAGE
-Freezing risk extent
+Freezing risk index
 g Kg**-1
 g Kg**-1
 ......................
 155
 GIVRAGE_VV
-Freezing risk extent as regards vert.veloc
+Freezing risk index as regards vert.veloc
 g Kg**-1
 g Kg**-1
 ......................

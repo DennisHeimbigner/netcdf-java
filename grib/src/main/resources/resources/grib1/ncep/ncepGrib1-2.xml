@@ -119,7 +119,7 @@
   </parameter>
   <parameter code="24">
     <shortName>PLI</shortName>
-    <description>Parcel lifted extent (to 500 hPa)</description>
+    <description>Parcel lifted index (to 500 hPa)</description>
     <units>K</units>
   </parameter>
   <parameter code="25">
@@ -384,7 +384,7 @@
   </parameter>
   <parameter code="77">
     <shortName>BLI</shortName>
-    <description>Best lifted extent (to 500 hPa)</description>
+    <description>Best lifted index (to 500 hPa)</description>
     <units>K</units>
   </parameter>
   <parameter code="78">
@@ -654,22 +654,22 @@
   </parameter>
   <parameter code="131">
     <shortName>LFTX</shortName>
-    <description>Surface lifted extent</description>
+    <description>Surface lifted index</description>
     <units>K</units>
   </parameter>
   <parameter code="132">
     <shortName>4LFTX</shortName>
-    <description>Best (4 layer) lifted extent</description>
+    <description>Best (4 layer) lifted index</description>
     <units>K</units>
   </parameter>
   <parameter code="133">
     <shortName>KX</shortName>
-    <description>K extent</description>
+    <description>K index</description>
     <units>K</units>
   </parameter>
   <parameter code="134">
     <shortName>SX</shortName>
-    <description>Sweat extent</description>
+    <description>Sweat index</description>
     <units>K</units>
   </parameter>
   <parameter code="135">
@@ -1009,7 +1009,7 @@
   </parameter>
   <parameter code="202">
     <shortName>CWDI</shortName>
-    <description>Convective weather detection extent</description>
+    <description>Convective weather detection index</description>
     <units>non-dim</units>
   </parameter>
   <parameter code="203">
@@ -1029,7 +1029,7 @@
   </parameter>
   <parameter code="206">
     <shortName>UVI</shortName>
-    <description>Ultra violet extent (1 hour integration centered at solar noon)</description>
+    <description>Ultra violet index (1 hour integration centered at solar noon)</description>
     <units>W/m2</units>
   </parameter>
   <parameter code="207">
@@ -1089,7 +1089,7 @@
   </parameter>
   <parameter code="218">
     <shortName>PREIX</shortName>
-    <description>Precipitation extent(0.0-1.00) (see note)</description>
+    <description>Precipitation index(0.0-1.00) (see note)</description>
     <units>fraction</units>
   </parameter>
   <parameter code="219">

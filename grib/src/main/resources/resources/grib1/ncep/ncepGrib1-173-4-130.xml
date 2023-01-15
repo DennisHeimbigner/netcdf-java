@@ -165,12 +165,12 @@
     <parameter code="224">
         <shortName>SOTYP</shortName>
         <description>Soil type</description>
-        <units>extent</units>
+        <units>index</units>
     </parameter>
     <parameter code="225">
         <shortName>VGTYP</shortName>
         <description>Vegetation type</description>
-        <units>extent</units>
+        <units>index</units>
     </parameter>
     <parameter code="228">
         <shortName>PEVAP</shortName>

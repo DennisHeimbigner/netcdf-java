@@ -15,7 +15,7 @@ for i in range(5,len(tab)):
     unit = ""
     # get new line from table
     line = tab[i]
-    # j is the extent into the string
+    # j is the index into the string
     j = 0
     if ((line != "\n") and (line[0] !="#")):
         entry = 0

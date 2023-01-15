@@ -4,7 +4,7 @@
   <title>Quality Value Associated with Parameter</title>
   <source>https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_table4-16.shtml</source>
   <parameter code="0">
-    <description>Confidence extent (see Note 2)</description>
+    <description>Confidence index (see Note 2)</description>
   </parameter>
   <parameter code="1">
     <description>Quality indicator (see Note 3 and see Code Table 244)</description>

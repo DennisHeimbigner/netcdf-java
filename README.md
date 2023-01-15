@@ -24,7 +24,7 @@ You can obtain a copy of the latest released version of netCDF-Java software fro
 
 More documentation can be found at
 
-* https://docs.unidata.ucar.edu/netcdf-java/current/userguide/extent.html
+* https://docs.unidata.ucar.edu/netcdf-java/current/userguide/index.html
 
 A mailing list, netcdf-java@unidata.ucar.edu, exists for discussion of all things netCDF-Java/CDM including announcements about netCDF-Java/CDM bugs, fixes, enhancements, and releases.
 For information about how to subscribe, see the "Subscribe" link on this page
@@ -74,7 +74,7 @@ netCDF-Java is released under the BSD-3 licence, which can be found [here](https
 
 Furthermore, this project includes code from third-party open-source software components:
 * [Gretty](https://github.com/akhikhl/gretty): for details, see `buildSrc/README.md`
-* [ERDDAP](https://coastwatch.pfeg.noaa.gov/erddap/extent.html): for details, see `waterml/README.md`
+* [ERDDAP](https://coastwatch.pfeg.noaa.gov/erddap/index.html): for details, see `waterml/README.md`
 * [JUnit](https://github.com/junit-team/junit4): for details, see `testUtil/README.md`
 
 Each of these software components have their own license.

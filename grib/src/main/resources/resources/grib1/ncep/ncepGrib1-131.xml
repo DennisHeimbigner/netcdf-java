@@ -14,12 +14,12 @@
   </parameter>
   <parameter code="131">
     <shortName>LFTX</shortName>
-    <description>Surface lifted extent</description>
+    <description>Surface lifted index</description>
     <units>K</units>
   </parameter>
   <parameter code="132">
     <shortName>4LFTX</shortName>
-    <description>Best (4-layer) lifted extent</description>
+    <description>Best (4-layer) lifted index</description>
     <units>K</units>
   </parameter>
   <parameter code="134">
@@ -254,7 +254,7 @@
   </parameter>
   <parameter code="182">
     <shortName>LAI</shortName>
-    <description>Leaf area extent (0-9)</description>
+    <description>Leaf area index (0-9)</description>
     <units>non-dim</units>
   </parameter>
   <parameter code="183">
@@ -420,7 +420,7 @@
   <parameter code="222">
     <shortName>SLTYP</shortName>
     <description>Surface slope type</description>
-    <units>extent</units>
+    <units>index</units>
   </parameter>
   <parameter code="223">
     <shortName>CNWAT</shortName>
@@ -430,12 +430,12 @@
   <parameter code="224">
     <shortName>SOTYP</shortName>
     <description>Soil type</description>
-    <units>extent</units>
+    <units>index</units>
   </parameter>
   <parameter code="225">
     <shortName>VGTYP</shortName>
     <description>Vegetation type</description>
-    <units>extent</units>
+    <units>index</units>
   </parameter>
   <parameter code="226">
     <shortName>BMIXL</shortName>

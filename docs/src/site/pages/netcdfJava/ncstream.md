@@ -11,7 +11,7 @@ NetCDF Streaming Format (ncstream) is a write-optimized encoding of CDM datasets
 
 ### Design Goals
 * Experiment with our own on-the-wire protocol to rapidly explore new ideas for remote data access.
-* Experiment with ways to optimize subset extraction of large datasets, especially for the case when the subset is specified in coordinate space rather than extent space.
+* Experiment with ways to optimize subset extraction of large datasets, especially for the case when the subset is specified in coordinate space rather than index space.
 * Must be easy to read ncstream and write netCDF-3 or netCDF-4 files.
 & The information content / data model of ncstream is identical to CDM. So ncstream is an alternate encoding of CDM datasets.
 

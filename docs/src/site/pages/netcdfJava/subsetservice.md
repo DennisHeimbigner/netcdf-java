@@ -22,7 +22,7 @@ Please note that the interface described here is still a prototype, and subject 
 * [Reference](#reference)
 
 ## Overview
-The NetCDF Subset Service (NCSS) is a web service for subsetting CDM scientific datasets. The subsetting is specified using earth coordinates, such as lat/lon or projection coordinates bounding boxes and date ranges, rather than extent ranges that refer to the underlying data arrays. The data arrays are subsetted but not resampled or reprojected, and preserve the resolution and accuracy of the original dataset.
+The NetCDF Subset Service (NCSS) is a web service for subsetting CDM scientific datasets. The subsetting is specified using earth coordinates, such as lat/lon or projection coordinates bounding boxes and date ranges, rather than index ranges that refer to the underlying data arrays. The data arrays are subsetted but not resampled or reprojected, and preserve the resolution and accuracy of the original dataset.
 
 As of version 4.4.0 of TDS, NCSS supports spatial and temporal subsetting on collections of grids, stations and points. A Dataset is described by a Dataset Description XML document, which describes the dataset in enough detail to enable a programmatic client to form valid data requests.
 
@@ -53,7 +53,7 @@ Examples:
 Each dataset has an XML document called the Dataset Description Document. These are intended to perform the same function as OGC GetCapabilities or Atom Introspection, that is, provide clients with the necessary information to formulate a valid request and send it to the server. The content of these documents is still evolving.
 
 ### Grid Dataset
-A Grid Dataset is a collection of Grids which have horizontal (x,y) coordinates, and optional vertical and time coordinates. Grid data points next to each other in extent space are next to each other in coordinate space.
+A Grid Dataset is a collection of Grids which have horizontal (x,y) coordinates, and optional vertical and time coordinates. Grid data points next to each other in index space are next to each other in coordinate space.
 
 Example gridDataset document (offline example)
 

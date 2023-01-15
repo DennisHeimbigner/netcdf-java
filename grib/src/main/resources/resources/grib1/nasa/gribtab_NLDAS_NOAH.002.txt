@@ -19,7 +19,7 @@
 162:ARAIN:Liquid precipitation (rainfall) [kg/m^2]
 179:ACOND:Aerodynamic conductance [m/s]
 181:CCOND:Canopy conductance [m/s]
-182:LAI:Leaf area extent (0-9) [unitless]
+182:LAI:Leaf area index (0-9) [unitless]
 198:SBSNO:Sublimation (evaporation from snow) [W/m^2]
 199:EVBS:Direct evaporation from bare soil [W/m^2]
 200:EVCW:Canopy water evaporation [W/m^2]

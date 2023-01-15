@@ -5764,7 +5764,7 @@
 <ClassNo>07</ClassNo>
 <ClassName_E>Location (vertical)</ClassName_E>
 <FXY>007036</FXY>
-<ElementName_E>Level extent of z</ElementName_E>
+<ElementName_E>Level index of z</ElementName_E>
 <BUFR_Unit>Numeric</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
 <BUFR_ReferenceValue>0</BUFR_ReferenceValue>
@@ -7960,7 +7960,7 @@
 <ClassNo>11</ClassNo>
 <ClassName_E>Wind and turbulence</ClassName_E>
 <FXY>011037</FXY>
-<ElementName_E>Turbulence extent</ElementName_E>
+<ElementName_E>Turbulence index</ElementName_E>
 <BUFR_Unit>Code table</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
 <BUFR_ReferenceValue>0</BUFR_ReferenceValue>
@@ -10348,7 +10348,7 @@
 <ClassNo>13</ClassNo>
 <ClassName_E>Hydrographic and hydrological elements</ClassName_E>
 <FXY>013042</FXY>
-<ElementName_E>Parcel lifted extent (to 500 hPa)</ElementName_E>
+<ElementName_E>Parcel lifted index (to 500 hPa)</ElementName_E>
 <Note_E>(see Notes 3 and 4)#BUFR_16_0_0_TableB.doc#BC_Cls13</Note_E>
 <BUFR_Unit>K</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
@@ -10364,7 +10364,7 @@
 <ClassNo>13</ClassNo>
 <ClassName_E>Hydrographic and hydrological elements</ClassName_E>
 <FXY>013043</FXY>
-<ElementName_E>Best lifted extent (to 500 hPa)</ElementName_E>
+<ElementName_E>Best lifted index (to 500 hPa)</ElementName_E>
 <Note_E>(see Note 3 and 4)#BUFR_16_0_0_TableB.doc#BC_Cls13</Note_E>
 <BUFR_Unit>K</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
@@ -10380,7 +10380,7 @@
 <ClassNo>13</ClassNo>
 <ClassName_E>Hydrographic and hydrological elements</ClassName_E>
 <FXY>013044</FXY>
-<ElementName_E>K extent</ElementName_E>
+<ElementName_E>K index</ElementName_E>
 <BUFR_Unit>K</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
 <BUFR_ReferenceValue>-30</BUFR_ReferenceValue>
@@ -10395,7 +10395,7 @@
 <ClassNo>13</ClassNo>
 <ClassName_E>Hydrographic and hydrological elements</ClassName_E>
 <FXY>013045</FXY>
-<ElementName_E>KO extent</ElementName_E>
+<ElementName_E>KO index</ElementName_E>
 <BUFR_Unit>K</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
 <BUFR_ReferenceValue>-30</BUFR_ReferenceValue>
@@ -10425,7 +10425,7 @@
 <ClassNo>13</ClassNo>
 <ClassName_E>Hydrographic and hydrological elements</ClassName_E>
 <FXY>013047</FXY>
-<ElementName_E>Modified Showalter stability extent</ElementName_E>
+<ElementName_E>Modified Showalter stability index</ElementName_E>
 <Note_E>(see Note 7)#BUFR_16_0_0_TableB.doc#BC_Cls13</Note_E>
 <BUFR_Unit>K</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
@@ -11254,7 +11254,7 @@
 <ClassNo>14</ClassNo>
 <ClassName_E>Radiation and radiance</ClassName_E>
 <FXY>014055</FXY>
-<ElementName_E>Solar activity extent</ElementName_E>
+<ElementName_E>Solar activity index</ElementName_E>
 <BUFR_Unit>Numeric</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
 <BUFR_ReferenceValue>-32768</BUFR_ReferenceValue>
@@ -11681,7 +11681,7 @@
 <ClassNo>15</ClassNo>
 <ClassName_E>Physical/chemical constituents</ClassName_E>
 <FXY>015030</FXY>
-<ElementName_E>Aerosol contamination extent</ElementName_E>
+<ElementName_E>Aerosol contamination index</ElementName_E>
 <Note_E>(see Note 6)#BUFR_16_0_0_TableB.doc#BC_Cls15</Note_E>
 <BUFR_Unit>Numeric</BUFR_Unit>
 <BUFR_Scale>2</BUFR_Scale>
@@ -13013,7 +13013,7 @@
 <ClassNo>20</ClassNo>
 <ClassName_E>Observed phenomena</ClassName_E>
 <FXY>020050</FXY>
-<ElementName_E>Cloud extent</ElementName_E>
+<ElementName_E>Cloud index</ElementName_E>
 <BUFR_Unit>Code table</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
 <BUFR_ReferenceValue>0</BUFR_ReferenceValue>
@@ -15063,7 +15063,7 @@
 <ClassNo>21</ClassNo>
 <ClassName_E>Radar data</ClassName_E>
 <FXY>021121</FXY>
-<ElementName_E>SEAWINDS NOF rain extent</ElementName_E>
+<ElementName_E>SEAWINDS NOF rain index</ElementName_E>
 <Note_E>*#BUFR_16_0_0_TableB.doc#BC_Cls21a</Note_E>
 <BUFR_Unit>Numeric</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
@@ -19232,7 +19232,7 @@
 <ClassNo>25</ClassNo>
 <ClassName_E>Processing information</ClassName_E>
 <FXY>025091</FXY>
-<ElementName_E>Structure constant of the refraction extent (Cn2)</ElementName_E>
+<ElementName_E>Structure constant of the refraction index (Cn2)</ElementName_E>
 <BUFR_Unit>dB</BUFR_Unit>
 <BUFR_Scale>3</BUFR_Scale>
 <BUFR_ReferenceValue>-18192</BUFR_ReferenceValue>
@@ -21284,7 +21284,7 @@
 <ClassNo>33</ClassNo>
 <ClassName_E>Quality information</ClassName_E>
 <FXY>033062</FXY>
-<ElementName_E>GqisQualIndexLoc - indicator for geometric quality extent</ElementName_E>
+<ElementName_E>GqisQualIndexLoc - indicator for geometric quality index</ElementName_E>
 <BUFR_Unit>%</BUFR_Unit>
 <BUFR_Scale>0</BUFR_Scale>
 <BUFR_ReferenceValue>0</BUFR_ReferenceValue>
@@ -21929,7 +21929,7 @@
 <ClassNo>40</ClassNo>
 <ClassName_E>Satellite data</ClassName_E>
 <FXY>040015</FXY>
-<ElementName_E>Normalised differential vegetation extent (NDVI)</ElementName_E>
+<ElementName_E>Normalised differential vegetation index (NDVI)</ElementName_E>
 <BUFR_Unit>Numeric</BUFR_Unit>
 <BUFR_Scale>2</BUFR_Scale>
 <BUFR_ReferenceValue>-100</BUFR_ReferenceValue>

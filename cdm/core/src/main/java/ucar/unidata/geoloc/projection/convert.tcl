@@ -82,8 +82,8 @@ set loopTemplate {
      * @param to       resulting array of projection coordinates, 
      *                 where to[0][i], to[1][i] is the (x,y) coordinate 
      *                 of the ith point
-     * @param latIndex extent of latitude in "from"
-     * @param lonIndex extent of longitude in "from"
+     * @param latIndex index of latitude in "from"
+     * @param lonIndex index of longitude in "from"
      *
      * @return the "to" array.
      */

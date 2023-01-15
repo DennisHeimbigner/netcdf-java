@@ -67,7 +67,7 @@ char *centerLookup (unsigned short int center)
       {22, "ACMAD"},
       {23, "Mozambique"},
       {24, "Pretoria"},
-      {25, "La Rï¿½union"},
+      {25, "La Réunion"},
       {26, "Khabarovsk"},
       {27, ") Khabarovsk"},
       {28, "New Delhi"},
@@ -124,8 +124,8 @@ char *centerLookup (unsigned short int center)
       {79, ") Offenbach"},
       {80, "Rome"},
       {81, ") Rome"},
-      {82, "Norrkï¿½ping"},
-      {83, ") Norrkï¿½ping"},
+      {82, "Norrköping"},
+      {83, ") Norrköping"},
       {84, "Toulouse"},
       {85, "Toulouse"},
       {86, "Helsinki"},
@@ -257,7 +257,7 @@ char *centerLookup (unsigned short int center)
       {212, "Lisboa"},
       {213, "Reykiavik"},
       {214, "Madrid"},
-      {215, "Zï¿½rich"},
+      {215, "Zürich"},
       {216, "Service ARGOS Toulouse"},
       {217, "Bratislava"},
       {218, "Budapest"},
@@ -393,7 +393,7 @@ char *subCenterLookup (unsigned short int center,
       {74, 27, "Nordic Commission of Geodesy (Norway)"},
       {74, 28, "Nordic Commission of Geodesy (Sweden)"},
       {74, 29, "Institute de Geodesie National (France)"},
-      {74, 30, "Bundesamt fï¿½r Kartographie und Geodï¿½sie (Germany)"},
+      {74, 30, "Bundesamt für Kartographie und Geodäsie (Germany)"},
       {74, 31, "Institute of Engineering Satellite Surveying and Geodesy (U.K.)"},
       {254, 10, "Tromso (Norway)"}, {254, 10, "Maspalomas (Spain)"},
       {254, 30, "Kangerlussuaq (Greenland)"}, {254, 40, "Edmonton (Canada)"},
@@ -587,7 +587,7 @@ GRIB2ParmTable MeteoTemp[] = {
    /* 10 */ {"LHTFL", "Latent heat net flux", "W/(m^2)", UC_NONE},
    /* 11 */ {"SHTFL", "Sensible heat net flux", "W/(m^2)", UC_NONE},
             /* NDFD */
-   /* 12 */ {"HEATX", "Heat extent", "K", UC_K2F},
+   /* 12 */ {"HEATX", "Heat index", "K", UC_K2F},
             /* NDFD */
    /* 13 */ {"WCF", "Wind chill factor", "K", UC_K2F},
    /* 14 */ {"MINDPD", "Minimum dew point depression", "K", UC_K2F},
@@ -792,8 +792,8 @@ GRIB2ParmTable MeteoShortRadiate[] = {
 /* 47 */   {"", "Reserved", "-", UC_NONE},
 /* 48 */   {"", "Reserved", "-", UC_NONE},
 /* 49 */   {"", "Reserved", "-", UC_NONE},
-/* 50 */   {"UVIUCS", "UV extent (under clear sky)", "Numeric", UC_NONE},
-/* 51 */   {"UVI", "UV extent", "W/(m^2)", UC_UVIndex},
+/* 50 */   {"UVIUCS", "UV index (under clear sky)", "Numeric", UC_NONE},
+/* 51 */   {"UVI", "UV index", "W/(m^2)", UC_UVIndex},
 };
 
 /* GRIB2 Code table 4.2 : 0.5 */
@@ -858,18 +858,18 @@ GRIB2ParmTable MeteoCloud[] = {
 
 /* GRIB2 Code table 4.2 : 0.7 */
 GRIB2ParmTable MeteoStability[] = {
-   /* 0 */ {"PLI", "Parcel lifted extent (to 500 hPa)", "K", UC_NONE},
-   /* 1 */ {"BLI", "Best lifted extent (to 500 hPa)", "K", UC_NONE},
-   /* 2 */ {"KX", "K extent", "K", UC_NONE},
-   /* 3 */ {"KOX", "KO extent", "K", UC_NONE},
-   /* 4 */ {"TOTALX", "Total totals extent", "K", UC_NONE},
-   /* 5 */ {"SX", "Sweat extent", "numeric", UC_NONE},
+   /* 0 */ {"PLI", "Parcel lifted index (to 500 hPa)", "K", UC_NONE},
+   /* 1 */ {"BLI", "Best lifted index (to 500 hPa)", "K", UC_NONE},
+   /* 2 */ {"KX", "K index", "K", UC_NONE},
+   /* 3 */ {"KOX", "KO index", "K", UC_NONE},
+   /* 4 */ {"TOTALX", "Total totals index", "K", UC_NONE},
+   /* 5 */ {"SX", "Sweat index", "numeric", UC_NONE},
    /* 6 */ {"CAPE", "Convective available potential energy", "J/kg", UC_NONE},
    /* 7 */ {"CIN", "Convective inhibition", "J/kg", UC_NONE},
    /* 8 */ {"HLCY", "Storm relative helicity", "J/kg", UC_NONE},
-   /* 9 */ {"EHLX", "Energy helicity extent", "numeric", UC_NONE},
-/* 10 */   {"LFTX", "Surface lifted extent", "K", UC_NONE},
-/* 11 */   {"4LFTX", "Best (4-layer) lifted extent", "K", UC_NONE},
+   /* 9 */ {"EHLX", "Energy helicity index", "numeric", UC_NONE},
+/* 10 */   {"LFTX", "Surface lifted index", "K", UC_NONE},
+/* 11 */   {"4LFTX", "Best (4-layer) lifted index", "K", UC_NONE},
 /* 12 */   {"RI", "Richardson number", "-", UC_NONE},
 };
 
@@ -1199,7 +1199,7 @@ GRIB2ParmTable SpaceImage[] = {
    /* 1 */ {"SALBEDO", "Scaled albedo", "Numeric", UC_NONE},
    /* 2 */ {"SBTMP", "Scaled brightness temperature", "Numeric", UC_NONE},
    /* 3 */ {"SPWAT", "Scaled precipitable water", "Numeric", UC_NONE},
-   /* 4 */ {"SLFTI", "Scaled lifted extent", "Numeric", UC_NONE},
+   /* 4 */ {"SLFTI", "Scaled lifted index", "Numeric", UC_NONE},
    /* 5 */ {"SCTPRES", "Scaled cloud top pressure", "Numeric", UC_NONE},
    /* 6 */ {"SSTMP", "Scaled skin temperature", "Numeric", UC_NONE},
    /* 7 */ {"CLOUDM", "Cloud mask", "0=clear over water; 1=clear over land; "
@@ -1500,9 +1500,9 @@ GRIB2LocalTable NDFD_LclTable[] = {
    /* grandfather'ed in a NDFD choice for POP. */
    /* 2 */ {0, 10, 8, "PoP12", "Prob of 0.01 In. of Precip", "%", UC_NONE},
            {0, 13, 194, "smokes", "Surface level smoke from fires",
-            "log10(ï¿½g/m^3)", UC_LOG10},
+            "log10(µg/m^3)", UC_LOG10},
            {0, 13, 195, "smokec", "Average vertical column smoke from fires",
-            "log10(ï¿½g/m^3)", UC_LOG10},
+            "log10(µg/m^3)", UC_LOG10},
    /* 3 */ {0, 14, 192, "O3MR", "Ozone Mixing Ratio", "kg/kg", UC_NONE},
    /* 4 */ {0, 14, 193, "OZCON", "Ozone Concentration", "PPB", UC_NONE},
    /* Arthur adopted NCEP ozone values from NCEP local table to NDFD local tables. (11/14/2009) */
@@ -1696,14 +1696,14 @@ GRIB2LocalTable NCEP_LclTable[] = {
             {0, 7, 195, "CWDI", "Convective Weather Detection Index", "-", UC_NONE},
             {0, 7, 196, "UVI", "Ultra Violet Index", "W/(m^2)", UC_UVIndex},
             {0, 7, 197, "UPHL", "Updraft Helicity", "m^2/s^2", UC_NONE},
-            {0, 7, 198, "LAI", "Leaf area extent", "-", UC_NONE},
+            {0, 7, 198, "LAI", "Leaf area index", "-", UC_NONE},
 
-            {0, 13, 192, "PMTC", "Particulate matter (coarse)", "ï¿½g/m^3", UC_NONE},
-            {0, 13, 193, "PMTF", "Particulate matter (fine)", "ï¿½g/m^3", UC_NONE},
+            {0, 13, 192, "PMTC", "Particulate matter (coarse)", "µg/m^3", UC_NONE},
+            {0, 13, 193, "PMTF", "Particulate matter (fine)", "µg/m^3", UC_NONE},
             {0, 13, 194, "LPMTF", "Particulate matter (fine)",
-             "log10(ï¿½g/m^3)", UC_LOG10},
+             "log10(µg/m^3)", UC_LOG10},
             {0, 13, 195, "LIPMF", "Integrated column particulate matter " /* over-ride in the code based on surface */
-             "(fine)", "log10(ï¿½g/m^3)", UC_LOG10},
+             "(fine)", "log10(µg/m^3)", UC_LOG10},
 
    /* 42 */ {0, 14, 192, "O3MR", "Ozone Mixing Ratio", "kg/kg", UC_NONE},
    /* 43 */ {0, 14, 193, "OZCON", "Ozone Concentration", "PPB", UC_NONE},
@@ -1755,7 +1755,7 @@ GRIB2LocalTable NCEP_LclTable[] = {
             {0, 19, 217, "SIPD", "Supercooled Large Droplet Icing",
                          "0=None; 1=Light; 2=Moderate; 3=Severe; 4=Trace; 5=Heavy; 255=missing", UC_NONE},
             {0, 19, 218, "EPSR", "Radiative emissivity", "", UC_NONE},
-            {0, 19, 219, "TPFI", "Turbulence potential forecast extent", "-", UC_NONE},
+            {0, 19, 219, "TPFI", "Turbulence potential forecast index", "-", UC_NONE},
             {0, 19, 220, "", "Reserved", "-", UC_NONE},
             {0, 19, 221, "", "Reserved", "-", UC_NONE},
             {0, 19, 222, "", "Reserved", "-", UC_NONE},
@@ -1844,7 +1844,7 @@ GRIB2LocalTable NCEP_LclTable[] = {
             {2, 0, 214, "GWREC", "Groundwater recharge", "kg/m^2", UC_NONE},
             {2, 0, 215, "QREC", "Flood plain recharge", "kg/m^2", UC_NONE},
             {2, 0, 216, "SFCRH", "Roughness length for heat", "m", UC_NONE},
-            {2, 0, 217, "NDVI", "Normalized difference vegetation extent", "-", UC_NONE},
+            {2, 0, 217, "NDVI", "Normalized difference vegetation index", "-", UC_NONE},
             {2, 0, 218, "LANDN", "Land-sea coverage (nearest neighbor)", "0=sea; 1=land", UC_NONE},
             {2, 0, 219, "AMIXL", "Asymptotic mixing length scale", "m", UC_NONE},
             {2, 0, 220, "WVINC", "Water vapor added by precip assimilation", "kg/m^2", UC_NONE},
@@ -2565,8 +2565,8 @@ static void ElemNameNorm (uShort2 center, uShort2 subcenter, int prodType,
                   strcpy (*name, "dusts");
                   *comment = (char *) malloc (strlen ("Surface level dust") + 1);
                   strcpy (*comment, "Surface level dust");
-                  *unit = (char *) malloc (strlen ("[log10(ï¿½g/m^3)]") + 1);
-                  strcpy (*unit, "[log10(ï¿½g/m^3)]");
+                  *unit = (char *) malloc (strlen ("[log10(µg/m^3)]") + 1);
+                  strcpy (*unit, "[log10(µg/m^3)]");
                   *convert = UC_LOG10;
                   return;
                } else if ((delt <= 5000) && (delt >= -5000)) {
@@ -2574,8 +2574,8 @@ static void ElemNameNorm (uShort2 center, uShort2 subcenter, int prodType,
                   strcpy (*name, "dustc");
                   *comment = (char *) malloc (strlen ("Average vertical column dust") + 1);
                   strcpy (*comment, "Average vertical column dust");
-                  *unit = (char *) malloc (strlen ("[log10(ï¿½g/m^3)]") + 1);
-                  strcpy (*unit, "[log10(ï¿½g/m^3)]");
+                  *unit = (char *) malloc (strlen ("[log10(µg/m^3)]") + 1);
+                  strcpy (*unit, "[log10(µg/m^3)]");
                   *convert = UC_LOG10;
                   return;
                }
@@ -2588,8 +2588,8 @@ static void ElemNameNorm (uShort2 center, uShort2 subcenter, int prodType,
                   strcpy (*name, "smokes");
                   *comment = (char *) malloc (strlen ("Surface level smoke from fires") + 1);
                   strcpy (*comment, "Surface level smoke from fires");
-                  *unit = (char *) malloc (strlen ("[log10(ï¿½g/m^3)]") + 1);
-                  strcpy (*unit, "[log10(ï¿½g/m^3)]");
+                  *unit = (char *) malloc (strlen ("[log10(µg/m^3)]") + 1);
+                  strcpy (*unit, "[log10(µg/m^3)]");
                   *convert = UC_LOG10;
                   return;
                } else if ((delt <= 5000) && (delt >= -5000)) {
@@ -2597,8 +2597,8 @@ static void ElemNameNorm (uShort2 center, uShort2 subcenter, int prodType,
                   strcpy (*name, "smokec");
                   *comment = (char *) malloc (strlen ("Average vertical column smoke from fires") + 1);
                   strcpy (*comment, "Average vertical column smoke from fires");
-                  *unit = (char *) malloc (strlen ("[log10(ï¿½g/m^3)]") + 1);
-                  strcpy (*unit, "[log10(ï¿½g/m^3)]");
+                  *unit = (char *) malloc (strlen ("[log10(µg/m^3)]") + 1);
+                  strcpy (*unit, "[log10(µg/m^3)]");
                   *convert = UC_LOG10;
                   return;
                }
@@ -2867,7 +2867,7 @@ static void ParseElemName2 (int prodType, int templat, int cat, int subcat,
                strcpy (unit, "[K]");
                return;
             case TEMP_HEAT: * 12 *
-               strcpy (comment, "Heat extent [K]");
+               strcpy (comment, "Heat index [K]");
                strcpy (name, "HeatIndex");
                strcpy (unit, "[K]");
                return;
@@ -3059,7 +3059,7 @@ int ComputeUnit (int convert, char *origName, sChar f_unit, double *unitM,
             return 0;
          }
          break;
-      case UC_UVIndex: /* multiply by Watts/ m**2 by 40 for the UV extent. */
+      case UC_UVIndex: /* multiply by Watts/ m**2 by 40 for the UV index. */
          if (f_unit == 1) {
             strcpy (name, "[UVI]");
             *unitM = 40;
@@ -3243,7 +3243,7 @@ GRIB2SurfTable Surface[] = {
 };
 
 typedef struct {
-   int extent;
+   int index;
    GRIB2SurfTable surface;
 } GRIB2LocalSurface;
 
@@ -3296,8 +3296,8 @@ GRIB2LocalSurface NCEP_Surface[] = {
  *   To figure out the entry in the "Surface" table (used for Code Table 4.5)
  *
  * ARGUMENTS
- *          i = The original extent to look up. (Input)
- * f_reserved = If the extent is a "reserved" extent (Output)
+ *          i = The original index to look up. (Input)
+ * f_reserved = If the index is a "reserved" index (Output)
  *
  * FILES/DATABASES: None
  *
@@ -3318,7 +3318,7 @@ GRIB2SurfTable Table45Index (int i, int *f_reserved, uShort2 center,
    *f_reserved = 1;
    if ((i > 255) || (i < 0)) {
 #ifdef DEBUG
-      printf ("Surface extent is out of 0..255 range?\n");
+      printf ("Surface index is out of 0..255 range?\n");
 #endif
       return Surface[0];
    }
@@ -3328,7 +3328,7 @@ GRIB2SurfTable Table45Index (int i, int *f_reserved, uShort2 center,
       if (center == 7) {
          for (j = 0; j < sizeof (NCEP_Surface) / sizeof (NCEP_Surface[0]);
               j++) {
-            if (i == NCEP_Surface[j].extent) {
+            if (i == NCEP_Surface[j].index) {
                *f_reserved = 0;
                return (NCEP_Surface[j].surface);
             }
@@ -3386,7 +3386,7 @@ void ParseLevelName (unsigned short int center, unsigned short int subcenter,
    GRIB2SurfTable surf = Table45Index (surfType, &f_reserved, center,
                                        subcenter);
 
-   /* Check if extent is defined... 191 is undefined. */
+   /* Check if index is defined... 191 is undefined. */
    free (*shortLevelName);
    *shortLevelName = NULL;
    free (*longLevelName);

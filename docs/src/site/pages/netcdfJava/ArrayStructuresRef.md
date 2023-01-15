@@ -52,10 +52,10 @@ The most general method for accessing the data in a StructureArray is to iterate
 Another general way to access data in an ArrayStructure is to use
 
 ~~~
-    StructureData getStructureData(Index extent).
+    StructureData getStructureData(Index index).
 ~~~
 
-One can also obtain the StructureData using the record number of the StructureData. For the common case of one-dimensional Structures, the record number is the same as the extent:
+One can also obtain the StructureData using the record number of the StructureData. For the common case of one-dimensional Structures, the record number is the same as the index:
 
 ~~~
     public ucar.ma2.StructureData getStructureData(int recno);
@@ -296,11 +296,11 @@ Typically the data can be read from disk directly into a ByteBuffer, for example
 
 ArrayStructureBB calculates member offsets on demand. By default it assumes that each record is the same size. <b>_ucar.ma2.ArrayStructureBBpos_</b> relaxes this assumption by allowing you to pass in the starting positions in the ByteBuffer of each record.
 
-Member offsets must be the same for each record. However, more complex objects can be stored as an extent into a object heap list. For example, the object heap is used to store Strings, which are variable length arrays of UTF-16 charactors. The extent of the String in the list is stored (as a 4-byte integer) in the ByteBuffer instead of the String. The String itself is added using <b>_ArrayStructureBB.addObjectToHeap()_</b>, as in the following code:
+Member offsets must be the same for each record. However, more complex objects can be stored as an index into a object heap list. For example, the object heap is used to store Strings, which are variable length arrays of UTF-16 charactors. The index of the String in the list is stored (as a 4-byte integer) in the ByteBuffer instead of the String. The String itself is added using <b>_ArrayStructureBB.addObjectToHeap()_</b>, as in the following code:
 
 ~~~
   int heapIndex = arrayStructureBB.addObjectToHeap(stringData);   // add object into the Heap
-  arrayStructureBB.setInt(bbPos, heapIndex);                    // store the extent
+  arrayStructureBB.setInt(bbPos, heapIndex);                    // store the index
 ~~~
 
 or
@@ -439,12 +439,12 @@ Can be read like this:
 ~~~
  Variable v = ncfile.findVariable("soundings");
  ArrayStructure data = (ArrayStructure) v.read();       // read all of it
- StructureData sdata = data.getStructureData(extent);    // pick out one
+ StructureData sdata = data.getStructureData(index);    // pick out one
  String memberName = "temp";
  Array tempData = sdata.getArray(memberName);           // get the data for this member
  assert tempData instanceof ArrayFloat;                 // it will be a float array
  
- System.out.printf("the %d th record has %d elements for vlen member %s%n", extent, tempData.getSize(), memberName);
+ System.out.printf("the %d th record has %d elements for vlen member %s%n", index, tempData.getSize(), memberName);
 ~~~
 
 Or like this:

@@ -342,7 +342,7 @@ Table B STD |  0 | 14
   0-07-031 |   1 |       -4000 |  17 | m                 | HBMSL    ;     ; Height of barometer above mean sea level
   0-07-032 |   2 |           0 |  16 | m                 | HSALG    ;     ; Height of sensor above local ground (or deck of marine platform)
   0-07-033 |   1 |           0 |  12 | m                 | HSAWS    ;     ; Height of sensor above water surface
-  0-07-036 |   0 |           0 |  12 | Numeric           | LINZ     ;     ; Level extent of Z
+  0-07-036 |   0 |           0 |  12 | Numeric           | LINZ     ;     ; Level index of Z
   0-07-040 |   1 |    62000000 |  22 | m                 | IMPP     ;     ; Impact parameter
   0-07-061 |   2 |           0 |  14 | m                 | DBLS     ;     ; Depth below land surface
   0-07-062 |   1 |           0 |  17 | m                 | DBSS     ;     ; Depth below sea/water surface
@@ -480,7 +480,7 @@ Table B STD |  0 | 14
   0-11-034 |   1 |       -1024 |  11 | m s⁻¹             | VGVL     ;     ; Vertical gust velocity
   0-11-035 |   2 |       -8192 |  14 | m s⁻²             | VGAC     ;     ; Vertical gust acceleration
   0-11-036 |   1 |           0 |  10 | m s⁻¹             | MDEVG    ;     ; Maximum derived equivalent vertical gust speed
-  0-11-037 |   0 |           0 |   6 | Code table        | TRBXST   ;     ; Turbulence extent
+  0-11-037 |   0 |           0 |   6 | Code table        | TRBXST   ;     ; Turbulence index
   0-11-038 |   0 |           0 |   5 | Code table        | TOPEDR   ;     ; Time of occurrence of peak eddy dissipation rate
   0-11-039 |   0 |           0 |   6 | Code table        | XTOPEDR  ;     ; Extended time of occurrence of peak eddy dissipation rate
   0-11-040 |   1 |           0 |  12 | m s⁻¹             | MXWS     ;     ; Maximum wind speed (mean wind)
@@ -622,12 +622,12 @@ Table B STD |  0 | 14
   0-13-039 |   0 |           0 |   3 | Code table        | TERN     ;     ; Terrain type (ice/snow)
   0-13-040 |   0 |           0 |   4 | Code table        | SFLG     ;     ; Surface flag
   0-13-041 |   0 |           0 |   4 | Code table        | PGSC     ;     ; Pasquill-Gifford stability category
-  0-13-042 |   0 |         -20 |   6 | K                 | PLFTI    ;     ; Parcel lifted extent (to 500 hPa)
-  0-13-043 |   0 |         -20 |   6 | K                 | BLFTI    ;     ; Best lifted extent (to 500 hPa)
-  0-13-044 |   0 |         -30 |   8 | K                 | KIND     ;     ; K extent
-  0-13-045 |   0 |         -30 |   8 | K                 | KOIND    ;     ; KO extent
+  0-13-042 |   0 |         -20 |   6 | K                 | PLFTI    ;     ; Parcel lifted index (to 500 hPa)
+  0-13-043 |   0 |         -20 |   6 | K                 | BLFTI    ;     ; Best lifted index (to 500 hPa)
+  0-13-044 |   0 |         -30 |   8 | K                 | KIND     ;     ; K index
+  0-13-045 |   0 |         -30 |   8 | K                 | KOIND    ;     ; KO index
   0-13-046 |   0 |         -30 |   8 | K                 | MAXB     ;     ; Maximum buoyancy
-  0-13-047 |   0 |         -60 |   6 | K                 | STBS     ;     ; Modified Showalter stability extent
+  0-13-047 |   0 |         -60 |   6 | K                 | STBS     ;     ; Modified Showalter stability index
   0-13-048 |   1 |           0 |  10 | %                 | WFCN     ;     ; Water fraction
   0-13-051 |   0 |           0 |   4 | Code table        | FRGP     ;     ; Frequency group, precipitation
   0-13-052 |   1 |          -1 |  14 | kg m⁻²            | HIDP     ;     ; Highest daily amount of precipitation
@@ -691,7 +691,7 @@ Table B STD |  0 | 14
   0-14-048 |   0 |           0 |  31 | W m⁻² sr⁻¹ m      | SSDR     ;     ; Scaled standard deviation AVHRR radiance
   0-14-050 |   1 |           0 |  10 | %                 | EMMI     ;     ; Emissivity
   0-14-051 |  -3 |           0 |  14 | J m⁻²             | DRSOLH   ;     ; Direct solar radiation integrated over last hour
-  0-14-055 |   0 |      -32768 |  16 | Numeric           | SOAI     ;     ; Solar activity extent
+  0-14-055 |   0 |      -32768 |  16 | Numeric           | SOAI     ;     ; Solar activity index
   0-15-001 |   0 |           0 |  10 | DU                | OZON     ;     ; Total ozone
   0-15-002 |   2 |           0 |  10 | Numeric           | AIRM     ;     ; Air mass (slant path at 22 km)
   0-15-003 |   4 |           0 |   9 | Pa                | MOPP     ;     ; Measured ozone partial pressure (sounding)
@@ -707,7 +707,7 @@ Table B STD |  0 | 14
   0-15-025 |   0 |           0 |   4 | Code table        | TYPO     ;     ; Type of pollutant
   0-15-026 |   9 |           0 |   9 | mol mol⁻¹         | COPO     ;     ; Concentration of pollutant (mol mol-1)
   0-15-027 |   9 |           0 |  10 | kg m⁻³            | COPOPM   ;     ; Concentration of pollutant (kg m-3)
-  0-15-030 |   2 |       -1000 |  12 | Numeric           | ACIDX    ;     ; Aerosol contamination extent
+  0-15-030 |   2 |       -1000 |  12 | Numeric           | ACIDX    ;     ; Aerosol contamination index
   0-15-031 |   4 |       10000 |  15 | m                 | APDS     ;     ; Atmospheric path delay in satellite signal
   0-15-032 |   4 |           0 |  10 | m                 | APDE     ;     ; Estimated error in atmospheric path delay
   0-15-033 |   5 |      -10000 |  15 | m                 | PDDX     ;     ; Difference in path delays for limb views at extremes of scan
@@ -790,7 +790,7 @@ Table B STD |  0 | 14
   0-20-044 |   4 |           0 |   7 | kg m⁻³            | ALWC     ;     ; Average liquid water content
   0-20-045 |   0 |           0 |   2 | Code table        | SCLD     ;     ; Supercooled large droplet (SLD) conditions
   0-20-048 |   0 |           0 |   4 | Code table        | EVFE     ;     ; Evolution of feature
-  0-20-050 |   0 |           0 |   8 | Code table        | CLDI     ;     ; Cloud extent
+  0-20-050 |   0 |           0 |   8 | Code table        | CLDI     ;     ; Cloud index
   0-20-051 |   0 |           0 |   7 | %                 | LCLD     ;     ; Amount of low clouds
   0-20-052 |   0 |           0 |   7 | %                 | MCLD     ;     ; Amount of middle clouds
   0-20-053 |   0 |           0 |   7 | %                 | HCLD     ;     ; Amount of high clouds
@@ -894,7 +894,7 @@ Table B STD |  0 | 14
   0-21-118 |   2 |      -10000 |  14 | dB                | ACRS     ;     ; Attenuation correction on sigma-0
   0-21-119 |   0 |           0 |   6 | Code table        | WSGF     ;     ; Wind scatterometer geophysical model function
   0-21-120 |   3 |           0 |  10 | Numeric           | SPRR     ;     ; Probability of rain
-  0-21-121 |   0 |           0 |   8 | Numeric           | SNRI     ;     ; SEAWINDS NOF rain extent
+  0-21-121 |   0 |           0 |   8 | Numeric           | SNRI     ;     ; SEAWINDS NOF rain index
   0-21-122 |   2 |      -10000 |  14 | dB                | ACST     ;     ; Attenuation correction of sigma-0 (from tB)
   0-21-123 |   2 |      -30000 |  15 | dB                | SNRCS    ;     ; SEAWINDS normalized radar cross-section
   0-21-128 |   0 |           0 |   8 | Numeric           | NVPP     ;     ; Number of valid points per second used to derive previous parameters
@@ -1157,7 +1157,7 @@ Table B STD |  0 | 14
   0-25-085 |   0 |           0 |   7 | Numeric           | FCPH     ;     ; Fraction of clear pixels in HIRS FOV
   0-25-086 |   0 |           0 |   2 | Code table        | QDEP     ;     ; Depth correction indicator
   0-25-090 |   0 |           0 |   4 | Code table        | ORSF     ;     ; Orbit state flag
-  0-25-091 |   3 |      -18192 |  13 | dB                | SCRIN    ;     ; Structure constant of the refraction extent (Cn2)
+  0-25-091 |   3 |      -18192 |  13 | dB                | SCRIN    ;     ; Structure constant of the refraction index (Cn2)
   0-25-092 |   2 |       28000 |  14 | m s⁻¹             | APVE     ;     ; Acoustic propagation velocity
   0-25-093 |   0 |           0 |   8 | Flag table        | RACC     ;     ; RASS computation correction
   0-25-095 |   0 |           0 |   2 | Flag table        | ASFL     ;     ; Altimeter state flag
@@ -1286,7 +1286,7 @@ Table B STD |  0 | 14
   0-33-053 |   0 |           0 |  21 | Flag table        | KORQ     ;     ; Ku band ocean retracking quality
   0-33-060 |   0 |           0 |   2 | Code table        | QGFQ     ;     ; GqisFlagQual - individual IASI-System quality flag
   0-33-061 |   0 |           0 |   7 | %                 | QGQI     ;     ; GqisQualIndex - indicator for instrument noise performance (contributions from spectral and radiometric calibration)
-  0-33-062 |   0 |           0 |   7 | %                 | QGQIL    ;     ; GqisQualIndexLoc - indicator for geometric quality extent
+  0-33-062 |   0 |           0 |   7 | %                 | QGQIL    ;     ; GqisQualIndexLoc - indicator for geometric quality index
   0-33-063 |   0 |           0 |   7 | %                 | QGQIR    ;     ; GqisQualIndexRad - indicator for instrument noise performance (contributions from radiometric calibration)
   0-33-064 |   0 |           0 |   7 | %                 | QGQIS    ;     ; GqisQualIndexSpect - indicator for instrument noise performance (contributions from spectral calibration)
   0-33-065 |   0 |           0 |  24 | Numeric           | QGSSQ    ;     ; GqisSysTecSondQual - output of system TEC (Technical Expertise Centre) quality function

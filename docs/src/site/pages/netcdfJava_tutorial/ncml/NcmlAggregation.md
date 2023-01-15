@@ -249,7 +249,7 @@ These are the ways that coordinate values may be assigned to a `joinExisting` co
 
 The previous example \"joined\" variables along their existing outer dimension.
 Another common case is to aggregate variables by creating a new outer dimension.
-Each existing variable becomes one \"slice\" of the compound variable (a slice holds the extent of one dimension constant, e.g. **humidity(3,:,:,:)**).
+Each existing variable becomes one \"slice\" of the compound variable (a slice holds the index of one dimension constant, e.g. **humidity(3,:,:,:)**).
 The following NcML joins variables from three separate files into a single variable, by creating a new dimension of length 3:
 
 {% include link_file.html file="netcdfJava_tutorial/ncml/aggregation/aggNew.ncml" text="aggNew.ncml" %}, 

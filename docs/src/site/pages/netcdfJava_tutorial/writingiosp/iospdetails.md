@@ -122,7 +122,7 @@ Or you can add `Attributes` that are contained inside a `Variable` and apply onl
 
 #### `Dimension`
 
-A `Dimension` describes the extent space for the multidimension arrays of data stored in `Variables`. 
+A `Dimension` describes the index space for the multidimension arrays of data stored in `Variables`. 
 A `Dimension` has a `String` name and in integer length. In the Netcdf-3 data model, `Dimensions` are shared between `Variables` and stored globally.
 
 {% capture rmd %}

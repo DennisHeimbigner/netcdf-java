@@ -90,12 +90,12 @@
 0	6	6	C WAT	. Cloud water	. kg m-2
 0	6	192	CDLYR	. Non-Convective cloud cover	. %
 0	6	193	CWORK	. Cloud workfunction	. J kg-1
-0	7	0	PLI	    . Parcel lifted extent (to 500 mb)	. K
+0	7	0	PLI	    . Parcel lifted index (to 500 mb)	. K
 0	7	6	CAPE	. Convective available potential energy . 	J kg-1
 0	7	7	CIN	    . Convective inhibition	. J kg-1
 0	7	8	HLCY	. Storm relative helicity	. m2 s-2
-0	7	192	LFT X	. Surface lifted extent	. deg K
-0	7	193	4LFTX	. Best (4 layer) lifted extent	. deg K
+0	7	192	LFT X	. Surface lifted index	. deg K
+0	7	193	4LFTX	. Best (4 layer) lifted index	. deg K
 0	14	0	TOZNE	. Total ozone	. Dobson
 0	14	192	O3MR	. Ozone mixing ratio	. kg kg-1
 0	14	195	VDFOZ	. Ozone vertical diffusion	. kg kg-1 s-1

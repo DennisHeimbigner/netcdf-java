@@ -185,8 +185,8 @@
 	 parameterCategory = 4 ;
 	 parameterNumber = 193 ;
 	}
-#UV extent
-'UV extent ' = {
+#UV index 
+'UV index ' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
 	 parameterNumber = 196 ;
@@ -245,14 +245,14 @@
 	 parameterCategory = 6 ;
 	 parameterNumber = 199 ;
 	}
-#Surface lifted extent
-'Surface lifted extent' = {
+#Surface lifted index
+'Surface lifted index' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
 	 parameterNumber = 192 ;
 	}
-#Best (4-layer) lifted extent
-'Best (4-layer) lifted extent' = {
+#Best (4-layer) lifted index
+'Best (4-layer) lifted index' = {
 	 discipline = 0 ;
 	 parameterCategory = 7 ;
 	 parameterNumber = 193 ;

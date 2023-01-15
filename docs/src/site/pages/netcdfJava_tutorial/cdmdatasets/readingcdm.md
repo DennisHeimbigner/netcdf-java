@@ -97,7 +97,7 @@ Or suppose you want to loop over all time steps, and make it general to handle a
  
 In this case, we call reduce(0), to reduce dimension 0, which we know has length one, but leave the other two dimensions alone.
 
-Note that `varShape` holds the total number of elements that can be read from the variable; `origin` is the starting extent, and `size` is the number of elements to read.
+Note that `varShape` holds the total number of elements that can be read from the variable; `origin` is the starting index, and `size` is the number of elements to read.
 This is different from the Fortran 90 array syntax, which uses the starting and ending array indices (inclusive):
 
 {% capture rmd %}
@@ -172,7 +172,7 @@ can be used on scalar `String` or `char`, as well as 1D `char` variables of any 
 Once you have read the data in, you usually have an `Array` object to work with.
 The shape of the `Array` will match the shape of the `Variable` (if all data was read) or the shape of the `Section` (if a subset was read).
 There are a number of ways to access data in the `Array`.
-Here is an example of accessing data in a 3D array, keeping track of extent:
+Here is an example of accessing data in a 3D array, keeping track of index:
 
 {% capture rmd %}
 {% includecodeblock netcdf-java&docs/src/test/java/examples/cdmdatasets/ReadingCdmTutorial.java&iterateForLoop %}
@@ -203,7 +203,7 @@ If you know the Array's rank and type, you can cast to the appropriate subclass 
 {% endcapture %}
 {{ rmd | markdownify }}
 
-There are a number of *extent reordering* methods that operate on an `Array`, and return another `Array` with the same backing data storage, but with the indices modified in various ways:
+There are a number of *index reordering* methods that operate on an `Array`, and return another `Array` with the same backing data storage, but with the indices modified in various ways:
 
 {% capture rmd %}
 {% includecodeblock netcdf-java&docs/src/test/java/examples/cdmdatasets/ReadingCdmTutorial.java&indexManipulation %}
@@ -218,7 +218,7 @@ You can work directly with the Java array by extracting it from the `Array`:
 {% endcapture %}
 {{ rmd | markdownify }}
 
-If the `Array` has the same type as the request, and the indices have not been reordered, this will return the backing array, otherwise it will return a copy with the requested type and correct extent ordering.
+If the `Array` has the same type as the request, and the indices have not been reordered, this will return the backing array, otherwise it will return a copy with the requested type and correct index ordering.
 
 ## Writing temporary files to the disk cache
 
@@ -226,7 +226,7 @@ There are a number of places where the library needs to write files to disk.
 If you end up using the file more than once, its useful to cache these files.
 
 1. If a filename ends with `.Z`, `.zip`, `.gzip`, `.gz`, or `.bz2`, `NetcdfFile.open` will write an uncompressed file of the same name, but without the suffix.
-2. The *GRIB IOSP* writes an extent file with the same name and a `.gbx` extension.
+2. The *GRIB IOSP* writes an index file with the same name and a `.gbx` extension.
    Other IOSPs may do similar things in the future.
 3. *Nexrad2* files that are compressed will be uncompressed to a file with an `.uncompress` prefix.
 
@@ -257,7 +257,7 @@ The `ucar.nc2` library uses the HTTP 1.1 protocol's `Range` command to get range
 The efficiency of the remote access depends on how the data is accessed.
 Reading large contiguous regions of the file should generally be good, while skipping around the file and reading small amounts of data will be poor.
 In many cases, reading data from a `Variable` should give good performance because a `Variable`'s data is stored contiguously, and so can be read with a minimal number of server requests.
-A record `Variable`, however, is spread out across the file, so can incur a separate request for each record extent.
+A record `Variable`, however, is spread out across the file, so can incur a separate request for each record index.
 In that case you may do better copying the file to a local drive, or putting the file into a THREDDS server which will more efficiently subset the file on the server.
 
 ## Opening remote files on AWS S3

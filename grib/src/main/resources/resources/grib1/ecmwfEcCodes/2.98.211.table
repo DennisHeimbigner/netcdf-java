@@ -15,7 +15,7 @@
 119 alediff [Altitude of emitter] (m above sea level)
 92 cfirediff [Wildfire overall flux of burnt Carbon] (kg m**-2 s**-1)
 93 c4ffirediff [Wildfire fraction of C4 plants] (dimensionless)
-94 vegfirediff [Wildfire vegetation map extent] (dimensionless)
+94 vegfirediff [Wildfire vegetation map index] (dimensionless)
 95 ccfirediff [Wildfire Combustion Completeness] (dimensionless)
 96 flfirediff [Wildfire Fuel Load: Carbon per unit area] (kg m**-2)
 97 offirediff [Wildfire fraction of area observed] (dimensionless)

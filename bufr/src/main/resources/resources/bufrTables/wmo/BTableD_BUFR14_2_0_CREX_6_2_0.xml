@@ -27679,7 +27679,7 @@
 <FXY1>310018</FXY1>
 <ElementName1>(Ozone data)</ElementName1>
 <FXY2>015030</FXY2>
-<ElementName2>Aerosol contamination extent</ElementName2>
+<ElementName2>Aerosol contamination index</ElementName2>
 <Status>Operational</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>
@@ -27919,7 +27919,7 @@
 <FXY1>310019</FXY1>
 <ElementName1>(Ozone data)</ElementName1>
 <FXY2>015030</FXY2>
-<ElementName2>Aerosol contamination extent</ElementName2>
+<ElementName2>Aerosol contamination index</ElementName2>
 <Status>Operational</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>
@@ -33435,7 +33435,7 @@
 <FXY1>311010</FXY1>
 <ElementName1>(BUFR template for AMDAR, 3 11 010, version 4)</ElementName1>
 <FXY2>011037</FXY2>
-<ElementName2>Turbulence extent (EDR)</ElementName2>
+<ElementName2>Turbulence index (EDR)</ElementName2>
 <Status>Validation</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>
@@ -35906,7 +35906,7 @@
 <CategoryOfSequences>Single level report sequences (satellite data)</CategoryOfSequences>
 <FXY1>312032</FXY1>
 <FXY2>021121</FXY2>
-<ElementName2>SEAWINDS NOF rain extent</ElementName2>
+<ElementName2>SEAWINDS NOF rain index</ElementName2>
 <Status>Operational</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>
@@ -37260,7 +37260,7 @@
 <FXY1>312052</FXY1>
 <ElementName1>(RA2 - radar altimeter-2)</ElementName1>
 <FXY2>014055</FXY2>
-<ElementName2>Solar activity extent</ElementName2>
+<ElementName2>Solar activity index</ElementName2>
 <Status>Operational</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>
@@ -46679,7 +46679,7 @@
 <FXY1>321026</FXY1>
 <ElementName1>(RASS data - fluxes)</ElementName1>
 <FXY2>025091</FXY2>
-<ElementName2>Structure constant of the refraction extent (Cn^2)</ElementName2>
+<ElementName2>Structure constant of the refraction index (Cn^2)</ElementName2>
 <Status>Operational</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>
@@ -49681,7 +49681,7 @@
 <ElementName1>(IASI principal component scores)</ElementName1>
 <ElementName1_sub>Quality information</ElementName1_sub>
 <FXY2>033062</FXY2>
-<ElementName2>Gqisqualindexloc - indicator for geometric quality extent</ElementName2>
+<ElementName2>Gqisqualindexloc - indicator for geometric quality index</ElementName2>
 <Status>Deprecated</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>
@@ -51249,7 +51249,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>001007</FXY2>
 <ElementName2>Satellite identifier</ElementName2>
 <Status>Validation</Status>
@@ -51259,7 +51259,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>001031</FXY2>
 <ElementName2>Generating centre</ElementName2>
 <Status>Validation</Status>
@@ -51269,7 +51269,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>002019</FXY2>
 <ElementName2>Satellite instrument</ElementName2>
 <Status>Validation</Status>
@@ -51279,7 +51279,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>002020</FXY2>
 <ElementName2>Satellite classification</ElementName2>
 <Status>Validation</Status>
@@ -51289,7 +51289,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>301011</FXY2>
 <ElementName2>Date</ElementName2>
 <Status>Validation</Status>
@@ -51299,7 +51299,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>301013</FXY2>
 <ElementName2>Time</ElementName2>
 <Status>Validation</Status>
@@ -51309,7 +51309,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>005040</FXY2>
 <ElementName2>Orbit number</ElementName2>
 <Status>Validation</Status>
@@ -51319,7 +51319,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>201136</FXY2>
 <ElementName2>Add 8 bits to width of next descriptor</ElementName2>
 <Status>Validation</Status>
@@ -51329,7 +51329,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>005041</FXY2>
 <ElementName2>Scan linen umber</ElementName2>
 <Status>Validation</Status>
@@ -51339,7 +51339,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>201000</FXY2>
 <ElementName2>Reset descriptor width</ElementName2>
 <Status>Validation</Status>
@@ -51349,7 +51349,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>025071</FXY2>
 <ElementName2>Frame count</ElementName2>
 <Status>Validation</Status>
@@ -51359,7 +51359,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>005001</FXY2>
 <ElementName2>Latitude (high accuracy)</ElementName2>
 <Status>Validation</Status>
@@ -51369,7 +51369,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>005001</FXY2>
 <ElementName2>Latitude (high accuracy)</ElementName2>
 <Status>Validation</Status>
@@ -51379,7 +51379,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>006001</FXY2>
 <ElementName2>Longitude (high accuracy)</ElementName2>
 <Status>Validation</Status>
@@ -51389,7 +51389,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>006001</FXY2>
 <ElementName2>Longitude (high accuracy)</ElementName2>
 <Status>Validation</Status>
@@ -51399,7 +51399,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>107064</FXY2>
 <ElementName2>Repeat next 7 descriptors 64 times</ElementName2>
 <Status>Validation</Status>
@@ -51409,7 +51409,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>106032</FXY2>
 <ElementName2>Repeat next 6 descriptors 32 times</ElementName2>
 <Status>Validation</Status>
@@ -51419,7 +51419,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>008012</FXY2>
 <ElementName2>Land/sea qualifier</ElementName2>
 <Status>Validation</Status>
@@ -51429,7 +51429,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>008013</FXY2>
 <ElementName2>Day/night qualifier</ElementName2>
 <Status>Validation</Status>
@@ -51439,7 +51439,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>008065</FXY2>
 <ElementName2>Sun-glint indicator</ElementName2>
 <Status>Validation</Status>
@@ -51449,7 +51449,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>008072</FXY2>
 <ElementName2>Pixel(s) type</ElementName2>
 <Status>Validation</Status>
@@ -51459,7 +51459,7 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>013039</FXY2>
 <ElementName2>Terrain type (ice/snow)</ElementName2>
 <Status>Validation</Status>
@@ -51469,9 +51469,9 @@
 <Category>40</Category>
 <CategoryOfSequences>Additional satellite report sequences</CategoryOfSequences>
 <FXY1>340009</FXY1>
-<ElementName1>(Normalised differential vegetation extent (NDVI))</ElementName1>
+<ElementName1>(Normalised differential vegetation index (NDVI))</ElementName1>
 <FXY2>040015</FXY2>
-<ElementName2>Normalised differential vegetation extent (NDVI)</ElementName2>
+<ElementName2>Normalised differential vegetation index (NDVI)</ElementName2>
 <Status>Validation</Status>
 </Exporting_BUFRTableD_E>
 <Exporting_BUFRTableD_E>

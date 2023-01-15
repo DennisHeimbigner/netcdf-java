@@ -10,7 +10,7 @@ permalink: cdmremote_feature_datasets.html
 
 [CDM Remote](cdmremote.html) is a web service implemented in the CDM library (client) and TDS (server), providing remote access to CDM datasets, using ncstream as the on-the-wire protocol. An experimental python client is under development. It provides access at the NetcdfFile and FeatureDataset levels of the CDM API, so there are two levels of services:
 
-1. CDM Remote provides extent subsetting on remote CDM datasets, with the same functionality that NetcdfFile provides for CDM local datasets and DODSNetcdfFile provides for remote OPeNDAP datasets. CdmRemote supports the full CDM data model.
+1. CDM Remote provides index subsetting on remote CDM datasets, with the same functionality that NetcdfFile provides for CDM local datasets and DODSNetcdfFile provides for remote OPeNDAP datasets. CdmRemote supports the full CDM data model.
 
 2. CDM Remote Feature provides coordinate subsetting on remote CDM Feature Datasets, with similar functionality to OGC’s Web Coverage Service and the exact functionality of Unidata’s NetCDF Subset Service (NCSS).
 
@@ -64,7 +64,7 @@ Setting deflate requests that the server compress the data at the specified defl
 
 * The ncstream header and ncstream data messages are for software consumption only.
 
-* A data request uses the Section specification (same as Fortran-90 array notation) to ask for a subset in extent space.
+* A data request uses the Section specification (same as Fortran-90 array notation) to ask for a subset in index space.
 
 * Variable names are case-sensitive and must be backslash-escaped
 
@@ -72,7 +72,7 @@ Setting deflate requests that the server compress the data at the specified defl
 
 #### Java
 
-<b>_ucar.nc2.stream.CdmRemote_</b> is a subclass of <b>_NetcdfFile_</b> which provides extent subsetting on remote CDM datasets. <b>_NetcdfDataset.openOrAcquireFile()_</b> sees a cdmremote:url prefix, and instantiates a <b>_CdmRemote object_</b>. The url must be an endpoint for a cdmremote service. ToolsUI now preferentially uses cdmremote service when it is available.
+<b>_ucar.nc2.stream.CdmRemote_</b> is a subclass of <b>_NetcdfFile_</b> which provides index subsetting on remote CDM datasets. <b>_NetcdfDataset.openOrAcquireFile()_</b> sees a cdmremote:url prefix, and instantiates a <b>_CdmRemote object_</b>. The url must be an endpoint for a cdmremote service. ToolsUI now preferentially uses cdmremote service when it is available.
 
 * upon opening, <b>_req=header_</b> is called and the NetcdfFile objects are read from the response
 

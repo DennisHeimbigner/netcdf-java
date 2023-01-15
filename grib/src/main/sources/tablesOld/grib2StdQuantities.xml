@@ -30,7 +30,7 @@
             <quantity id="Sensible_heat_net_flux" number="11" unit="W m-2"
                 description="Sensible heat net flux" />
             <quantity id="Heat_index" number="12" unit="K"
-                description="Heat extent" />
+                description="Heat index" />
             <quantity id="Wind_chill_factor" number="13" unit="K"
                 description="Wind chill factor" />
             <quantity id="Minimum_dew_point_depression" number="14" unit="K"
@@ -662,17 +662,17 @@
         </category>
         <category id="Thermodynamic_Stability_indices" number="7">
             <quantity id="Parcel_lifted_index" number="0" unit="K"
-                description="Parcel lifted extent to 500 hPa" />
+                description="Parcel lifted index to 500 hPa" />
             <quantity id="Best_lifted_index" number="1" unit="K"
-                description="Best lifted extent to 500 hPa" />
+                description="Best lifted index to 500 hPa" />
             <quantity id="K_index" number="2" unit="K"
-                description="K extent" />
+                description="K index" />
             <quantity id="KO_index" number="3" unit="K"
-                description="KO extent" />
+                description="KO index" />
             <quantity id="Total_totals_index" number="4" unit="K"
-                description="Total totals extent" />
+                description="Total totals index" />
             <quantity id="Sweat_index" number="5" unit=""
-                description="Sweat extent" />
+                description="Sweat index" />
             <quantity id="Convective_available_potential_energy" number="6" unit="J kg-1"
                 description="Convective available potential energy" />
             <quantity id="Convective_inhibition" number="7" unit="J kg-1"
@@ -680,7 +680,7 @@
             <quantity id="Storm_relative_helicity" number="8" unit="J kg-1"
                 description="Storm relative helicity" />
             <quantity id="Energy_helicity_index" number="9" unit=""
-                description="Energy helicity extent" />
+                description="Energy helicity index" />
             <quantity id="Surface_Lifted_Index" number="10" unit="K"
                 description="Surface Lifted Index" />
             <quantity id="Best_lifted_index" number="11" unit="K"
@@ -1308,7 +1308,7 @@
             <quantity id="Scaled_precipitable_water" number="3" unit=""
                 description="Scaled precipitable water" />
             <quantity id="Scaled_lifted_index" number="4" unit=""
-                description="Scaled lifted extent" />
+                description="Scaled lifted index" />
             <quantity id="Scaled_cloud_top_pressure" number="5" unit=""
                 description="Scaled cloud top pressure" />
             <quantity id="Scaled_skin_temperature" number="6" unit=""

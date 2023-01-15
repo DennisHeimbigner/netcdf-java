@@ -34,6 +34,6 @@
 230 230 Ellrod and Knapp turbulence index1(s-2)
 231 231 Ellrod and Knapp turbulence index2(s-2)
 232 232 Divergence trend (scaled divergence tendency needed for CAT_DVI)(s-2)
-233 233 Divergence modified turbulence extent (Ellrod and Knox)(s-2)
+233 233 Divergence modified turbulence index (Ellrod and Knox)(s-2)
 234 234 sea ice albedo - diffusive solar (0.3 - 5.0 m-6)(%)
 235 235 Random pattern for  the stochastically perturbed parametrization tendencies(Numeric)

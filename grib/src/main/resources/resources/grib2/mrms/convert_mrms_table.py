@@ -26,14 +26,14 @@ def parse_file(fname):
 def fix_item(item):
     # To be recognized as a UDUNITS compatible unit, we should fix units that:
     #   - have AGL/MSL in them (add to description instead)
-    #   - are extent, non-dim, or flag (should be dimensionless)
+    #   - are index, non-dim, or flag (should be dimensionless)
     #   - are C (use degree_Celsius instead, as C is coulomb, and these fields really are temperature related)
     #   - are years (udunits 1.x says plural ok, but not udunits 2.x, so go with singular year)
     #   - use flashes (use count instead of flashes)
     if item.Unit.endswith(' MSL') or item.Unit.endswith(' AGL'):
         item = item._replace(Unit=item.Unit[:-4],
                 Description=item.Description + item.Unit[-4:])
-    elif item.Unit == 'non-dim' or item.Unit == 'flag' or item.Unit == 'extent':
+    elif item.Unit == 'non-dim' or item.Unit == 'flag' or item.Unit == 'index':
         item = item._replace(Unit='dimensionless')
     elif item.Unit == 'C':
         item = item._replace(Unit='degree_Celsius')

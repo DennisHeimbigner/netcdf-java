@@ -136,7 +136,7 @@
           parameterCategory = 15 ;
           parameterNumber = 8 ;
           }
-#Parcel lifted extent (to 500 hPa)
+#Parcel lifted index (to 500 hPa)
 'K' = {
           discipline = 0 ;
           parameterCategory = 7 ;
@@ -454,7 +454,7 @@
           parameterCategory = 6 ;
           parameterNumber = 6 ;
           }
-#Best lifted extent (to 500 hPa)
+#Best lifted index (to 500 hPa)
 'K' = {
           discipline = 0 ;
           parameterCategory = 7 ;
@@ -1144,7 +1144,7 @@
           parameterCategory = 0 ;
           parameterNumber = 15 ;
           }
-#Heat extent
+#Heat index
 'K' = {
           discipline = 0 ;
           parameterCategory = 0 ;
@@ -1420,13 +1420,13 @@
           parameterCategory = 4 ;
           parameterNumber = 12 ;
           }
-#UV extent (under clear sky)
+#UV index (under clear sky)
 'Numeric' = {
           discipline = 0 ;
           parameterCategory = 4 ;
           parameterNumber = 50 ;
           }
-#UV extent
+#UV index
 'Numeric' = {
           discipline = 0 ;
           parameterCategory = 4 ;
@@ -1582,25 +1582,25 @@
           parameterCategory = 6 ;
           parameterNumber = 33 ;
           }
-#K extent
+#K index
 'K' = {
           discipline = 0 ;
           parameterCategory = 7 ;
           parameterNumber = 2 ;
           }
-#KO extent
+#KO index
 'K' = {
           discipline = 0 ;
           parameterCategory = 7 ;
           parameterNumber = 3 ;
           }
-#Total totals extent
+#Total totals index
 'K' = {
           discipline = 0 ;
           parameterCategory = 7 ;
           parameterNumber = 4 ;
           }
-#Sweat extent
+#Sweat index
 'Numeric' = {
           discipline = 0 ;
           parameterCategory = 7 ;
@@ -1612,19 +1612,19 @@
           parameterCategory = 7 ;
           parameterNumber = 8 ;
           }
-#Energy helicity extent
+#Energy helicity index
 'Numeric' = {
           discipline = 0 ;
           parameterCategory = 7 ;
           parameterNumber = 9 ;
           }
-#Surface lifted extent
+#Surface lifted index
 'K' = {
           discipline = 0 ;
           parameterCategory = 7 ;
           parameterNumber = 10 ;
           }
-#Best (4-layer) lifted extent
+#Best (4-layer) lifted index
 'K' = {
           discipline = 0 ;
           parameterCategory = 7 ;
@@ -2872,7 +2872,7 @@
           parameterCategory = 0 ;
           parameterNumber = 3 ;
           }
-#Scaled lifted extent
+#Scaled lifted index
 'Numeric' = {
           discipline = 3 ;
           parameterCategory = 0 ;

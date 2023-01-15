@@ -2509,7 +2509,7 @@ Table D STD |  0 | 14
            | 0-15-001 > | Total ozone
            | 2-07-000 > | Cancel increase scale, reference value and bit width
            | 0-33-070 > | SBUV total ozone quality
-           | 0-15-030 > | Aerosol contamination extent
+           | 0-15-030 > | Aerosol contamination index
            | 2-07-002 > | Increase scale, reference value and bit width
            | 0-20-081 > | Cloud amount in segment (cloud fraction)
            | 2-07-000 > | Cancel increase scale, reference value and bit width
@@ -3250,7 +3250,7 @@ Table D STD |  0 | 14
 
   3-12-032 | SEAWPROR   ;     ;  
            | 0-21-120 > | Probability of rain
-           | 0-21-121 > | SEAWINDS NOF rain extent
+           | 0-21-121 > | SEAWINDS NOF rain index
            | 0-13-055 > | Intensity of precipitation
            | 0-21-122   | Attenuation correction on sigma-0 (from tB)
 
@@ -3400,7 +3400,7 @@ Table D STD |  0 | 14
            | 0-02-118 > | Percentage of 20 MHz band processed
            | 0-02-156 > | Percentage of valid Ku ocean retracker measurements
            | 0-02-157 > | Percentage of valid S ocean retracker measurements
-           | 0-14-055 > | Solar activity extent
+           | 0-14-055 > | Solar activity index
            | 0-22-150 > | Number of 18 Hz valid points for Ku band
            | 0-22-151 > | Ku band ocean range
            | 0-22-152 > | STD of 18Hz Ku band ocean range
@@ -4255,7 +4255,7 @@ Table D STD |  0 | 14
            | 2-04-001 > | Add associated field of 1 bit in length
            | 0-31-021 > | Associated field significance
            | 0-12-007 > | Virtual temperature
-           | 0-25-091 > | Structure constant of the refraction extent (Cn2)
+           | 0-25-091 > | Structure constant of the refraction index (Cn2)
            | 0-11-071 > | Turbulent vertical momentum flux
            | 0-11-072 > | Turbulent vertical buoyancy flux
            | 0-11-073 > | Turbulent kinetic energy
@@ -4356,7 +4356,7 @@ Table D STD |  0 | 14
            | 2-02-000 > | Reset scale
            | 0-33-060 > | Individual IASI-system quality flag
            | 0-33-061 > | Indicator for instrument noise performance (contributions from spectral and radiometric)
-           | 0-33-062 > | Indicator for geometric quality extent
+           | 0-33-062 > | Indicator for geometric quality index
            | 0-33-063 > | Indicator for instrument noise performance (contributions from radiometric calibration)
            | 0-33-064 > | Indicator for instrument noise performance (contributions from spectral calibration)
            | 0-33-065 > | Output of system TEC (Technical Expertise Center) quality function

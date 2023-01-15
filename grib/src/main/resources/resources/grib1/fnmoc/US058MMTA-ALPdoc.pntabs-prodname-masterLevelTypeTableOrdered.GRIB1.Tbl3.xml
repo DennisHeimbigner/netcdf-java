@@ -157,7 +157,7 @@
       <grib1Id>241</grib1Id>
       <fnmocId>dpth_ix</fnmocId>
       <name>dpth_ix</name>
-      <description>depth extent</description>
+      <description>depth index</description>
       <status>current</status>
     </entry>
     <entry>

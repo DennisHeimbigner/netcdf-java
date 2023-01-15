@@ -19,7 +19,7 @@
     </metadata>
     
     <documentation xlink:href="http://cloud1.arc.nasa.gov/solve/" xlink:title="SOLVE home page"/>
-    <documentation xlink:href="http://espoarchive.nasa.gov/archive/extent.html" xlink:title="Earth Science Project Office Archives"/>
+    <documentation xlink:href="http://espoarchive.nasa.gov/archive/index.html" xlink:title="Earth Science Project Office Archives"/>
     <documentation type="summary"> NetCDF files of 1-minute averaged data sets for each flight of the DC-8 and ER-2 aircraft during the NASA SOLVE field experiment. </documentation>
 
     <metadata xlink:href="solve1.dc" metadataType="DC"/>

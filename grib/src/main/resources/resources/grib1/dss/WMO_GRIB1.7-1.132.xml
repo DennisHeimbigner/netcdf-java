@@ -823,22 +823,22 @@
   </parameter>
   <parameter code="131">
     <shortName>LFTX</shortName>
-    <description>Surface lifted extent</description>
+    <description>Surface lifted index</description>
     <units>K</units>
   </parameter>
   <parameter code="132">
     <shortName>4LFTX</shortName>
-    <description>Best (4 layer) lifted extent</description>
+    <description>Best (4 layer) lifted index</description>
     <units>K</units>
   </parameter>
   <parameter code="133">
     <shortName>KX</shortName>
-    <description>K extent</description>
+    <description>K index</description>
     <units>K</units>
   </parameter>
   <parameter code="134">
     <shortName>SX</shortName>
-    <description>Sweat extent</description>
+    <description>Sweat index</description>
     <units>K</units>
   </parameter>
   <parameter code="135">
@@ -1310,7 +1310,7 @@
   </parameter>
   <parameter code="218">
     <shortName>PREIX</shortName>
-    <description>precip.extent(0.0-1.00)</description>
+    <description>precip.index(0.0-1.00)</description>
     <units>fraction</units>
     <ISO>climatologyMeteorologyAtmosphere</ISO>
   </parameter>

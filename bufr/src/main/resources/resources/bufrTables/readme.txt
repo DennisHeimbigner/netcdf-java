@@ -321,8 +321,8 @@ BUFR Tables log
  **No key 0-33-84 in second table; local=false
  **No key 0-33-86 in second table; local=false
   0-40-15 name
-    Normalized differential vegetation extent NDVI
-    Normalised differential vegetation extent NDVI
+    Normalized differential vegetation index NDVI
+    Normalised differential vegetation index NDVI
   0-40-17 name
     Non-normalized principal component score
     Non-normalised principal component score

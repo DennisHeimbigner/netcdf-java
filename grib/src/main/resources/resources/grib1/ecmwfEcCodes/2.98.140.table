@@ -35,7 +35,7 @@
 250 2dsp [2D wave spectra (multiple)] (m**2 s radian**-1)
 251 2dfd [2D wave spectra (single)] (m**2 s radian**-1)
 252 wsk [Wave spectral kurtosis] (~)
-253 bfi [Benjamin-Feir extent] (~)
+253 bfi [Benjamin-Feir index] (~)
 210 mswsi [Mean square wave strain in sea ice] (~)
 254 wsp [Wave spectral peakedness] (s**-1)
 211 phiaw [Normalized energy flux into waves] (~)

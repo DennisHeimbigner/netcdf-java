@@ -334,10 +334,10 @@ Conflicts=0 extra=0 udunits=0
 
 NcepTable{title='Thermodynamic stability indices', source='http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table4-2-0-7.shtml', tableName='Table4.2.0.7'}
   p1=     0.7.0          Parcel Lifted Index (to 500 mb)               K              PLI
-  p2= 4.2.0.7.0         Parcel lifted extent (to 500 hPa)               K             null
+  p2= 4.2.0.7.0         Parcel lifted index (to 500 hPa)               K             null
 
   p1=     0.7.1            Best Lifted Index (to 500 mb)               K              BLI
-  p2= 4.2.0.7.1           Best lifted extent (to 500 hPa)               K             null
+  p2= 4.2.0.7.1           Best lifted index (to 500 hPa)               K             null
 
   ud=    0.7.15 m2s-2 (1000000.0 2s-2) != m2.s-2 for 0.7.15 (Updraft Helicity)
 
@@ -518,7 +518,7 @@ NcepTable{title='Vegetation/Biomass', source='http://www.nco.ncep.noaa.gov/pmb/d
   ud=    2.0.27 m3m-3 (1.0E9 3m-3) != m3.m-3 for 2.0.27 (Volumetric Wilting Moisture)
 
   p1=    2.0.31 Normalized Differential Vegetation Index         Numeric       Validation
-  p2=4.2.2.0.31 Normalized differential vegetation extent (NDVI)                             null
+  p2=4.2.2.0.31 Normalized differential vegetation index (NDVI)                             null
 
   p1=   2.0.197           Blackadars Mixing Length Scale               m            BMIXL
   p2=   2.0.197          Blackadar's Mixing Length Scale               m            BMIXL

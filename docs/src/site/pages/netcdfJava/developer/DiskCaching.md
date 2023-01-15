@@ -113,9 +113,9 @@ Otherwise, the cache will try to write the temporary file in the same directory 
 
 ### GRIB Indexing and Caching
 
-In 4.3 and above, for each GRIB file the CDM writes a _grib extent file_ using the filename plus suffix <b>_.gbx9_</b>. So a file named <b>_filename.grib1_</b> will have an extent file <b>_filename.grib1.gbx9_</b> created for it the first time that its read. Usually a _cdm extent file_ is also created, using the filename plus suffix <b>_.ncx_</b>. So a file named filename.grib1 will have an extent file filename.grib1.ncx created for it the first time. When a GRIB file is only part of a collection of GRIB files, then the ncx file may be created only for the collection.
+In 4.3 and above, for each GRIB file the CDM writes a _grib index file_ using the filename plus suffix <b>_.gbx9_</b>. So a file named <b>_filename.grib1_</b> will have an index file <b>_filename.grib1.gbx9_</b> created for it the first time that its read. Usually a _cdm index file_ is also created, using the filename plus suffix <b>_.ncx_</b>. So a file named filename.grib1 will have an index file filename.grib1.ncx created for it the first time. When a GRIB file is only part of a collection of GRIB files, then the ncx file may be created only for the collection.
 
-The location of these extent files is controlled by a caching strategy. The default strategy is to try to place the extent files in the same directory as the data file. If that directory is not writeable, then the default strategy is to write the extent files in the default caching directory. In a client application using the CDM, that default will be
+The location of these index files is controlled by a caching strategy. The default strategy is to try to place the index files in the same directory as the data file. If that directory is not writeable, then the default strategy is to write the index files in the default caching directory. In a client application using the CDM, that default will be
 
 <b>_${user_home}/.unidata/cache/._</b>
 

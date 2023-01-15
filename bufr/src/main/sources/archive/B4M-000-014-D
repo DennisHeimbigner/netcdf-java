@@ -3519,7 +3519,7 @@
 #
 3  12  32  
     0  21 120  Probability of rain
-    0  21 121  SEAWINDS NOF rain extent
+    0  21 121  SEAWINDS NOF rain index
     0  13  55  Intensity of precipitation
     0  21 122  Attenuation correction on sigma-0 (from tB)
    -1
@@ -3676,7 +3676,7 @@
     0   2 118  Percentage of 20 MHz band processed
     0   2 156  Percentage of valid Ku ocean retracker measurements
     0   2 157  Percentage of valid S ocean retracker measurements
-    0  14  55  Solar activity extent
+    0  14  55  Solar activity index
     0  22 150  Number of 18 Hz valid points for Ku band
     0  22 151  Ku band ocean range
     0  22 152  STD of 18Hz Ku band ocean range
@@ -4577,7 +4577,7 @@
     2   4   1  Add associated field of 1 bit in length
     0  31  21  Associated field significance
     0  12   7  Virtual temperature
-    0  25  91  Structure constant of the refraction extent (Cn2)
+    0  25  91  Structure constant of the refraction index (Cn2)
     0  11  71  Turbulent vertical momentum flux
     0  11  72  Turbulent vertical buoyancy flux
     0  11  73  Turbulent kinetic energy

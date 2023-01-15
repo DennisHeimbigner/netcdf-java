@@ -31155,8 +31155,8 @@ instead.</p>
 			</feature>
 			<feature ID="F0X21Y121">
 				<annotation>
-					<documentation>SEAWINDS NOF rain extent<p>BUFR B description</p>
-						<p>SEAWINDS NOF rain extent</p>
+					<documentation>SEAWINDS NOF rain index<p>BUFR B description</p>
+						<p>SEAWINDS NOF rain index</p>
 					</documentation>
 				</annotation>
 				<name>BRD_SEAWrainIndex</name>
@@ -32710,8 +32710,8 @@ instead.</p>
 			</feature>
 			<feature ID="F0X14Y055">
 				<annotation>
-					<documentation>Solar activity extent<p>BUFR B description</p>
-						<p>Solar activity extent</p>
+					<documentation>Solar activity index<p>BUFR B description</p>
+						<p>Solar activity index</p>
 					</documentation>
 				</annotation>
 				<name>BRR_solarActivityIndex</name>
@@ -40964,8 +40964,8 @@ maximum or spot values (missing code value).</p>
 			</feature>
 			<feature ID="F0X25Y091">
 				<annotation>
-					<documentation>Structure constant of the refraction extent (Cn2)<p>BUFR B description</p>
-						<p>Structure constant of the refraction extent (Cn2)</p>
+					<documentation>Structure constant of the refraction index (Cn2)<p>BUFR B description</p>
+						<p>Structure constant of the refraction index (Cn2)</p>
 					</documentation>
 				</annotation>
 				<name>BPI_structureConst</name>
@@ -41985,7 +41985,7 @@ maximum or spot values (missing code value).</p>
 			<feature ID="F0X33Y062">
 				<annotation>
 					<documentation>QGisQualIndexLoc<p>BUFR B description</p>
-						<p>GqisQualIndexLoc - indicator for geometric quality extent</p>
+						<p>GqisQualIndexLoc - indicator for geometric quality index</p>
 					</documentation>
 				</annotation>
 				<name>BQI_GqisQualIndexLoc</name>

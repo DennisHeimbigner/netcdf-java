@@ -2421,7 +2421,7 @@
     <TableTitle_E>Code table 4.2 - Parameter number by product discipline and parameter category</TableTitle_E>
     <TableSubTitle_E>Product discipline 0 - Meteorological products, parameter category 0: temperature</TableSubTitle_E>
     <CodeFlag>12</CodeFlag>
-    <Meaning_E>Heat extent</Meaning_E>
+    <Meaning_E>Heat index</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4072,7 +4072,7 @@
     <TableSubTitle_E>Product discipline 0 - Meteorological products, parameter category 4: short-wave radiation
     </TableSubTitle_E>
     <CodeFlag>50</CodeFlag>
-    <Meaning_E>UV extent (under clear sky)</Meaning_E>
+    <Meaning_E>UV index (under clear sky)</Meaning_E>
     <Nindicator_E>**</Nindicator_E>
     <AsciiUnit_x002F_Description_E>Numeric</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
@@ -4083,7 +4083,7 @@
     <TableSubTitle_E>Product discipline 0 - Meteorological products, parameter category 4: short-wave radiation
     </TableSubTitle_E>
     <CodeFlag>51</CodeFlag>
-    <Meaning_E>UV extent</Meaning_E>
+    <Meaning_E>UV index</Meaning_E>
     <Nindicator_E>**</Nindicator_E>
     <AsciiUnit_x002F_Description_E>Numeric</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
@@ -4557,7 +4557,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>0</CodeFlag>
-    <Meaning_E>Parcel lifted extent (to 500 hPa)</Meaning_E>
+    <Meaning_E>Parcel lifted index (to 500 hPa)</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4568,7 +4568,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>1</CodeFlag>
-    <Meaning_E>Best lifted extent (to 500 hPa)</Meaning_E>
+    <Meaning_E>Best lifted index (to 500 hPa)</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4579,7 +4579,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>2</CodeFlag>
-    <Meaning_E>K extent</Meaning_E>
+    <Meaning_E>K index</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4590,7 +4590,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>3</CodeFlag>
-    <Meaning_E>KO extent</Meaning_E>
+    <Meaning_E>KO index</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4601,7 +4601,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>4</CodeFlag>
-    <Meaning_E>Total totals extent</Meaning_E>
+    <Meaning_E>Total totals index</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4612,7 +4612,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>5</CodeFlag>
-    <Meaning_E>Sweat extent</Meaning_E>
+    <Meaning_E>Sweat index</Meaning_E>
     <AsciiUnit_x002F_Description_E>Numeric</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4656,7 +4656,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>9</CodeFlag>
-    <Meaning_E>Energy helicity extent</Meaning_E>
+    <Meaning_E>Energy helicity index</Meaning_E>
     <AsciiUnit_x002F_Description_E>Numeric</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4667,7 +4667,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>10</CodeFlag>
-    <Meaning_E>Surface lifted extent</Meaning_E>
+    <Meaning_E>Surface lifted index</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4678,7 +4678,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>11</CodeFlag>
-    <Meaning_E>Best (4-layer) lifted extent</Meaning_E>
+    <Meaning_E>Best (4-layer) lifted index</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -4700,7 +4700,7 @@
       indices
     </TableSubTitle_E>
     <CodeFlag>13</CodeFlag>
-    <Meaning_E>Showalter extent</Meaning_E>
+    <Meaning_E>Showalter index</Meaning_E>
     <AsciiUnit_x002F_Description_E>K</AsciiUnit_x002F_Description_E>
     <Status>Validation</Status>
   </ForExport_CodeFlag_E>
@@ -5344,7 +5344,7 @@
     <No>964</No>
     <TableTitle_E>Code table 4.7 - Derived forecast</TableTitle_E>
     <CodeFlag>5</CodeFlag>
-    <Meaning_E>Large anomaly extent of all members</Meaning_E>
+    <Meaning_E>Large anomaly index of all members</Meaning_E>
     <Nindicator_E>*</Nindicator_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>
@@ -7090,7 +7090,7 @@
     <TableSubTitle_E>Product discipline 2 - Land surface products, parameter category 0: vegetation/biomass
     </TableSubTitle_E>
     <CodeFlag>28</CodeFlag>
-    <Meaning_E>Leaf area extent</Meaning_E>
+    <Meaning_E>Leaf area index</Meaning_E>
     <AsciiUnit_x002F_Description_E>Numeric</AsciiUnit_x002F_Description_E>
     <Status>Validation</Status>
   </ForExport_CodeFlag_E>
@@ -7120,7 +7120,7 @@
     <TableSubTitle_E>Product discipline 2 - Land surface products, parameter category 0: vegetation/biomass
     </TableSubTitle_E>
     <CodeFlag>31</CodeFlag>
-    <Meaning_E>Normalized differential vegetation extent (NDVI)</Meaning_E>
+    <Meaning_E>Normalized differential vegetation index (NDVI)</Meaning_E>
     <AsciiUnit_x002F_Description_E>Numeric</AsciiUnit_x002F_Description_E>
     <Status>Validation</Status>
   </ForExport_CodeFlag_E>
@@ -7477,7 +7477,7 @@
     <TableSubTitle_E>Product discipline 3 - Space products, parameter category 0: image format products
     </TableSubTitle_E>
     <CodeFlag>4</CodeFlag>
-    <Meaning_E>Scaled lifted extent</Meaning_E>
+    <Meaning_E>Scaled lifted index</Meaning_E>
     <AsciiUnit_x002F_Description_E>Numeric</AsciiUnit_x002F_Description_E>
     <Status>Operational</Status>
   </ForExport_CodeFlag_E>

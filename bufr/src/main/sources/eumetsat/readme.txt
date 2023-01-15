@@ -1,10 +1,10 @@
 download dec 02,2009
 
-http://www.eumetsat.int/HOME/Main/Access_to_Data/Meteosat_Meteorological_Products/BUFR___GRIB2/extent.htm
+http://www.eumetsat.int/HOME/Main/Access_to_Data/Meteosat_Meteorological_Products/BUFR___GRIB2/index.htm
 
 product schedule with WMO headers:
 
-http://www.eumetsat.int/Home/Main/Access_to_Data/Meteosat_Meteorological_Products/Product_Schedule/extent.htm
+http://www.eumetsat.int/Home/Main/Access_to_Data/Meteosat_Meteorological_Products/Product_Schedule/index.htm
 
 the two table C are identical
 

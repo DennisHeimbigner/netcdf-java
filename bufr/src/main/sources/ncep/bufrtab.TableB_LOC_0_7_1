@@ -160,11 +160,11 @@ Table B LOC |  0 | 7 |  1
   0-11-231 |   1 |       -4096 |  13 | m s⁻¹             | USTM     ;     ; u-component of storm motion
   0-11-232 |   1 |       -4096 |  13 | m s⁻¹             | VSTM     ;     ; v-component of storm motion
   0-11-233 |   1 |      -10000 |  15 | m² s              | HLCY     ;     ; Storm relative helicity
-  0-11-235 |   0 |           0 |   6 | Code table        | TRBX     ;     ; Turbulence extent
-  0-11-236 |   0 |           0 |   6 | Code table        | TRBX10   ;     ; Turbulence extent for period from 1 minute prior to observation time to observation time
-  0-11-237 |   0 |           0 |   6 | Code table        | TRBX21   ;     ; Turbulence extent for period from 2 minutes prior to observation time to 1 minute prior to observation time
-  0-11-238 |   0 |           0 |   6 | Code table        | TRBX32   ;     ; Turbulence extent for period from 3 minutes prior to observation time to 2 minute prior to observation time
-  0-11-239 |   0 |           0 |   6 | Code table        | TRBX43   ;     ; Turbulence extent for period from 4 minutes prior to observation time to 3 minute prior to observation time
+  0-11-235 |   0 |           0 |   6 | Code table        | TRBX     ;     ; Turbulence index
+  0-11-236 |   0 |           0 |   6 | Code table        | TRBX10   ;     ; Turbulence index for period from 1 minute prior to observation time to observation time
+  0-11-237 |   0 |           0 |   6 | Code table        | TRBX21   ;     ; Turbulence index for period from 2 minutes prior to observation time to 1 minute prior to observation time
+  0-11-238 |   0 |           0 |   6 | Code table        | TRBX32   ;     ; Turbulence index for period from 3 minutes prior to observation time to 2 minute prior to observation time
+  0-11-239 |   0 |           0 |   6 | Code table        | TRBX43   ;     ; Turbulence index for period from 4 minutes prior to observation time to 3 minute prior to observation time
   0-11-240 |   0 |           0 |   5 | Code table        | WQM      ;     ; PREPBUFR: u-, v-component wind (UOB/VOB) (quality) marker
   0-11-241 |   0 |           0 |   5 | Code table        | WPC      ;     ; PREPBUFR: u-, v-component wind (UOB/VOB) event program code
   0-11-242 |   0 |           0 |  10 | Code table        | WRC      ;     ; PREPBUFR: u-, v-component wind (UOB/VOB) event reason code
@@ -220,12 +220,12 @@ Table B LOC |  0 | 7 |  1
   0-13-192 |   2 |           0 |  12 | kg m⁻²            | CH2O     ;     ; Cloud water
   0-13-193 |   1 |           0 |  11 | kg m⁻²            | PH2O     ;     ; Total column precipitable water
   0-13-194 |   0 |           0 |   3 | Code table        | INPC     ;     ; Indicator for inclusion/omission of precipitation
-  0-13-195 |   0 |         -40 |   8 | Numeric           | STBS5    ;     ; Modified Showalter stability extent
+  0-13-195 |   0 |         -40 |   8 | Numeric           | STBS5    ;     ; Modified Showalter stability index
   0-13-196 |   3 |          -2 |  20 | m                 | SNDP     ;     ; Snow depth
   0-13-197 |   3 |           0 |   8 | m                 | SMOI     ;     ; Soil moisture
   0-13-198 |   5 |           0 |  14 | kg kg⁻¹           | Q2MS     ;     ; Specific humidity at 2 m
   0-13-199 |   1 |          -1 |  14 | kg m⁻²            | TP5M     ;     ; Total precipitation past 5 minutes
-  0-13-201 |   2 |       -5000 |  14 | K                 | GLFTI    ;     ; Lifted extent
+  0-13-201 |   2 |       -5000 |  14 | K                 | GLFTI    ;     ; Lifted index
   0-13-202 |   1 |           0 |  11 | kg m⁻²            | PH2O19   ;     ; Precipitable water in layer bounded by 1.0 to 0.9 sigma
   0-13-203 |   1 |           0 |  11 | kg m⁻²            | PH2O97   ;     ; Precipitable water in layer bounded by 0.9 to 0.7 sigma
   0-13-204 |   1 |           0 |  11 | kg m⁻²            | PH2O73   ;     ; Precipitable water in layer bounded by 0.7 to 0.3 sigma
@@ -258,7 +258,7 @@ Table B LOC |  0 | 7 |  1
   0-13-239 |   5 |           0 |  16 | kg kg⁻¹           | CWTR     ;     ; Cloud water mixing ratio
   0-13-240 |   5 |           0 |  14 | kg kg⁻¹           | Q10M     ;     ; Specific humidity at 10 m
   0-13-242 |   0 |           0 |  16 | mg kg⁻¹           | ESBAK    ;     ; PREPBUFR: Global forecast (background) saturation specific humidity value
-  0-13-243 |   1 |         -50 |  10 | K                 | LFTI     ;     ; PREPBUFR: Lifted extent
+  0-13-243 |   1 |         -50 |  10 | K                 | LFTI     ;     ; PREPBUFR: Lifted index
   0-13-244 |   5 |           0 |  16 | kg kg⁻¹           | IMXR     ;     ; Ice mixing ratio
   0-13-245 |   0 |           0 |  16 | mg kg⁻¹           | QOB      ;     ; PREPBUFR: Specific humidity observation
   0-13-246 |   0 |           0 |   5 | Code table        | QQM      ;     ; PREPBUFR: Specific humidity (quality) marker
@@ -378,8 +378,8 @@ Table B LOC |  0 | 7 |  1
   0-33-194 |   0 |           0 |   4 | Code table        | QMDD     ;     ; SDMEDIT/QUIPS quality mark for moisture
   0-33-195 |   0 |           0 |   4 | Code table        | QMWN     ;     ; SDMEDIT/QUIPS quality mark for wind (does not include NESDIS produced satellite winds)
   0-33-196 |   0 |           0 |   8 | %                 | RFFL     ;     ; Per cent confidence based on NESDIS recursive filter function (satellite winds)
-  0-33-197 |   0 |           0 |   8 | %                 | QIFY     ;     ; Per cent confidence based on EUMETSAT quality extent with forecast consistency test (satellite winds)
-  0-33-198 |   0 |           0 |   8 | %                 | QIFN     ;     ; Per cent confidence based on EUMETSAT quality extent without forecast consistency test (satellite winds)
+  0-33-197 |   0 |           0 |   8 | %                 | QIFY     ;     ; Per cent confidence based on EUMETSAT quality index with forecast consistency test (satellite winds)
+  0-33-198 |   0 |           0 |   8 | %                 | QIFN     ;     ; Per cent confidence based on EUMETSAT quality index without forecast consistency test (satellite winds)
   0-33-199 |   2 |           0 |  17 | Numeric           | CHSQ     ;     ; Chi-squared
   0-33-200 |   0 |           0 |  31 | Flag table        | WSEQC1   ;     ; WindSat EDR quality flag-1
   0-33-201 |   1 |           0 |  12 | Degree true       | PHER     ;     ; Estimated error covariance for wind direction retrieval
@@ -444,7 +444,7 @@ Table B LOC |  0 | 7 |  1
   0-50-005 |   0 |           0 |  24 | CCITT IA5         | SRC      ;     ; PREPBUFR: File name of data source
   0-50-192 |   0 |           0 |  14 | J kg⁻¹            | CAPE     ;     ; PREPBUFR/PREPFITS: Convective available potential energy
   0-50-193 |   0 |       -3890 |  12 | J kg⁻¹            | CINH     ;     ; PREPBUFR/PREPFITS: Convective inhibition
-  0-50-194 |   1 |         -50 |  10 | K                 | LI       ;     ; PREPFITS: Lifted extent
+  0-50-194 |   1 |         -50 |  10 | K                 | LI       ;     ; PREPFITS: Lifted index
   0-50-195 |  -1 |         -40 |  16 | m                 | PBL      ;     ; PREPFITS: Planetary boudary layer height
   0-50-196 |   1 |           0 |  14 | mb                | TROP     ;     ; PREPFITS: Tropopause level
   0-50-197 |   1 |           0 |  14 | m                 | CDBZ     ;     ; PREPFITS: Height of base of cloud

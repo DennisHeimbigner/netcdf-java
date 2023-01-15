@@ -36,11 +36,11 @@ Attributes {
     }
     WVC_Lat_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     WVC_Lat_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     WVC_Lon {
         String long_name "longitude";
@@ -54,11 +54,11 @@ Attributes {
     }
     WVC_Lon_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     WVC_Lon_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Num_Sigma0 {
         String long_name "The total number of sigma-0 measurements";
@@ -72,11 +72,11 @@ Attributes {
     }
     Num_Sigma0_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Num_Sigma0_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Num_Good_Sigma0 {
         String long_name "The number of good sigma-0 measurements";
@@ -90,11 +90,11 @@ Attributes {
     }
     Num_Good_Sigma0_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Num_Good_Sigma0_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Num_Beam_12 {
         String long_name "The total number of sigma-0s received from beam 1 or 2";
@@ -108,11 +108,11 @@ Attributes {
     }
     Num_Beam_12_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Num_Beam_12_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Num_Beam_34 {
         String long_name "The total number of sigma-0s received from beam 3 or 4";
@@ -126,11 +126,11 @@ Attributes {
     }
     Num_Beam_34_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Num_Beam_34_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Num_Beam_56 {
         String long_name "The total number of sigma-0s received from beam 5 or 6";
@@ -144,11 +144,11 @@ Attributes {
     }
     Num_Beam_56_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Num_Beam_56_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Num_Beam_78 {
         String long_name "The total number of sigma-0s received from beam 7 or 8";
@@ -162,11 +162,11 @@ Attributes {
     }
     Num_Beam_78_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Num_Beam_78_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     WVC_Quality_Flag {
         String long_name "WVC Quality Flag";
@@ -179,11 +179,11 @@ Attributes {
     }
     WVC_Quality_Flag_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     WVC_Quality_Flag_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Cen_Lat {
         String long_name "The center geodetic latitude of a sigma-0 cell";
@@ -197,15 +197,15 @@ Attributes {
     }
     Cen_Lat_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Cen_Lat_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Cen_Lat_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Cen_Lon {
         String long_name "The center longitude of a sigma-0 cell";
@@ -219,15 +219,15 @@ Attributes {
     }
     Cen_Lon_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Cen_Lon_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Cen_Lon_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Cell_Azimuth {
         String long_name "The center longitude of a sigma-0 cell";
@@ -241,15 +241,15 @@ Attributes {
     }
     Cell_Azimuth_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Cell_Azimuth_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Cell_Azimuth_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Incidence_Angle {
         String long_name "The angle between the local normal vector and cell center direction vector";
@@ -263,15 +263,15 @@ Attributes {
     }
     Incidence_Angle_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Incidence_Angle_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Incidence_Angle_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Sigma0 {
         String long_name "The sigma-0 measurement corresponding to each WVC";
@@ -285,15 +285,15 @@ Attributes {
     }
     Sigma0_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Sigma0_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Sigma0_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Coeff_A {
         String long_name "The coefficient (alpha) of sigma-0 squared in the sigma-0 variance equation";
@@ -306,15 +306,15 @@ Attributes {
     }
     Coeff_A_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Coeff_A_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Coeff_A_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Coeff_B {
         String long_name "The coefficient (beta) of sigma-0 in the sigma-0 variance equation";
@@ -327,15 +327,15 @@ Attributes {
     }
     Coeff_B_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Coeff_B_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Coeff_B_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Coeff_C {
         String long_name "The coefficient (gamma) representing the constant term in the sigma-0 variance equation";
@@ -348,15 +348,15 @@ Attributes {
     }
     Coeff_C_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Coeff_C_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Coeff_C_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Sigma0_Quality_Flag {
         String long_name "Bit flags indicating the quality of sigma-0 measurements";
@@ -364,18 +364,18 @@ Attributes {
     }
     Sigma0_Quality_Flag_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Sigma0_Quality_Flag_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Sigma0_Quality_Flag_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     K_Polar {
-        String long_name "The polarization extent to the model function table";
+        String long_name "The polarization index to the model function table";
         Float64 scale_factor 1;
         Float64 scale_factor_err 0;
         Float64 add_offset 0;
@@ -385,15 +385,15 @@ Attributes {
     }
     K_Polar_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     K_Polar_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     K_Polar_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
     Sigma0_Usable_Flag_1 {
         String long_name "Eight bit flags indicating whether or not the first set of eight sigma-0 measurements is usable for wind retrieval";
@@ -401,11 +401,11 @@ Attributes {
     }
     Sigma0_Usable_Flag_1_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Sigma0_Usable_Flag_1_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Sigma0_Usable_Flag_2 {
         String long_name "Eight bit flags indicating whether or not the second set of eight sigma-0 measurements is usable for wind retrieval";
@@ -413,11 +413,11 @@ Attributes {
     }
     Sigma0_Usable_Flag_2_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Sigma0_Usable_Flag_2_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Sigma0_Usable_Flag_3 {
         String long_name "Eight bit flags indicating whether or not the third set of eight sigma-0 measurements is usable for wind retrieval";
@@ -425,11 +425,11 @@ Attributes {
     }
     Sigma0_Usable_Flag_3_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Sigma0_Usable_Flag_3_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Surface_Flag {
         String long_name "Bit flags indicating land and ice contamination of data";
@@ -437,14 +437,14 @@ Attributes {
     }
     Surface_Flag_dim_0 {
         String name "row";
-        String long_name "WVC row extent";
+        String long_name "WVC row index";
     }
     Surface_Flag_dim_1 {
         String name "WVC";
-        String long_name "WVC extent within a row";
+        String long_name "WVC index within a row";
     }
     Surface_Flag_dim_2 {
         String name "Sigma0-Dimension";
-        String long_name "Sigma0 position extent";
+        String long_name "Sigma0 position index";
     }
 }

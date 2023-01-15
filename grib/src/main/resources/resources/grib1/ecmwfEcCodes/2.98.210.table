@@ -178,7 +178,7 @@
 91 bcfire [Wildfire flux of Black Carbon] (kg m**-2 s**-1)
 92 cfire [Wildfire overall flux of burnt Carbon] (kg m**-2 s**-1)
 93 c4ffire [Wildfire fraction of C4 plants] (dimensionless)
-94 vegfire [Wildfire vegetation map extent] (dimensionless)
+94 vegfire [Wildfire vegetation map index] (dimensionless)
 95 ccfire [Wildfire Combustion Completeness] (dimensionless)
 96 flfire [Wildfire Fuel Load: Carbon per unit area] (kg m**-2)
 97 offire [Wildfire fraction of area observed] (dimensionless)

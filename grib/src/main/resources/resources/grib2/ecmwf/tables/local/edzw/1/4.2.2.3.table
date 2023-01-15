@@ -7,4 +7,4 @@
 197 197 variance of soil moisture content (10-100)(kg2 m-4)
 198 198 covariance of soil moisture content (kg2 m-4)
 199 199 surface emissivity(Numeric)
-200 200 soil moisture extent (multilayers)(Numeric)
+200 200 soil moisture index (multilayers)(Numeric)

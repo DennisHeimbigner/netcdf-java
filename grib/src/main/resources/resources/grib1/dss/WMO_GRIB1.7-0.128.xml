@@ -159,7 +159,7 @@
   </parameter>
   <parameter code="24">
     <shortName>PLI</shortName>
-    <description>Parcel lifted extent (to 500hPa)</description>
+    <description>Parcel lifted index (to 500hPa)</description>
     <units>K</units>
   </parameter>
   <parameter code="25">
@@ -509,7 +509,7 @@
   </parameter>
   <parameter code="77">
     <shortName>BLI</shortName>
-    <description>Best lifted extent (to 500 hPa)</description>
+    <description>Best lifted index (to 500 hPa)</description>
     <units>K</units>
   </parameter>
   <parameter code="78">

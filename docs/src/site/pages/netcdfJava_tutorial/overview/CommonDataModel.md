@@ -139,7 +139,7 @@ Structure {
 } station(*)
 ~~~
 
-Formally, a Variable is thought of as a sampled function whose domain is an extent range; each CoordinateAxis is a scalar valued function on the same range; each CoordinateSystem is therefore a vector-valued function on the same range consisting of its CoordinateAxis functions. To take it one step further, when the CoordinateSystem function is invertible, the Variable can be thought of as a sampled function whose domain is the range of the Coordinate System, that is on Rn (the product space of real numbers). To be invertible, each CoordinateAxis should be invertible. For a 1-dimensional CoordinateAxis this simply means the coordinate values are strictly monotonic. For a 2 dimensional CoordinateAxis, it means that the lines connecting adjacent coordinates do not cross each other. For > 2 dimensional CoordinateAxis, it means that the surfaces connecting the adjacent coordinates do not intersect each other.
+Formally, a Variable is thought of as a sampled function whose domain is an index range; each CoordinateAxis is a scalar valued function on the same range; each CoordinateSystem is therefore a vector-valued function on the same range consisting of its CoordinateAxis functions. To take it one step further, when the CoordinateSystem function is invertible, the Variable can be thought of as a sampled function whose domain is the range of the Coordinate System, that is on Rn (the product space of real numbers). To be invertible, each CoordinateAxis should be invertible. For a 1-dimensional CoordinateAxis this simply means the coordinate values are strictly monotonic. For a 2 dimensional CoordinateAxis, it means that the lines connecting adjacent coordinates do not cross each other. For > 2 dimensional CoordinateAxis, it means that the surfaces connecting the adjacent coordinates do not intersect each other.
 
 ### Current Encodings
 
@@ -160,7 +160,7 @@ The <b>_ucar.nc2.dataset_</b> layer reads various Conventions and extracts the C
 
 ## Scientific Feature Types
 
-Scientific Feature Types are a way to categorize scientific data. The CDM Feature Type layer turns CDM datasets into collections of Feature Type objects, and allows a user to extract subsets of the Feature Types "in coordinate space" i.e. using spatial and temporal bounding boxes. In contrast, the CDM Data Access layer provides array extent space subsetting, and the client application must know how to map array indices into coordinate values.
+Scientific Feature Types are a way to categorize scientific data. The CDM Feature Type layer turns CDM datasets into collections of Feature Type objects, and allows a user to extract subsets of the Feature Types "in coordinate space" i.e. using spatial and temporal bounding boxes. In contrast, the CDM Data Access layer provides array index space subsetting, and the client application must know how to map array indices into coordinate values.
 
 With these Feature Types objects, mapping into other data models like ISO/OGC becomes possible.
 

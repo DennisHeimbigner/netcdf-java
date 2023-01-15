@@ -270,7 +270,7 @@ for example
 
 * `cdmremote:http://server:8080/thredds/cdmremote/data.nc`
 
-The `cdmRemoteURL` must be an endpoint for a `cdmremote` web service, which provides extent subsetting on remote CDM datasets.
+The `cdmRemoteURL` must be an endpoint for a `cdmremote` web service, which provides index subsetting on remote CDM datasets.
 
 ### DAP4 datasets
 
@@ -318,7 +318,7 @@ Example:
 * `thredds:http://localhost:8081/thredds/catalog/grib.v5/gfs_2p5deg/catalog.html#grib.v5/gfs_2p5deg/TwoD`
 
 If the dataset has a `cdmrFeature` service, the `FeatureDataset` will be opened through that service.
-This can be more efficient than opening the dataset through the extent-based services like `OPeNDAP` and `cdmremote`.
+This can be more efficient than opening the dataset through the index-based services like `OPeNDAP` and `cdmremote`.
 
 ### Collection Datasets
 

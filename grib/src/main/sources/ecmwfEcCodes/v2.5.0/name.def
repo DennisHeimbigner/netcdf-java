@@ -374,13 +374,13 @@
 	 table2Version = 128 ;
 	 indicatorOfParameter = 65 ;
 	}
-#Leaf area extent, low vegetation
-'Leaf area extent, low vegetation' = {
+#Leaf area index, low vegetation
+'Leaf area index, low vegetation' = {
 	 table2Version = 128 ;
 	 indicatorOfParameter = 66 ;
 	}
-#Leaf area extent, high vegetation
-'Leaf area extent, high vegetation' = {
+#Leaf area index, high vegetation
+'Leaf area index, high vegetation' = {
 	 table2Version = 128 ;
 	 indicatorOfParameter = 67 ;
 	}
@@ -2364,13 +2364,13 @@
 	 table2Version = 200 ;
 	 indicatorOfParameter = 65 ;
 	}
-#Leaf area extent, low vegetation
-'Leaf area extent, low vegetation' = {
+#Leaf area index, low vegetation
+'Leaf area index, low vegetation' = {
 	 table2Version = 200 ;
 	 indicatorOfParameter = 66 ;
 	}
-#Leaf area extent, high vegetation
-'Leaf area extent, high vegetation' = {
+#Leaf area index, high vegetation
+'Leaf area index, high vegetation' = {
 	 table2Version = 200 ;
 	 indicatorOfParameter = 67 ;
 	}
@@ -3314,8 +3314,8 @@
 	 table2Version = 131 ;
 	 indicatorOfParameter = 97 ;
 	}
-#Maximum of significant wave height extent
-'Maximum of significant wave height extent' = {
+#Maximum of significant wave height index
+'Maximum of significant wave height index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 216 ;
 	}
@@ -8919,23 +8919,23 @@
 	 table2Version = 228 ;
 	 indicatorOfParameter = 29 ;
 	}
-#Soil wetness extent in layer 1
-'Soil wetness extent in layer 1' = {
+#Soil wetness index in layer 1
+'Soil wetness index in layer 1' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 40 ;
 	}
-#Soil wetness extent in layer 2
-'Soil wetness extent in layer 2' = {
+#Soil wetness index in layer 2
+'Soil wetness index in layer 2' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 41 ;
 	}
-#Soil wetness extent in layer 3
-'Soil wetness extent in layer 3' = {
+#Soil wetness index in layer 3
+'Soil wetness index in layer 3' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 42 ;
 	}
-#Soil wetness extent in layer 4
-'Soil wetness extent in layer 4' = {
+#Soil wetness index in layer 4
+'Soil wetness index in layer 4' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 43 ;
 	}
@@ -9204,13 +9204,13 @@
 	 table2Version = 230 ;
 	 indicatorOfParameter = 251 ;
 	}
-#K extent
-'K extent' = {
+#K index
+'K index' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 121 ;
 	}
-#Total totals extent
-'Total totals extent' = {
+#Total totals index
+'Total totals index' = {
 	 table2Version = 228 ;
 	 indicatorOfParameter = 123 ;
 	}
@@ -9484,13 +9484,13 @@
 	 table2Version = 129 ;
 	 indicatorOfParameter = 65 ;
 	}
-#Leaf area extent, low vegetation
-'Leaf area extent, low vegetation' = {
+#Leaf area index, low vegetation
+'Leaf area index, low vegetation' = {
 	 table2Version = 129 ;
 	 indicatorOfParameter = 66 ;
 	}
-#Leaf area extent, high vegetation
-'Leaf area extent, high vegetation' = {
+#Leaf area index, high vegetation
+'Leaf area index, high vegetation' = {
 	 table2Version = 129 ;
 	 indicatorOfParameter = 67 ;
 	}
@@ -10564,13 +10564,13 @@
 	 table2Version = 131 ;
 	 indicatorOfParameter = 16 ;
 	}
-#Showalter extent probability
-'Showalter extent probability' = {
+#Showalter index probability
+'Showalter index probability' = {
 	 table2Version = 131 ;
 	 indicatorOfParameter = 17 ;
 	}
-#Whiting extent probability
-'Whiting extent probability' = {
+#Whiting index probability
+'Whiting index probability' = {
 	 table2Version = 131 ;
 	 indicatorOfParameter = 18 ;
 	}
@@ -10774,38 +10774,38 @@
 	 table2Version = 131 ;
 	 indicatorOfParameter = 255 ;
 	}
-#10 metre wind gust extent
-'10 metre wind gust extent' = {
+#10 metre wind gust index
+'10 metre wind gust index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 49 ;
 	}
-#Snowfall extent
-'Snowfall extent' = {
+#Snowfall index
+'Snowfall index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 144 ;
 	}
-#10 metre speed extent
-'10 metre speed extent' = {
+#10 metre speed index
+'10 metre speed index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 165 ;
 	}
-#2 metre temperature extent
-'2 metre temperature extent' = {
+#2 metre temperature index
+'2 metre temperature index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 167 ;
 	}
-#Maximum temperature at 2 metres extent
-'Maximum temperature at 2 metres extent' = {
+#Maximum temperature at 2 metres index
+'Maximum temperature at 2 metres index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 201 ;
 	}
-#Minimum temperature at 2 metres extent
-'Minimum temperature at 2 metres extent' = {
+#Minimum temperature at 2 metres index
+'Minimum temperature at 2 metres index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 202 ;
 	}
-#Total precipitation extent
-'Total precipitation extent' = {
+#Total precipitation index
+'Total precipitation index' = {
 	 table2Version = 132 ;
 	 indicatorOfParameter = 228 ;
 	}
@@ -11454,8 +11454,8 @@
 	 table2Version = 140 ;
 	 indicatorOfParameter = 252 ;
 	}
-#Benjamin-Feir extent
-'Benjamin-Feir extent' = {
+#Benjamin-Feir index
+'Benjamin-Feir index' = {
 	 table2Version = 140 ;
 	 indicatorOfParameter = 253 ;
 	}
@@ -14564,18 +14564,18 @@
 	 table2Version = 201 ;
 	 indicatorOfParameter = 70 ;
 	}
-#KO-extent
-'KO-extent' = {
+#KO-index
+'KO-index' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 71 ;
 	}
-#convection base extent
-'convection base extent' = {
+#convection base index
+'convection base index' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 72 ;
 	}
-#convection top extent
-'convection top extent' = {
+#convection top index
+'convection top index' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 73 ;
 	}
@@ -14624,8 +14624,8 @@
 	 table2Version = 201 ;
 	 indicatorOfParameter = 82 ;
 	}
-#dry convection top extent
-'dry convection top extent' = {
+#dry convection top index
+'dry convection top index' = {
 	 table2Version = 201 ;
 	 indicatorOfParameter = 83 ;
 	}
@@ -15064,8 +15064,8 @@
 	 table2Version = 210 ;
 	 indicatorOfParameter = 93 ;
 	}
-#Wildfire vegetation map extent
-'Wildfire vegetation map extent' = {
+#Wildfire vegetation map index
+'Wildfire vegetation map index' = {
 	 table2Version = 210 ;
 	 indicatorOfParameter = 94 ;
 	}
@@ -15764,8 +15764,8 @@
 	 table2Version = 211 ;
 	 indicatorOfParameter = 93 ;
 	}
-#Wildfire vegetation map extent
-'Wildfire vegetation map extent' = {
+#Wildfire vegetation map index
+'Wildfire vegetation map index' = {
 	 table2Version = 211 ;
 	 indicatorOfParameter = 94 ;
 	}
