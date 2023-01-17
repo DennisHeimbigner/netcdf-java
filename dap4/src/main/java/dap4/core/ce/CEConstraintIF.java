@@ -3,7 +3,7 @@
  * See the LICENSE file for more information.
  */
 
-package dap4.core.interfaces;
+package dap4.core.ce;
 
 import dap4.core.dmr.DapNode;
 

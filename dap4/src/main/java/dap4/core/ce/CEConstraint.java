@@ -8,8 +8,9 @@ package dap4.core.ce;
 import dap4.core.ce.parser.CEParserImpl;
 import dap4.core.dmr.*;
 import dap4.core.dmr.parser.ParseException;
-import dap4.core.interfaces.DataCursor;
 import dap4.core.util.*;
+import dap4.dap4lib.D4Array;
+
 import java.util.*;
 
 /**
@@ -313,7 +314,7 @@ public class CEConstraint {
    * @throws DapException
    * @return the value of the expression (usually a Boolean)
    */
-  protected Object eval(DapVariable var, DapSequence seq, DataCursor record, CEAST expr) throws DapException {
+  protected Object eval(DapVariable var, DapSequence seq, D4Array record, CEAST expr) throws DapException {
     switch (expr.sort) {
 
       case CONSTANT:
@@ -653,7 +654,7 @@ public class CEConstraint {
    * @throws DapException
    * @return true if the filter matches the record
    */
-  public boolean match(DapVariable sqvar, DapSequence seq, DataCursor rec) throws DapException {
+  public boolean match(DapVariable sqvar, DapSequence seq, D4Array rec) throws DapException {
     Segment sseq = findSegment(sqvar);
     if (sseq == null)
       return false;
@@ -674,7 +675,7 @@ public class CEConstraint {
    * @return true if a match
    * @throws DapException
    */
-  protected boolean matches(DapVariable var, DapSequence seq, DataCursor rec, CEAST filter) throws DapException {
+  protected boolean matches(DapVariable var, DapSequence seq, D4Array rec, CEAST filter) throws DapException {
     Object value = eval(var, seq, rec, filter);
     return ((Boolean) value);
   }

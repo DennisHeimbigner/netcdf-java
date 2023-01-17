@@ -5,8 +5,6 @@
 
 package dap4.dap4lib.cdm;
 
-import dap4.core.interfaces.DataIndex;
-import dap4.dap4lib.D4Cursor;
 import dap4.core.dmr.DapDimension;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.TypeSort;
