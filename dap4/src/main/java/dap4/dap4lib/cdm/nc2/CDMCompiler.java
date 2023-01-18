@@ -6,12 +6,6 @@
 
 package dap4.dap4lib.cdm.nc2;
 
-<<<<<<< HEAD:dap4/src/main/java/dap4/dap4lib/cdm/nc2/CDMCompiler.java
-import dap4.core.dmr.DapVariable;
-import dap4.core.util.DapContext;
-import dap4.dap4lib.D4Cursor;
-=======
->>>>>>> dap4fixes1a.tmp:dap4/d4cdm/src/main/java/dap4/cdm/nc2/CDMCompiler.java
 import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.DapDataset;
