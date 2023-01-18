@@ -6,9 +6,12 @@
 
 package dap4.dap4lib.cdm.nc2;
 
+<<<<<<< HEAD:dap4/src/main/java/dap4/dap4lib/cdm/nc2/CDMCompiler.java
 import dap4.core.dmr.DapVariable;
 import dap4.core.util.DapContext;
 import dap4.dap4lib.D4Cursor;
+=======
+>>>>>>> dap4fixes1a.tmp:dap4/d4cdm/src/main/java/dap4/cdm/nc2/CDMCompiler.java
 import dap4.dap4lib.D4DSP;
 import dap4.dap4lib.cdm.NodeMap;
 import dap4.core.dmr.DapDataset;
@@ -16,7 +19,6 @@ import dap4.core.dmr.DapNode;
 import dap4.core.util.DapException;
 import ucar.ma2.Array;
 import ucar.nc2.CDMNode;
-import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import java.util.Map;
