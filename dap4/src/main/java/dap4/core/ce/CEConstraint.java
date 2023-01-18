@@ -8,7 +8,6 @@ package dap4.core.ce;
 import dap4.core.ce.parser.CEParserImpl;
 import dap4.core.dmr.*;
 import dap4.core.dmr.parser.ParseException;
-import dap4.core.interfaces.DataCursor;
 import dap4.core.util.*;
 import dap4.dap4lib.D4Array;
 

@@ -37,3 +37,5 @@ project(':cdm:s3').name = 'cdm-s3'
 project(':cdm:zarr').name = 'cdm-zarr'
 project(':visad:mcidas').name = 'cdm-mcidas'
 project(':visad:vis5d').name = 'cdm-vis5d'
+
+project(':dap4').name = 'dap4-lib'
