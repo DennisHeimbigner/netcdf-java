@@ -97,8 +97,6 @@ public class CEConstraint {
     NONE, EXPANDED, CONTRACTED
   }
 
-  ;
-
   protected static class Segment {
     DapVariable var;
     List<Slice> slices; // projection slices for this variable
@@ -498,26 +496,6 @@ public class CEConstraint {
     }
     return isref;
   }
-
-  /**
-   * Reference X Iterator
-   * Iterate over the variables and return
-   * those that are referenced. The order of
-   * return is preorder.
-   * Inputs:
-   * 1. the variable whose slices are to be iterated.
-   *
-   * @return ReferenceIterator
-   * @throws DapException if could not create.
-   */
-  /*
-   * public ReferenceIterator
-   * referenceIterator()
-   * throws DapException
-   * {
-   * return new ReferenceIterator(this);
-   * }
-   */
 
   //////////////////////////////////////////////////
   // Selection (Filter) processing
