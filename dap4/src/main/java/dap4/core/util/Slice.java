@@ -206,7 +206,9 @@ public class Slice {
     return this.maxsize;
   }
 
-  public boolean isScalar() {return this.getSize() <= 1;}
+  public boolean isScalar() {
+    return this.getSize() <= 1;
+  }
 
   public Slice setMaxSize(int size) throws DapException {
     return setIndices(this.first, this.stop, this.stride, size);
