@@ -10,6 +10,8 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.Nullable;
+
+import com.google.common.collect.Multimap;
 import thredds.client.catalog.ServiceType;
 import ucar.httpservices.HTTPFactory;
 import ucar.httpservices.HTTPMethod;
@@ -445,28 +447,26 @@ public class DatasetUrl {
 
   // check for dmr
   private static ServiceType checkIfDap4(String location) throws IOException {
-    if (!location.matches("^.*[.](dmr|dap|dsr)([.](xml|html))?$"))
-      return null;
-    // Strip off any trailing DAP4 suffix
-    if (location.endsWith(".xml"))
-      location = location.substring(0, location.length() - ".xml".length());
-    else if (location.endsWith(".html"))
-      location = location.substring(0, location.length() - ".html".length());
-    // location must end with dap, dmr, or dsr
-    location = location.substring(0, location.length() - ".dxx".length());
-
-    try (HTTPMethod method = HTTPFactory.Get(location + ".dsr.xml")) {
+    if (location.matches("^.*[.](dmr|dap|dsr)([.](xml|html))?$")) {
+      // Strip off any trailing DAP4 suffix(es)
+      if(location.endsWith(".xml"))
+        location = location.substring(0, location.length() - ".xml".length());
+      else if(location.endsWith(".html"))
+        location = location.substring(0, location.length() - ".html".length());
+      // location must end with dap, dmr, or dsr; strip it off
+      location = location.substring(0, location.length() - ".dxx".length());
+    }
+    location = location + ".dsr.xml"; // get known dap4 response
+    try (HTTPMethod method = HTTPFactory.Get(location)) {
       int status = method.execute();
       if (status == HTTP_OK) {
-        Optional<String> value = method.getResponseHeaderValue("Content-Type");
+        Optional<String> value = method.getResponseHeaderValue("Content-Description");
         if (value.isPresent()) {
           if (value.get().contains("application/vnd.opendap.dap4"))
             return ServiceType.DAP4;
         }
       }
-      if (status == HTTP_UNAUTHORIZED || status == HTTP_FORBIDDEN)
-        throw new IOException("Unauthorized to open dataset " + location);
-      // not dods
+      // not dap4
       return null;
     }
   }
