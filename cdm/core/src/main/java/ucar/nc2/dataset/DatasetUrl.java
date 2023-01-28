@@ -449,9 +449,9 @@ public class DatasetUrl {
   private static ServiceType checkIfDap4(String location) throws IOException {
     if (location.matches("^.*[.](dmr|dap|dsr)([.](xml|html))?$")) {
       // Strip off any trailing DAP4 suffix(es)
-      if(location.endsWith(".xml"))
+      if (location.endsWith(".xml"))
         location = location.substring(0, location.length() - ".xml".length());
-      else if(location.endsWith(".html"))
+      else if (location.endsWith(".html"))
         location = location.substring(0, location.length() - ".html".length());
       // location must end with dap, dmr, or dsr; strip it off
       location = location.substring(0, location.length() - ".dxx".length());

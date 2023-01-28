@@ -38,18 +38,16 @@ import java.util.List;
  */
 
 @RunWith(Parameterized.class)
-public class TestDap4Url extends DapTestCommon implements Dap4ManifestIF
-{
+public class TestDap4Url extends DapTestCommon implements Dap4ManifestIF {
 
   //////////////////////////////////////////////////
   // Constants
 
   // Legal url formats
-  static protected String[] urls = {
-          "https://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc#dap4",
-          "dap4://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc",
-          "https://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc",
-          //"https://remotetest.unidata.ucar.edu/thredds/dap4/testAll/H.1.1.nc",
+  static protected String[] urls = {"https://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc#dap4",
+      "dap4://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc",
+      "https://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc",
+      // "https://remotetest.unidata.ucar.edu/thredds/dap4/testAll/H.1.1.nc",
   };
 
   //////////////////////////////////////////////////
@@ -67,8 +65,7 @@ public class TestDap4Url extends DapTestCommon implements Dap4ManifestIF
   // Test Case Class
 
   // Encapulate the arguments for each test
-  static class TestCase extends TestCaseCommon
-  {
+  static class TestCase extends TestCaseCommon {
     public String url;
 
     public TestCase(String url) {
@@ -87,7 +84,7 @@ public class TestDap4Url extends DapTestCommon implements Dap4ManifestIF
   @Parameterized.Parameters(name = "{index}: {0}")
   static public List<TestCaseCommon> defineTestCases() {
     List<TestCaseCommon> testcases = new ArrayList<>();
-    for(String u : urls) {
+    for (String u : urls) {
       TestCase tc = new TestCase(u);
       testcases.add(tc);
     }
