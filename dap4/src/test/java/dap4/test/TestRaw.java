@@ -147,8 +147,8 @@ public class TestRaw extends DapTestCommon implements Dap4ManifestIF {
     }
     assert ncfile != null;
 
-    String datasetname = tc.url;
     String testresult = dumpdata(ncfile, tc.name); // print data section
+    ncfile.close();
 
     // Remove unused text
     sb.setLength(0);

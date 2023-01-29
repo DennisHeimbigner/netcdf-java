@@ -163,6 +163,7 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
 
     String datasetname = tc.name;
     String testresult = dumpdata(ncfile, datasetname);
+    ncfile.close();
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;

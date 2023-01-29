@@ -149,8 +149,9 @@ public class TestRemote extends DapTestCommon implements Dap4ManifestIF {
     }
     assert ncfile != null;
 
-    String datasetname = tc.name;
     String testresult = dumpdata(ncfile, tc.name); // print data section
+
+    ncfile.close();
 
     // Read the baseline file(s) if they exist
     String baselinecontent = null;
