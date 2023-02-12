@@ -295,7 +295,7 @@ public class Group extends CDMNode implements AttributeContainer {
 
   /** The attributes contained by this Group. */
   public AttributeContainer attributes() {
-    return AttributeContainer.filterExact(attributes, Attribute.SPECIALS);
+    return attributes;
   }
 
   /** Find the attribute by name, return null if not exist */
@@ -316,7 +316,7 @@ public class Group extends CDMNode implements AttributeContainer {
   /** @deprecated Use attributes() */
   @Deprecated
   public java.util.List<Attribute> getAttributes() {
-    return AttributeContainer.filterExact(attributes, Attribute.SPECIALS).getAttributes();
+    return AttributeContainer.filter(attributes, Attribute.SPECIALS).getAttributes();
   }
 
   /** @deprecated Use attributes() */
