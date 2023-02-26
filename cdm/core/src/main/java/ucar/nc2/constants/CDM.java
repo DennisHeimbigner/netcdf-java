@@ -68,8 +68,8 @@ public class CDM {
 
   static public final String[] SPECIALS = {NCPROPERTIES, ISNETCDF4, SUPERBLOCKVERSION};
 
-  // public static final String DAP4_LITTLE_ENDIAN = "_DAP4_Little_Endian";
-  // public static final String EDU_UCAR_PREFIX = "_edu.ucar";
+  public static final String DAP4_LITTLE_ENDIAN = "_DAP4_Little_Endian";
+  public static final String EDU_UCAR_PREFIX = "_edu.ucar";
 
   public static boolean isspecial(Attribute a) {
     String nm = a.getShortName();
