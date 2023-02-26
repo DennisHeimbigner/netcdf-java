@@ -17,7 +17,6 @@ public class TestReadArrayStructure {
   private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String testDir = "../../dap4/src/test/data/resources/nctestfiles/";
 
-
   @Test
   public void shouldReadScalarStructure() throws IOException {
     final String filename = testDir + "test_struct1.nc";

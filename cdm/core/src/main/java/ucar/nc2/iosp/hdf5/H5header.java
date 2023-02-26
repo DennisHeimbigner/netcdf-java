@@ -1760,7 +1760,6 @@ public class H5header extends NCheader implements H5headerIF {
       EnumTypedef actualEnumTypedef = null; // The final chosen EnumTypedef
       Group ncGroup = v.getParentGroupOrRoot();
 
-
       // Step 1:
       // See if an independent enum type already exists with the same name
       EnumTypedef candidate = ncGroup.findEnumeration(mdt.enumTypeName, true);
