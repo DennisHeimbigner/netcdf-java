@@ -32,6 +32,15 @@ import java.util.Map;
  * @author caron
  */
 public class Attribute extends CDMNode {
+  /** @deprecated move to jni.Nc4Iosp */
+  @Deprecated
+  private static final String SPECIALPREFIX = "_";
+
+  /** @deprecated move to jni.Nc4Iosp */
+  @Deprecated
+  static public final String[] SPECIALS =
+      {CDM.NCPROPERTIES, CDM.ISNETCDF4, CDM.SUPERBLOCKVERSION, CDM.DAP4_LITTLE_ENDIAN, CDM.EDU_UCAR_PREFIX};
+
   /**
    * Turn a list into a map
    *
