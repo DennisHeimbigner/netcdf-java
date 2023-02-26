@@ -61,10 +61,9 @@ public class TestCatalogBuilder {
 
   @Test
   public void testValidationInvalidNonRootPort() throws URISyntaxException {
-    // Apparently this port is no longer correct.
-    String port = ""; // was "8081"
+    String port = "8081";
     // valid non-root privileged port specified
-    URI testURI = new URI(host + (port.length() > 0 ? ":" + port : "") + catalog);
+    URI testURI = new URI(host + ":" + port + catalog);
     Assert.assertEquals(Long.valueOf(port), Long.valueOf(testURI.getPort()));
 
     // non-root privileged port is OK for port validation, but will fail against Unidata TDS server
