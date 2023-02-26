@@ -417,7 +417,8 @@ public class DOM4Parser implements Dap4Parser {
 
   protected boolean isattributeset(Node node) {
     String type = pull(node, "type");
-    return (nodesort(node) == DapSort.ATTRIBUTE && (isempty(type) || "container".equalsIgnoreCase(type)));
+    // See DAP4 Spec. PR https://github.com/OPENDAP/dap4-specification/pull/3
+    return (nodesort(node) == DapSort.ATTRIBUTE && (isempty(type) || "Container".equalsIgnoreCase(type)));
   }
 
   //////////////////////////////////////////////////
