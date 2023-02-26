@@ -319,7 +319,7 @@ public class Group extends CDMNode implements AttributeContainer {
   /** @deprecated Use attributes() */
   @Deprecated
   public java.util.List<Attribute> getAttributes() {
-    return attributes().getAttributes();
+    return AttributeContainer.filter(attributes, CDM.SPECIALS).getAttributes();
   }
 
   /** @deprecated Use attributes() */
