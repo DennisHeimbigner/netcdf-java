@@ -654,17 +654,18 @@ public class HTTPSession implements Closeable {
     this.sessioncontext.setCookieStore(new BasicCookieStore());
     this.sessioncache = new HTTPAuthCache();
     this.sessioncontext.setAuthCache(sessioncache);
-    this.interceptors = new HTTPIntercepts();
   }
 
   //////////////////////////////////////////////////
   // Accessor(s)
 
   public HTTPIntercepts getIntercepts() {
+    assert this.interceptors != null;
     return this.interceptors;
   }
 
   public HTTPIntercepts.DebugInterceptRequest getDebugRequestInterceptor() {
+    assert this.interceptors != null;
     return this.interceptors.debugRequestInterceptor();
   }
 
@@ -679,7 +680,6 @@ public class HTTPSession implements Closeable {
 
   public String getSessionURI() {
     return this.sessionURI;
-
   }
 
   /**
