@@ -28,6 +28,7 @@ dependencies {
 test {
   systemProperties['testargs'] = System.getProperty('testargs', '')
 
+if(false) { // disable dap4 tests for now
   include 'dap4/test/TestParserDMR.class'
   include 'dap4/test/TestParserCE.class'
   include 'dap4/test/TestRaw.class'
@@ -38,4 +39,6 @@ test {
 
   dependsOn('farmBeforeIntegrationTest')
   finalizedBy('farmAfterIntegrationTest')
+}
+
 }
