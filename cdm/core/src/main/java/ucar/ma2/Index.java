@@ -570,10 +570,14 @@ public class Index implements Cloneable {
       throw new ArrayIndexOutOfBoundsException();
     if (rank == 0)
       return this;
-    int prefixrank = (hasvlen ? rank - 1 : rank);
+    int prefixrank = -1;
+    if(hasvlen)
+        prefixrank = rank - 1;
+    else
+        prefixrank = rank;
     System.arraycopy(index, 0, current, 0, prefixrank);
     if (hasvlen)
-      current[prefixrank] = -1; // ?? is this right?
+      current[rank] = -1; // ??
     return this;
   }
 
