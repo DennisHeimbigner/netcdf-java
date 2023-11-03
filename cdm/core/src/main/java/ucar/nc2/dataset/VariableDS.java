@@ -14,6 +14,8 @@ import ucar.nc2.dataset.NetcdfDataset.Enhance;
 import ucar.nc2.filter.ConvertMissing;
 import ucar.nc2.filter.FilterHelpers;
 import ucar.nc2.filter.ScaleOffset;
+import ucar.nc2.filter.Standardizer;
+import ucar.nc2.filter.Normalizer;
 import ucar.nc2.filter.UnsignedConversion;
 import ucar.nc2.internal.dataset.CoordinatesHelper;
 import ucar.nc2.iosp.netcdf3.N3iosp;
@@ -268,6 +270,12 @@ public class VariableDS extends Variable implements VariableEnhanced, EnhanceSca
       if (enhancements.contains(Enhance.ConvertMissing) && convertMissing != null
           && (dataType == DataType.FLOAT || dataType == DataType.DOUBLE)) {
         data = convertMissing.convertMissing(data);
+      }
+      if (enhancements.contains(Enhance.ApplyStandardizer) && standardizer != null) {
+        data = standardizer.convert(data);
+      }
+      if (enhancements.contains(Enhance.ApplyNormalizer) && normalizer != null) {
+        data = normalizer.convert(data);
       }
       return data;
     }
@@ -797,6 +805,8 @@ public class VariableDS extends Variable implements VariableEnhanced, EnhanceSca
   // TODO make immutable in version 6
   private UnsignedConversion unsignedConversion;
   private ScaleOffset scaleOffset;
+  private Standardizer standardizer;
+  private Normalizer normalizer;
   private ConvertMissing convertMissing;
   private Set<Enhance> enhanceMode = EnumSet.noneOf(Enhance.class); // The set of enhancements that were made.
 
@@ -850,6 +860,14 @@ public class VariableDS extends Variable implements VariableEnhanced, EnhanceSca
     if (this.enhanceMode.contains(Enhance.ApplyScaleOffset) && (dataType.isNumeric() || dataType == DataType.CHAR)) {
       this.scaleOffset = ScaleOffset.createFromVariable(this);
       this.dataType = scaleOffset != null ? scaleOffset.getScaledOffsetType() : this.dataType;
+    }
+    Attribute standardizerAtt = findAttribute(CDM.STANDARDIZE);
+    if (standardizerAtt != null && this.enhanceMode.contains(Enhance.ApplyStandardizer) && dataType.isFloatingPoint()) {
+      this.standardizer = Standardizer.createFromVariable(this);
+    }
+    Attribute normalizerAtt = findAttribute(CDM.NORMALIZE);
+    if (normalizerAtt != null && this.enhanceMode.contains(Enhance.ApplyNormalizer) && dataType.isFloatingPoint()) {
+      this.normalizer = Normalizer.createFromVariable(this);
     }
 
     // need fill value info before convertMissing
