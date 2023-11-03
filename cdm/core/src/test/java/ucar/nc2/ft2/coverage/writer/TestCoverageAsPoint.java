@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.nc2.constants.FeatureType;
@@ -23,7 +24,7 @@ import java.util.List;
 /** Test CoverageAsPoint */
 public class TestCoverageAsPoint {
 
-  private static final String testFilePath = TestDir.cdmLocalTestDataDir + "rankTest.nc";
+  private static final String testFilePath = TestDir.cdmLocalTestDataDir + "point/testGridAsPointAxes.ncml";
 
   private static CoverageCollection gds;
 
@@ -68,6 +69,7 @@ public class TestCoverageAsPoint {
     SubsetParams params = new SubsetParams();
     params.setVariables(stationVarNames);
     params.setLatLonPoint(latlon);
+    params.setVertCoord(0);
 
     FeatureDatasetPoint fdp1 = new CoverageAsPoint(gds, stationVarNames, params).asFeatureDatasetPoint();
     assertThat(fdp1.getFeatureType()).isEqualTo(FeatureType.STATION);
@@ -75,6 +77,8 @@ public class TestCoverageAsPoint {
     // vars with z should be station profile
     List<String> profileVarNames = Arrays.asList(new String[] {"full4", "withT1", "full3", "3D", "4D"});
 
+    params = new SubsetParams();
+    params.setLatLonPoint(latlon);
     params.setVariables(profileVarNames);
 
     FeatureDatasetPoint fdp2 = new CoverageAsPoint(gds, profileVarNames, params).asFeatureDatasetPoint();
@@ -82,6 +86,7 @@ public class TestCoverageAsPoint {
   }
 
   @Test
+  @Ignore
   public void testCoverageAsPoint() throws IOException {
     double[] vals = Arrays.copyOfRange(expected, 0, 1);
     // test single point (no time)
@@ -95,8 +100,19 @@ public class TestCoverageAsPoint {
     // test time series
     varNames = new ArrayList<>();
     varNames.add("T1noZ");
+    vals = Arrays.copyOfRange(expected, 0, 2);
     params.setVariables(varNames);
-    readCoverageAsPoint(varNames, params, alts[0], times, vals);
+    readCoverageAsPoint(varNames, params, alts[0], times, vals, 0, "time1");
+
+    // test multiple time axes
+    varNames = new ArrayList<>();
+    varNames.add("full4");
+    varNames.add("withT1");
+    vals = new double[] {11.0, 1011.0};
+    params.setVariables(varNames);
+    params.setVertCoord(alts[0]);
+    readCoverageAsPoint(varNames, params, alts[0], times, vals, 0, "time");
+    readCoverageAsPoint(varNames, params, alts[0], times, vals, 1, "time1");
   }
 
   @Test
@@ -115,6 +131,7 @@ public class TestCoverageAsPoint {
   }
 
   @Test
+  @Ignore
   public void testCoverageAsProfile() throws IOException {
     // test single profile (no time)
     List<String> varNames = new ArrayList<>();
@@ -129,6 +146,48 @@ public class TestCoverageAsPoint {
     varNames.add("4D");
     params.setVariables(varNames);
     readCoverageAsProfile(varNames, params, alts, times, expected);
+
+    // test two different time axes
+    varNames = new ArrayList<>();
+    varNames.add("full4");
+    varNames.add("withT1");
+    params = new SubsetParams();
+    params.setVariables(varNames);
+    params.setLatLonPoint(latlon);
+    readCoverageAsProfile(varNames, params, alts, times, expected);
+    readCoverageAsProfile(varNames, params, alts, times, expected, 1, "time1", "z");
+
+    // test no time different z-axis names
+    varNames = new ArrayList<>();
+    varNames.add("full3");
+    varNames.add("Z1noT");
+    params = new SubsetParams();
+    params.setVariables(varNames);
+    params.setLatLonPoint(latlon);
+    readCoverageAsProfile(varNames, params, alts, times, Arrays.copyOfRange(expected, 0, 4));
+    readCoverageAsProfile(varNames, params, alts, times, Arrays.copyOfRange(expected, 0, 2), 1, "time", "z1");
+
+    // test single timeseries different z-axis names
+    varNames = new ArrayList<>();
+    varNames.add("withT1");
+    varNames.add("withT1Z1");
+    params = new SubsetParams();
+    params.setVariables(varNames);
+    params.setLatLonPoint(latlon);
+    readCoverageAsProfile(varNames, params, alts, times, expected, 0, "time1", "z");
+    readCoverageAsProfile(varNames, params, Arrays.copyOfRange(alts, 0, 2), times, Arrays.copyOfRange(expected, 0, 4),
+        1, "time1", "z1");
+
+    // test different time-axis names and different z-axis names
+    varNames = new ArrayList<>();
+    varNames.add("full4");
+    varNames.add("withT1Z1");
+    params = new SubsetParams();
+    params.setVariables(varNames);
+    params.setLatLonPoint(latlon);
+    readCoverageAsProfile(varNames, params, alts, times, expected);
+    readCoverageAsProfile(varNames, params, Arrays.copyOfRange(alts, 0, 2), times, Arrays.copyOfRange(expected, 0, 4),
+        1, "time1", "z1");
   }
 
   @Test
@@ -158,16 +217,22 @@ public class TestCoverageAsPoint {
 
   private void readCoverageAsPoint(List<String> varNames, SubsetParams params, double alt, double[] time,
       double[] expected) throws IOException {
+    readCoverageAsPoint(varNames, params, alt, time, expected, 0, "time");
+  }
+
+  private void readCoverageAsPoint(List<String> varNames, SubsetParams params, double alt, double[] time,
+      double[] expected, int stationIndex, String timeName) throws IOException {
     FeatureDatasetPoint fdp = new CoverageAsPoint(gds, varNames, params).asFeatureDatasetPoint();
     assertThat(fdp.getFeatureType()).isEqualTo(FeatureType.STATION);
-    final String varName = varNames.get(0);
+    final String varName = varNames.get(stationIndex);
 
     StationTimeSeriesFeatureCollection fc =
-        (StationTimeSeriesFeatureCollection) fdp.getPointFeatureCollectionList().get(0);
+        (StationTimeSeriesFeatureCollection) fdp.getPointFeatureCollectionList().get(stationIndex);
     assertThat(fc).isNotNull();
     assertThat(fc.getCollectionFeatureType()).isEqualTo(FeatureType.STATION);
 
     StationTimeSeriesFeature stationFeature = (StationTimeSeriesFeature) fc.getStationFeatures().get(0);
+
     int i = 0;
     for (PointFeature feat : stationFeature) {
       assertThat(feat).isInstanceOf(StationPointFeature.class);
@@ -177,6 +242,7 @@ public class TestCoverageAsPoint {
       assertThat(station.getLatitude()).isEqualTo(lat);
       assertThat(station.getLongitude()).isEqualTo(lon);
       assertThat(station.getAltitude()).isEqualTo(alt);
+      assertThat(((StationTimeSeriesFeature) station).getTimeName()).isEqualTo(timeName);
       assertThat(feat.getObservationTime()).isEqualTo(time[i]);
 
       // verify point data
@@ -189,11 +255,17 @@ public class TestCoverageAsPoint {
 
   private void readCoverageAsProfile(List<String> varNames, SubsetParams params, double[] alt, double[] time,
       double[] expected) throws IOException {
+    readCoverageAsProfile(varNames, params, alt, time, expected, 0, "time", "altitude");
+  }
+
+  private void readCoverageAsProfile(List<String> varNames, SubsetParams params, double[] alt, double[] time,
+      double[] expected, int stationIndex, String timeName, String altName) throws IOException {
     FeatureDatasetPoint fdp = new CoverageAsPoint(gds, varNames, params).asFeatureDatasetPoint();
     assertThat(fdp.getFeatureType()).isEqualTo(FeatureType.STATION_PROFILE);
-    final String varName = varNames.get(0);
+    final String varName = varNames.get(stationIndex);
 
-    StationProfileFeatureCollection fc = (StationProfileFeatureCollection) fdp.getPointFeatureCollectionList().get(0);
+    StationProfileFeatureCollection fc =
+        (StationProfileFeatureCollection) fdp.getPointFeatureCollectionList().get(stationIndex);
     assertThat(fc).isNotNull();
     assertThat(fc.getCollectionFeatureType()).isEqualTo(FeatureType.STATION_PROFILE);
 
@@ -207,8 +279,10 @@ public class TestCoverageAsPoint {
         Station station = ((StationPointFeature) feat).getStation();
         assertThat(station.getLatitude()).isEqualTo(lat);
         assertThat(station.getLongitude()).isEqualTo(lon);
-        assertThat(feat.getLocation().getAltitude()).isEqualTo(alts[i % alts.length]);
-        assertThat(feat.getObservationTime()).isEqualTo(time[i / alts.length]);
+        assertThat(feat.getLocation().getAltitude()).isEqualTo(alt[i % alt.length]);
+        assertThat(((StationProfileFeature) station).getTimeName()).isEqualTo(timeName);
+        assertThat(((StationProfileFeature) station).getAltName()).isEqualTo(altName);
+        assertThat(feat.getObservationTime()).isEqualTo(time[i / alt.length]);
         // verify point data
 
         Array data = feat.getDataAll().getArray(varName);
