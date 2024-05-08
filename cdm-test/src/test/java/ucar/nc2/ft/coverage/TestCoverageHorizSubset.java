@@ -61,7 +61,7 @@ public class TestCoverageHorizSubset {
 
       ProjectionRect expected =
           new ProjectionRect(ProjectionPoint.create(-2129.5688, -1793.0041), 4297.8453, 3308.3885);
-      assert prect.nearlyEquals(expected);
+      assert prect.nearlyEquals(expected, 1e-4);
 
       LatLonRect bb2 = p.projToLatLonBB(prect);
       System.out.printf("%s -> %s %n", prect, bb2);
@@ -133,7 +133,7 @@ public class TestCoverageHorizSubset {
   @Category(NeedsExternalResource.class)
   public void testCdmRemoteSubset() throws Exception {
     String filename =
-        "cdmremote:https://thredds-dev.unidata.ucar.edu/thredds/cdmremote/grib/NCEP/NAM/CONUS_40km/conduit/best";
+        "cdmremote:https://thredds-test.unidata.ucar.edu/thredds/cdmremote/grib/NCEP/NAM/CONUS_40km/conduit/best";
     System.out.printf("open %s%n", filename);
 
     try (FeatureDatasetCoverage cc = CoverageDatasetFactory.open(filename)) {

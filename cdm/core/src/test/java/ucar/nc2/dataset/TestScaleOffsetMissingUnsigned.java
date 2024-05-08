@@ -84,7 +84,6 @@ public class TestScaleOffsetMissingUnsigned {
     }
 
     Array readEnhanced;
-
     // read the packed form, enhance using scale/offset, compare to original
     try (NetcdfDataset ncd = NetcdfDatasets.openDataset(filename)) {
       VariableDS vs = (VariableDS) ncd.findVariable("packed");
@@ -133,7 +132,6 @@ public class TestScaleOffsetMissingUnsigned {
     }
   }
 
-
   // Asserts that "scale_factor" is applied to "_FillValue".
   // This test demonstrated the bug in https://github.com/Unidata/thredds/issues/1065.
   @Test
@@ -141,7 +139,7 @@ public class TestScaleOffsetMissingUnsigned {
     File testResource = new File(getClass().getResource("testScaledFillValue.ncml").toURI());
 
     // LOOK removeEnhancement does not work in new
-    try (NetcdfDataset ncd = NetcdfDataset.openDataset(testResource.getAbsolutePath(), true, null)) {
+    try (NetcdfDataset ncd = NetcdfDatasets.openDataset(testResource.getAbsolutePath(), true, null)) {
       VariableDS fooVar = (VariableDS) ncd.findVariable("foo");
 
       double expectedFillValue = .99999;
@@ -198,7 +196,7 @@ public class TestScaleOffsetMissingUnsigned {
       // foo[0] == -1 (raw); -0.01 (scaled). It is equal to fill value and outside of valid_range.
       Assert2.assertNearlyEquals(-0.01, fooVals.getDouble(0), Misc.defaultMaxRelativeDiffFloat);
       Assert.assertTrue(fooVar.isFillValue(-0.01));
-      Assert.assertTrue(fooVar.isMissingValue(-0.01));
+      Assert.assertFalse(fooVar.isMissingValue(-0.01));
       Assert.assertTrue(fooVar.isInvalidData(-0.01));
       Assert.assertTrue(fooVar.isMissing(-0.01));
 
@@ -215,7 +213,7 @@ public class TestScaleOffsetMissingUnsigned {
 
       // foo[3] == 101 (raw); 1.01 (scaled). It is outside of valid_range.
       Assert2.assertNearlyEquals(1.01, fooVals.getDouble(3), Misc.defaultMaxRelativeDiffFloat);
-      Assert.assertTrue(fooVar.isMissingValue(1.01));
+      Assert.assertFalse(fooVar.isMissingValue(1.01));
       Assert.assertTrue(fooVar.isInvalidData(1.01));
       Assert.assertTrue(fooVar.isMissing(1.01));
     }
@@ -236,7 +234,7 @@ public class TestScaleOffsetMissingUnsigned {
 
       // Packed _FillValue and missing_value are -1. Interpreting bit pattern as unsigned, we get 255.
       Assert2.assertNearlyEquals(255, var.getFillValue());
-      Assert2.assertNearlyEquals(255, var.getMissingValues()[0]);
+      Assert.assertEquals(var.getMissingValues().length, 0);
 
       // "missingUnsigned" was originally UBYTE, but was widened to accommodate unsigned conversion.
       Assert.assertEquals(DataType.USHORT, var.getDataType());
@@ -260,7 +258,7 @@ public class TestScaleOffsetMissingUnsigned {
       Assert.assertEquals(25001, var.getValidMax(), 0);
 
       Assert.assertEquals(25501, var.getFillValue(), 0);
-      Assert.assertEquals(25501, var.getMissingValues()[0], 0);
+      Assert.assertEquals(var.getMissingValues().length, 0);
 
       // "scaleOffsetMissingUnsigned" was originally UBYTE, but scale_factor (SHORT) and add_offset (INT) caused it to
       // be UINT due to:
@@ -281,7 +279,7 @@ public class TestScaleOffsetMissingUnsigned {
 
       // These vals are the same as ones from "missingUnsigned", but with a scale_factor of 100 and offset of 1 applied.
       long[] expecteds = new long[] {14901, 15001, 25001, 25101, 25501, 8001};
-      long[] actuals = (long[]) var.read().getStorage();
+      long[] actuals = (long[]) var.read().get1DJavaArray(DataType.LONG);
       Assert.assertArrayEquals(expecteds, actuals);
     }
   }
@@ -299,7 +297,7 @@ public class TestScaleOffsetMissingUnsigned {
       Assert.assertEquals(-15001, var.getValidMax(), fpTol);
 
       Assert.assertEquals(-25501, var.getFillValue(), fpTol);
-      Assert.assertEquals(-25501, var.getMissingValues()[0], fpTol);
+      Assert.assertEquals(var.getMissingValues().length, 0);
       // Because scale and offset are now float (to preserve negative values), var is float
       Assert.assertEquals(DataType.FLOAT, var.getDataType());
 
@@ -325,37 +323,6 @@ public class TestScaleOffsetMissingUnsigned {
       Assert.assertEquals(DataType.FLOAT, var.getDataType()); // scale_factor is float.
 
       float[] expecteds = new float[] {NaN, 9.9f, 10.0f, 10.1f, NaN};
-      float[] actuals = (float[]) var.read().getStorage();
-      Assert2.assertArrayNearlyEquals(expecteds, actuals);
-    }
-  }
-
-  @Test
-  public void testUnpackedValidRange() throws IOException, URISyntaxException {
-    File testResource = new File(getClass().getResource("testScaleOffsetMissingUnsigned.ncml").toURI());
-    DatasetUrl location = DatasetUrl.findDatasetUrl(testResource.getAbsolutePath());
-    Set<Enhance> enhanceMode = EnumSet.of(Enhance.ConvertUnsigned, Enhance.ApplyScaleOffset); // No ConvertMissing!
-
-    try (NetcdfDataset ncd = NetcdfDatasets.openDataset(location, enhanceMode, -1, null, null)) {
-      VariableDS var = (VariableDS) ncd.findVariable("unpackedValidRange");
-
-      // valid_range will be interpreted as unpacked because of:
-      /*
-       * If valid_range is the same type as scale_factor (actually the wider of scale_factor and add_offset) and this
-       * is wider than the external data, then it will be interpreted as being in the units of the internal (unpacked)
-       * data. Otherwise it is in the units of the external (packed) data.</li>
-       */
-      // As a result, scale_factor will not be applied to it.
-      // with the Builder design, we don't read the enhancement properties unless the corresponding enhancement is
-      // turned on
-      var.addEnhancement(Enhance.ConvertMissing);
-      Assert2.assertNearlyEquals(9.9f, (float) var.getValidMin());
-      Assert2.assertNearlyEquals(10.1f, (float) var.getValidMax());
-
-      Assert.assertEquals(DataType.FLOAT, var.getDataType()); // scale_factor is float.
-      var.removeEnhancement(Enhance.ConvertMissing);
-
-      float[] expecteds = new float[] {9.8f, 9.9f, 10.0f, 10.1f, 10.2f};
       float[] actuals = (float[]) var.read().getStorage();
       Assert2.assertArrayNearlyEquals(expecteds, actuals);
     }

@@ -10,7 +10,7 @@ javaPlatform {
 
 dependencies {
   def awsVersion = '2.17.290'
-  def jacksonVersion = '2.15.2'
+  def jacksonVersion = '2.16.1'
   api enforcedPlatform("software.amazon.awssdk:bom:${awsVersion}")
   api enforcedPlatform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
   constraints {
@@ -22,8 +22,8 @@ dependencies {
     api "com.google.protobuf:protoc:${depVersion.protobuf}"
     api 'com.google.guava:guava:32.0.1-jre'
     api 'com.google.re2j:re2j:1.3'
-    api 'org.jdom:jdom2:2.0.6'
-    api 'joda-time:joda-time:2.10.3' // replace by javax.time
+    api 'org.jdom:jdom2:2.0.6.1'
+    api 'joda-time:joda-time:2.12.7'
 
     // netcdf4, dap4
     // Tricky dependency here. We need to make sure that we keep in-line with the version
@@ -44,7 +44,7 @@ dependencies {
     api 'org.jsoup:jsoup:1.11.2' // HTML scraper used in GRIB
 
     // cdm-mcidas (GEMPAK and McIDAS IOSPs)
-    api 'edu.wisc.ssec:visad-mcidas-slim-ucar-ns:20200507-2'
+    api 'edu.wisc.ssec:visad-mcidas-slim-ucar-ns:20231121'
 
     // cdm-vis5d (vis5d IOSP)
     api 'edu.wisc.ssec:visad:2.0-20130124'
@@ -76,11 +76,11 @@ dependencies {
 
     // netcdf-java logging
     api "org.slf4j:slf4j-api:${depVersion.slf4j}"
-    runtime 'ch.qos.logback:logback-classic:1.2.9'
+    runtime 'ch.qos.logback:logback-classic:1.4.14'
 
     // legacy gradle module
     // todo: remove with legacy in 6
-    api 'com.amazonaws:aws-java-sdk-s3:1.12.263'
+    api 'com.amazonaws:aws-java-sdk-s3:1.12.649'
   }
 }
 

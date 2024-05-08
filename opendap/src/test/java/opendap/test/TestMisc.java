@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 import ucar.nc2.dods.DODSNetcdfFile;
 import ucar.nc2.write.CDLWriter;
 import ucar.unidata.util.test.Diff;
-import ucar.unidata.util.test.TestDir;
+import ucar.unidata.util.test.DapTestContainer;
 import ucar.unidata.util.test.UnitTestCommon;
 import java.io.*;
 import java.lang.invoke.MethodHandles;
@@ -68,29 +68,19 @@ public class TestMisc extends UnitTestCommon {
   public TestMisc() {
     setTitle("DAP Misc tests");
     // Check if we are running against remote or localhost, or what.
-    testserver = TestDir.dap2TestServer;
+    testserver = DapTestContainer.SERVER;
     definetestcases();
   }
 
   void definetestcases() {
     String threddsRoot = getThreddsroot();
     testcases = new ArrayList<Testcase>();
-    if (false) { // use this arm for debugging individual cases
-      testcases.add(new Testcase("TestDODSArrayPrimitiveExample", "dods://" + testserver + "/dts/test.02",
-          "file://" + threddsRoot + "/opendap/src/test/data/baselinemisc/test.02.cdl"));
-    } else {
-      // This test changes too often and I no longer remember why it is here.
-      // testcases.add(new Testcase("TestBennoGrid Example",
-      // "dods://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.GLOBAL/.daily/dods",
-      // "file://"+threddsRoot + "/opendap/src/test/data/baselinemisc/dods.cdl")
-      // );
-      testcases
-          .add(new Testcase("Constrained access", "dods://" + testserver + "/dts/test.22?exp.ThreeD[5:1:7][5:8][1:3]",
-              "file://" + threddsRoot + "/opendap/src/test/data/baselinemisc/test.22ce.cdl"));
-      testcases.add(new Testcase("TestDODSArrayPrimitiveExample", "dods://" + testserver + "/dts/test.02",
-          "file://" + threddsRoot + "/opendap/src/test/data/baselinemisc/test.02.cdl"));
+    testcases
+        .add(new Testcase("Constrained access", "dods://" + testserver + "/dts/test.22?exp.ThreeD[5:1:7][5:8][1:3]",
+            "file://" + threddsRoot + "/opendap/src/test/data/baselinemisc/test.22ce.cdl"));
+    testcases.add(new Testcase("TestDODSArrayPrimitiveExample", "dods://" + testserver + "/dts/test.02",
+        "file://" + threddsRoot + "/opendap/src/test/data/baselinemisc/test.02.cdl"));
 
-    }
   }
 
 
@@ -126,6 +116,9 @@ public class TestMisc extends UnitTestCommon {
   }
 
   boolean diff(Testcase testcase, String captured) throws Exception {
+    // don't match on host and port
+    captured = captured.replaceAll("dods://.*:\\d+/", "dods://localhost:8080/");
+
     // See if the cdl is in a file or a string.
     if (System.getProperty("nodiff") != null)
       return true;

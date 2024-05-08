@@ -70,10 +70,9 @@ Now you are all set!
 ### <a name="#gh-sync-ud"></a> Make sure you have the latest changes from Unidata netCDF-java repository
 First, make sure you have the most recent changes to the netCDF-java code by using git pull:
 
-`git pull unidata develop`
+`git pull unidata maint-5.x`
 
-All work on netcdf-java is should branch from the `develop` branch.
-Contributions will be backported to other versions as needed.
+At this time, all work on netcdf-java is should branch from the `maint-5.x` branch.
 
 ### <a name="#gh-branch"></a>Make a new branch for your work and start hacking
 Next, make a new branch where you will actually do the hacking:
@@ -99,8 +98,8 @@ Once you are satisfied with your work, there is one last step to complete before
 
 ### <a name="#gh-style-guidelines"></a>Follow these Style Guidelines
 
-#### Java, Groovy, and Gradle
-We are using the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) for Java, Groovy, and Gradle, with these exceptions and augmentations:
+#### Java and Gradle
+We are using the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) for Java and Gradle, with these exceptions and augmentations:
 
 1. The recommended line width is 120, not 100.
    Modern screens are much wider than tall, so having wider lines allows more code to fit on a screen.

@@ -5,7 +5,6 @@
 
 package dap4.test;
 
-import dap4.core.util.DapConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,16 +13,10 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ucar.nc2.dataset.DatasetUrl;
-import ucar.nc2.dataset.NetcdfDataset;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import ucar.unidata.util.test.DapTestContainer;
 
 /**
  * This Test uses the JUNIT Version 4 parameterized test mechanism.
@@ -44,11 +37,9 @@ public class TestDap4Url extends DapTestCommon implements Dap4ManifestIF {
   // Constants
 
   // Legal url formats
-  protected static String[] urls = {"https://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc#dap4",
-      "dap4://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc",
-      "https://remotetest.unidata.ucar.edu/d4ts/testfiles/test_one_var.nc",
-      // "https://remotetest.unidata.ucar.edu/thredds/dap4/testAll/H.1.1.nc",
-  };
+  protected static String[] urls = {"http://" + DapTestContainer.D4TS_PATH + "test_one_var.nc#dap4",
+      "dap4://" + DapTestContainer.D4TS_PATH + "test_one_var.nc",
+      "http://" + DapTestContainer.D4TS_PATH + "test_one_var.nc",};
 
   //////////////////////////////////////////////////
   // Static Fields
@@ -109,9 +100,6 @@ public class TestDap4Url extends DapTestCommon implements Dap4ManifestIF {
 
   @Before
   public void setup() {
-    // Set any properties
-    // props.prop_visual = true;
-    // props.prop_baseline = true;
     super.setup();
   }
 

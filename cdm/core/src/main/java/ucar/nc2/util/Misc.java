@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.List;
+
+import com.google.common.math.DoubleMath;
 import ucar.ma2.DataType;
 
 /** Miscellaneous static routines. */
@@ -89,7 +91,7 @@ public class Misc {
     }
   }
 
-  /** RelativeDifference is less than {@link #defaultMaxRelativeDiffFloat}. */
+  /** AbsoluteDifference is less than {@link #defaultMaxRelativeDiffFloat}. */
   public static boolean nearlyEquals(float a, float b) {
     return nearlyEquals(a, b, defaultMaxRelativeDiffFloat);
   }
@@ -99,7 +101,7 @@ public class Misc {
     return relativeDifference(a, b) < maxRelDiff;
   }
 
-  /** RelativeDifference is less than {@link #defaultMaxRelativeDiffDouble}. */
+  /** AbsoluteDifference is less than {@link #defaultMaxRelativeDiffDouble}. */
   public static boolean nearlyEquals(double a, double b) {
     return nearlyEquals(a, b, defaultMaxRelativeDiffDouble);
   }

@@ -22,7 +22,7 @@ import static ucar.ma2.DataType.*;
  * Filter implementation of FixedScaleOffset as described by the
  * <a href="https://numcodecs.readthedocs.io/en/stable/fixedscaleoffset.html">NumCodecs</a> project
  */
-public class ScaleOffset extends Filter {
+public class ScaleOffset extends Filter implements Enhancement {
 
   private static final String name = "fixedscaleoffset";
 
@@ -78,13 +78,16 @@ public class ScaleOffset extends Filter {
     if (scaleAtt != null && !scaleAtt.isString()) {
       scaleType = FilterHelpers.getAttributeDataType(scaleAtt, signedness);
       scale = 1 / (var.convertUnsigned(scaleAtt.getNumericValue(), scaleType).doubleValue());
+      var.remove(scaleAtt);
     }
 
     Attribute offsetAtt = var.findAttribute(CDM.ADD_OFFSET);
     if (offsetAtt != null && !offsetAtt.isString()) {
       offsetType = FilterHelpers.getAttributeDataType(offsetAtt, signedness);
       offset = var.convertUnsigned(offsetAtt.getNumericValue(), offsetType).doubleValue();
+      var.remove(offsetAtt);
     }
+
     if (scale != DEFAULT_SCALE || offset != DEFAULT_OFFSET) {
       DataType scaledOffsetType =
           FilterHelpers.largestOf(var.getUnsignedConversionType(), scaleType, offsetType).withSignedness(signedness);
@@ -171,7 +174,7 @@ public class ScaleOffset extends Filter {
     if (scale == DEFAULT_SCALE && offset == DEFAULT_OFFSET) {
       return dataIn;
     }
-    Array out = removeScaleOffset(FilterHelpers.bytesToArray(dataIn, astype, astypeOrder));
+    Array out = convert(FilterHelpers.bytesToArray(dataIn, astype, astypeOrder));
     return FilterHelpers.arrayToBytes(out, dtype, dtypeOrder);
   }
 
@@ -192,16 +195,15 @@ public class ScaleOffset extends Filter {
 
     // iterate and convert elements
     while (iterIn.hasNext()) {
-      Number value = (Number) iterIn.getObjectNext();
-      value = convertUnsigned(value, dtype.getSignedness());
-      value = applyScaleOffset(value);
-      iterOut.setObjectNext(value);
+      Number value = convertUnsigned((Number) iterIn.getObjectNext(), dtype.getSignedness());
+      double newVal = applyScaleOffset(value.doubleValue());
+      iterOut.setObjectNext(newVal);
     }
 
     return out;
   }
 
-  public Array removeScaleOffset(Array in) {
+  public Array convert(Array in) {
     if (scale == DEFAULT_SCALE && offset == DEFAULT_OFFSET) {
       return in;
     }
@@ -220,7 +222,7 @@ public class ScaleOffset extends Filter {
     while (iterIn.hasNext()) {
       Number value = (Number) iterIn.getObjectNext();
       value = convertUnsigned(value, astype.getSignedness());
-      value = removeScaleOffset(value);
+      value = convert(value.doubleValue());
       iterOut.setObjectNext(value);
     }
 
@@ -248,20 +250,18 @@ public class ScaleOffset extends Filter {
     return defaultOrder;
   }
 
-  public double applyScaleOffset(Number value) {
-    double convertedValue = value.doubleValue();
+  public double applyScaleOffset(double value) {
     if (astype.isIntegral()) {
-      return Math.round((convertedValue - offset) * scale);
+      return Math.round((value - offset) * scale);
     }
-    return (convertedValue - offset) * scale;
+    return (value - offset) * scale;
   }
 
-  public double removeScaleOffset(Number value) {
-    double convertedValue = value.doubleValue();
+  public double convert(double value) {
     if (dtype.isIntegral()) {
-      return Math.round(convertedValue / scale + offset);
+      return Math.round(value / scale + offset);
     }
-    return convertedValue / scale + offset;
+    return value / scale + offset;
   }
 
   private Number convertUnsigned(Number value, Signedness signedness) {

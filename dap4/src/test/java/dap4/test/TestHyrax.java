@@ -9,6 +9,7 @@ import dap4.core.util.DapConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
+import ucar.unidata.util.test.category.NeedsExternalResource;
 
 /**
  * This Test uses the JUNIT Version 4 parameterized test mechanism.
@@ -32,6 +34,7 @@ import java.util.List;
  * from the test.opendap.org test server
  */
 
+@Category(NeedsExternalResource.class)
 @RunWith(Parameterized.class)
 public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
 
@@ -39,7 +42,6 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
   // Constants
 
   // Define the server to use
-  protected static final String SERVERNAME = "hyrax";
   protected static final String SERVER = "test.opendap.org";
   protected static final int SERVERPORT = -1;
   protected static final String SERVERPATH = "opendap";
@@ -119,8 +121,6 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
       TestCase tc = new TestCase(file, url, baseline, query);
       testcases.add(tc);
     }
-    // singleTest("AIRS.2002.12.01.L3.RetStd_H031.v4.0.21.0.G06101132853.hdf", testcases); // choose single test for
-    // debugging
     return testcases;
   }
   //////////////////////////////////////////////////
@@ -141,9 +141,6 @@ public class TestHyrax extends DapTestCommon implements Dap4ManifestIF {
 
   @Before
   public void setup() {
-    // Set any properties
-    // props.prop_baseline = true;
-    // props.prop_visual = true;
     super.setup();
   }
 
